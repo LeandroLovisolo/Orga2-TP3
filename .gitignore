@@ -12,6 +12,13 @@
 *.la
 *.a
 
+# Binarios y código objeto
+*.bin
+*.tsk
+*.ctsk
+*.tsko
+*.tmp
+
 # Sublime Text
 *.sublime-project
 *.sublime-workspace
