@@ -54,13 +54,14 @@ start:
 
 	lgdt [GDT_DESC]
 	; setear el bit PE del registro CR0
+	xchg bx, bx
 	mov eax, cr0
 	or eax, 1
 	mov cr0, eax
-
 	; pasar a modo protegido
-	;jmp 0x8:modo_protegido
-	;modo_protegido:
+	jmp 0x8:modo_protegido
+	BITS 32
+	modo_protegido:
 	; acomodar los segmentos
 
 	; seteo la pila
