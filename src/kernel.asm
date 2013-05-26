@@ -50,14 +50,17 @@ start:
 	; habilitar A20
 	call habilitar_A20
 
-	; dehsabilitar las interrupciones
-
 	; cargar la GDT
 
+	lgdt [GDT_DESC]
 	; setear el bit PE del registro CR0
+	mov eax, cr0
+	or eax, 1
+	mov cr0, eax
 
 	; pasar a modo protegido
-
+	;jmp 0x8:modo_protegido
+	;modo_protegido:
 	; acomodar los segmentos
 
 	; seteo la pila
