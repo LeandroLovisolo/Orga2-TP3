@@ -35,16 +35,17 @@ gdt_entry gdt[GDT_COUNT] = {
 		.base_0_15   = 0,
 		.base_23_16  = 0,
 		/*Tipo: Si s = 1,
-		1° bit => código = 1
-			2° bit => Conforming: Estos segmentos de codigo “ajustan” 
+		1° bit => Accessed: 0
+		2° bit => código = 1
+			3° bit => Conforming: Estos segmentos de codigo “ajustan” 
 				su nivel de privilegio al del c odigo que los ha invocado.
 				0 en este caso.
-			3° bit => Readable: si está en 1, se puede leer
-		1° bit => datos = 0
-			2° bit => Expand Down: para utilizar el segmento de datos como pila
-			3° bit => Writable: para poder escribir los datos
+			4° bit => Readable: si está en 1, se puede leer
+		2° bit => datos = 0
+			3° bit => Expand Down: para utilizar el segmento de datos como pila
+			4° bit => Writable: para poder escribir los datos
 		*/
-		.type        = 5, //101
+		.type        = 10, //101
 		//System: s = 0 => recurso del kernel, s=1 => codigo o datos
 		.s           = 1,
 		//Descriptor de privilegios.
@@ -71,7 +72,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
 		.base_23_16  = 0,
-		.type        = 5,
+		.type        = 10,
 		.s           = 1,
 		.dpl         = 2,
 		.p           = 1,
@@ -88,7 +89,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
 		.base_23_16  = 0,
-		.type        = 5,
+		.type        = 10,
 		.s           = 1,
 		.dpl         = 3,
 		.p           = 1,
@@ -104,7 +105,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
 		.base_23_16  = 0,
-		.type        = 1, //001
+		.type        = 2, //0010
 		.s           = 1,
 		.dpl         = 0,
 		.p           = 1,
@@ -121,7 +122,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
 		.base_23_16  = 0,
-		.type        = 1,
+		.type        = 2,
 		.s           = 1,
 		.dpl         = 2,
 		.p           = 1,
@@ -138,7 +139,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
 		.base_23_16  = 0,
-		.type        = 1,
+		.type        = 2,
 		.s           = 1,
 		.dpl         = 3,
 		.p           = 1,
