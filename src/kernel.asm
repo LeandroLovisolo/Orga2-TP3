@@ -45,8 +45,6 @@ start:
 	; Imprimir mensaje de bienvenida
 	imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
 
-	xchg bx, bx
-
 	; habilitar A20
 	call habilitar_A20
 
@@ -54,7 +52,6 @@ start:
 
 	lgdt [GDT_DESC]
 	; setear el bit PE del registro CR0
-	xchg bx, bx
 	mov eax, cr0
 	or eax, 1
 	mov cr0, eax
@@ -63,9 +60,17 @@ start:
 	BITS 32
 	modo_protegido:
 	; acomodar los segmentos
-
+	;Muevo al stack segment el índice 4 de la GDT
+	;relacionado a datos de privilegio 0
+	mov ax, 32
+	mov ss, ax 
+	mov ds, ax
+	mov es, ax
+	mov gs, ax
+	mov fs, ax
 	; seteo la pila
-
+	mov EBP, 0x20000
+	mov ESP, 0x20000
 	; pintar pantalla, todos los colores, que bonito!
 
 	; inicializar el manejador de memoria
