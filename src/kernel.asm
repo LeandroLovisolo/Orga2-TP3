@@ -67,6 +67,8 @@ start:
 	mov ds, ax
 	mov es, ax
 	mov gs, ax
+	mov ax, 56
+	;Declaro a fs como mi segmento de video
 	mov fs, ax
 	; seteo la pila
 	mov EBP, 0x20000

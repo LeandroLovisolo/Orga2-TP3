@@ -149,6 +149,23 @@ gdt_entry gdt[GDT_COUNT] = {
 		.db          = 1,
 		.g           = 1,
 		.base_31_24  = 0,
+	},
+
+	//Memoria en pantalla, privilegio 0
+	[7] = {
+		.limit_0_15  = 0x8000,
+		.base_0_15   = 0x8000,
+		.base_23_16  = 0xB,
+		.type        = 2,
+		.s           = 1,
+		.dpl         = 3,
+		.p           = 1,
+		.limit_16_19 = 0,
+		.avl         = 0,
+		.l           = 0,
+		.db          = 1,
+		.g           = 1,
+		.base_31_24  = 0,
 	}
 };
 
