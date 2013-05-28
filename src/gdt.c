@@ -168,23 +168,6 @@ gdt_entry gdt[GDT_COUNT] = {
 		.db          = 1,
 		.g           = 1,
 		.base_31_24  = 0,
-	},
-	//Segmento de sistema para atender excepciones
-	[8] = {
-		.limit_0_15  = 0xFFFF,
-		.base_0_15   = 0,
-		.base_23_16  = 0,
-		//Interrupt Gate de 32 bits 1110
-		.type        = 14,
-		.s           = 0,
-		.dpl         = 0,
-		.p           = 1,
-		.limit_16_19 = 0x7,
-		.avl         = 0,
-		.l           = 0,
-		.db          = 1,
-		.g           = 1,
-		.base_31_24  = 0,
 	}
 };
 
