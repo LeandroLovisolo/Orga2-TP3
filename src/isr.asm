@@ -9,7 +9,8 @@
 BITS 32
 
 %define TAREA_QUANTUM		2
-
+excepcion_msg db		'Ch, ch, que andas haciendo? Toma una excepcion'
+excepcion_msg_len equ	$ - excepcion_msg
 ;; PIC
 extern fin_intr_pic1
 
@@ -38,7 +39,8 @@ reloj:  				db '|/-\'
 ;; Rutina de atención de las EXCEPCIONES
 ;;
 ISR 0
-
+imprimir_texto_mp excepcion_msg, excepcion_msg_len ,0x07, 0, 0
+jmp $
 
 ;;
 ;; Rutina de atención del RELOJ
