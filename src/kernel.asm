@@ -7,6 +7,13 @@
 
 global start
 
+%macro borrar_pantalla 0
+	mov ecx, 0x7FFF
+	limpar:
+		mov byte [fs:ecx], 0 ;pongo la pantalla limpa con 0's
+		loop limpar
+%endmacro
+
 
 ;; GDT
 extern GDT_DESC
@@ -28,6 +35,9 @@ jmp start
 ;;
 iniciando_mr_msg db		'Iniciando kernel (Modo Real)...'
 iniciando_mr_len equ	$ - iniciando_mr_msg
+
+bienvenida_msg db		'So I said to him, thats not a walrus, thats my wife!'
+bienvenida_len equ		$ - bienvenida_msg
 
 iniciando_mp_msg db		'Iniciando kernel (Modo Protegido)...'
 iniciando_mp_len equ	$ - iniciando_mp_msg
@@ -75,10 +85,9 @@ start:
 	mov ESP, 0x20000
 	; pintar pantalla, todos los colores, que bonito!
 	;Limpia pantalla:
-	mov ecx, 0x7FFF
-	limpar:
-		mov byte [fs:ecx], 0 ;pongo la pantalla limpa con 0's
-		loop limpar
+	borrar_pantalla
+
+	imprimir_texto_mp bienvenida_msg, bienvenida_len, 0x06, 0, 0
 	; inicializar el manejador de memoria
 
 	; inicializar el directorio de paginas
@@ -99,9 +108,9 @@ start:
 	call idt_inicializar
 	lidt [IDT_DESC]
 	;Para testear divido por 0
-	;mov eax, 12d
-	;mov ebx, 0d
-	;div ebx
+	mov eax, 12d
+	mov ebx, 0d
+	div ebx
 	; configurar controlador de interrupciones
 
 	; cargo la primer tarea null
