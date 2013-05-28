@@ -96,6 +96,7 @@ start:
 	; inicializar el scheduler
 
 	; inicializar la IDT
+	call idt_inicializar
 	lidt [IDT_DESC]
 	;Para testear divido por 0
 	;mov eax, 12d
