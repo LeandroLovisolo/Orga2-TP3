@@ -33,15 +33,15 @@ idt_descriptor IDT_DESC = {
 	}
 */
 
-/*
-#define IDT_ENTRY(numero)                                                                                        \
+
+#define IDT_ENTRY(numero, seg, atrr)                                                                            \
 	idt[numero].offset_0_15 = (unsigned short) ((unsigned int)(&_isr ## numero) & (unsigned int) 0xFFFF);        \
-	idt[numero].segsel = (unsigned short) 0x00;                                                                  \
-	idt[numero].attr = (unsigned short) 0x0000;                                                                  \
+	idt[numero].segsel = (unsigned short) seg;                                                                  \
+	idt[numero].attr = (unsigned short) atrr; 	                                                                 \
 	idt[numero].offset_16_31 = (unsigned short) ((unsigned int)(&_isr ## numero) >> 16 & (unsigned int) 0xFFFF);
-*/
 
-
+//Segmento 8 en la GDT, 8*2^3 (3 shifts) = 64
+//Atributos: P=1,DPL=00,0,D=1,Tipo de puerta=110,0000,0000 = 0x8E00
 void idt_inicializar() {
-	// Excepciones
+	IDT_ENTRY(0, 64, 0x8E00);
 }
