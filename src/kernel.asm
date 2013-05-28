@@ -96,7 +96,11 @@ start:
 	; inicializar el scheduler
 
 	; inicializar la IDT
-
+	lidt [IDT_DESC]
+	;Para testear divido por 0
+	;mov eax, 12d
+	;mov ebx, 0d
+	;div ebx
 	; configurar controlador de interrupciones
 
 	; cargo la primer tarea null
