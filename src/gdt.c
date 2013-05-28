@@ -153,7 +153,9 @@ gdt_entry gdt[GDT_COUNT] = {
 
 	//Memoria en pantalla, privilegio 0
 	[7] = {
-		.limit_0_15  = 0x8000,
+		//Memoria de pantalla de 0xB8000 a 0xC0000
+		//0xB8000 - 0xC0000 = 32 768 -1 = 32 767 = 0x7FFF
+		.limit_0_15  = 0x7FFF,
 		.base_0_15   = 0x8000,
 		.base_23_16  = 0xB,
 		.type        = 2,
@@ -161,6 +163,23 @@ gdt_entry gdt[GDT_COUNT] = {
 		.dpl         = 3,
 		.p           = 1,
 		.limit_16_19 = 0,
+		.avl         = 0,
+		.l           = 0,
+		.db          = 1,
+		.g           = 1,
+		.base_31_24  = 0,
+	},
+	//Segmento de sistema para atender excepciones
+	[8] = {
+		.limit_0_15  = 0xFFFF,
+		.base_0_15   = 0,
+		.base_23_16  = 0,
+		//Interrupt Gate de 32 bits 1110
+		.type        = 14,
+		.s           = 0,
+		.dpl         = 0,
+		.p           = 1,
+		.limit_16_19 = 0x7,
 		.avl         = 0,
 		.l           = 0,
 		.db          = 1,
