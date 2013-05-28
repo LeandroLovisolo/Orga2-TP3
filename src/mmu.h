@@ -20,7 +20,7 @@ typedef struct str_pd_entry {
     unsigned char user_supervisor:1;
     unsigned char read_write:1;
     unsigned char present:1;
-} __attribute__((__packed__, aligned (8))) gdt_entry;
+} __attribute__((__packed__, aligned (8))) pd_entry;
 
 typedef struct str_pt_entry {
     unsigned int  address:20;
@@ -34,7 +34,7 @@ typedef struct str_pt_entry {
     unsigned char user_supervisor:1;
     unsigned char read_write:1;
     unsigned char present:1;
-} __attribute__((__packed__, aligned (8))) gdt_entry;
+} __attribute__((__packed__, aligned (8))) pt_entry;
 
 // inicializa el mmu
 void mmu_inicializar();
