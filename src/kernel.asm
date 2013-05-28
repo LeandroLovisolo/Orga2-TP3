@@ -74,7 +74,11 @@ start:
 	mov EBP, 0x20000
 	mov ESP, 0x20000
 	; pintar pantalla, todos los colores, que bonito!
-
+	;Limpia pantalla:
+	mov ecx, 0x7FFF
+	limpar:
+		mov byte [fs:ecx], 0 ;pongo la pantalla limpa con 0's
+		loop limpar
 	; inicializar el manejador de memoria
 
 	; inicializar el directorio de paginas
