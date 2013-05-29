@@ -22,6 +22,9 @@ extern GDT_DESC
 extern IDT_DESC
 extern idt_inicializar
 
+;; PD y PT
+extern mmu_inicializar_dir_kernel
+
 ;; PIC
 extern resetear_pic
 extern habilitar_pic
@@ -53,7 +56,7 @@ start:
 	cli
 
 	; Imprimir mensaje de bienvenida
-	imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
+	; imprimir_texto_mr iniciando_mr_msg, iniciando_mr_len, 0x07, 0, 0
 
 	; habilitar A20
 	call habilitar_A20
@@ -87,14 +90,24 @@ start:
 	;Limpia pantalla:
 	borrar_pantalla
 
-	imprimir_texto_mp bienvenida_msg, bienvenida_len, 0x06, 0, 0
 	; inicializar el manejador de memoria
 
 	; inicializar el directorio de paginas
+	call mmu_inicializar_dir_kernel
+
+	xchg bx, bx
 
 	; inicializar memoria de tareas
 
 	; habilitar paginacion
+	mov eax, 0x00021000 ; KERNEL_PAGE_DIR = 0x00021000
+	mov cr3, eax
+	mov eax, cr0
+	or eax, 0x80000000 ; habilitamos paginacion
+	mov cr0, eax
+
+
+	imprimir_texto_mp bienvenida_msg, bienvenida_len, 0x06, 0, 0
 
 	; inicializar tarea idle
 
@@ -110,7 +123,7 @@ start:
 	;Para testear divido por 0
 	mov eax, 12d
 	mov ebx, 0d
-	div ebx
+	;div ebx
 	; configurar controlador de interrupciones
 
 	; cargo la primer tarea null
