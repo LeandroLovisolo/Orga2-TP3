@@ -84,8 +84,8 @@ start:
 	;Declaro a fs como mi segmento de video
 	mov fs, ax
 	; seteo la pila
-	mov EBP, KERNEL_STACK
-	mov ESP, KERNEL_STACK
+	mov EBP, 0x00020000
+	mov ESP, 0x00020000
 	; pintar pantalla, todos los colores, que bonito!
 	;Limpia pantalla:
 	borrar_pantalla
