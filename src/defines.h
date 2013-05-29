@@ -24,7 +24,7 @@ NOTA:
 
 /* INDICES EN LA GDT */
 #define GDT_IDX_NULL_DESC		0
-
+#define KERNEL_CODE_SEGMENT 8
 /* DIRECCIONES VIRTUALES DE CÓDIGO, PILA y DATOS */
 #define TASK_CODE    			0x003A0000 /* direccion virtual codigo */
 #define TASK_STACK   			0x003B0000 /* direccion virtual stack  */
