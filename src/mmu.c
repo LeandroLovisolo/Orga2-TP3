@@ -33,24 +33,39 @@ void inicializar_kernel_table_directory() {
 	int i;
 	for (i = 0; i < 1024; i++) {
 		*((unsigned int*) &(page_table[i])) = 0;
-//		if(i < 0x164) {
-//			page_table[i].user_supervisor = 0;
-//			page_table[i].address = 4096 * i;
-//			page_table[i].read_write = 1;
-//			page_table[i].present = 1;
-//		}
 	}
-
-	 for (i = 0; i < 1024; i++) {
-	 	if(i < 0x164) {
-	 		page_table[i].user_supervisor = 0;
-	 		page_table[i].address = i;
-	 		page_table[i].read_write = 1;
-	 		page_table[i].present = 1;
-	 	}
-	 }
+	for (i = 0; i < 0x164; i++) {
+		page_table[i].user_supervisor = 0;
+		page_table[i].address = i;
+		page_table[i].read_write = 1;
+		page_table[i].present = 1;
+	}
 }
 
 void mmu_inicializar() {
     
+}
+
+
+void mmu_inicializar_tarea_jugador(
+		pd_entry* page_directory,
+		pt_entry* page_table,
+		unsigned int code_address,
+		unsigned int stack_address) {
+	int i;
+	for (i = 0; i < 1024; i++) {
+		*((unsigned int*) &page_directory[i]) = 0;
+	}
+	page_directory[0].user_supervisor = 1;
+	page_directory[0].address = ((unsigned int) page_table) >> 12;
+	page_directory[0].read_write = 1;
+	page_directory[0].present = 1;
+
+	for (i = 0; i < 1024; i++) {
+		*((unsigned int*) &(page_table[i])) = 0;
+	}
+	page_table[928].user_supervisor = 0;
+	page_table[928].address = 0x00101000 >> 12;
+	page_table[928].read_write = 1;
+	page_table[928].present = 1;
 }
