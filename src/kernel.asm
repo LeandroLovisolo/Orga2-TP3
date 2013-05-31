@@ -22,7 +22,8 @@ extern GDT_DESC
 extern IDT_DESC
 extern idt_inicializar
 
-;; PD y PT
+;; MMU
+extern mmu_inicializar
 extern mmu_inicializar_dir_kernel
 
 ;; PIC
@@ -62,32 +63,32 @@ start:
 	call habilitar_A20
 
 	; cargar la GDT
-
 	lgdt [GDT_DESC]
+
 	; setear el bit PE del registro CR0
 	mov eax, cr0
 	or eax, 1
 	mov cr0, eax
+
 	; pasar a modo protegido
 	jmp 0x8:modo_protegido
 	BITS 32
-	modo_protegido:
+modo_protegido:
+
 	; acomodar los segmentos
-	;Muevo al stack segment el índice 4 de la GDT
-	;relacionado a datos de privilegio 0
-	mov ax, 32
-	mov ss, ax 
-	mov ds, ax
+	mov ax, 32			; Muevo al stack segment el índice 4 
+	mov ss, ax 			; de la GDT relacionado a datos de
+	mov ds, ax			; privilegio 0
 	mov es, ax
 	mov gs, ax
-	mov ax, 56
-	;Declaro a fs como mi segmento de video
-	mov fs, ax
+	mov ax, 56	
+	mov fs, ax			; Declaro a fs como mi segmento de video
+	
 	; seteo la pila
-	mov EBP, 0x00020000
+	mov EBP, 0x00020000	
 	mov ESP, 0x00020000
-	; pintar pantalla, todos los colores, que bonito!
-	;Limpia pantalla:
+
+	; limpio la pantalla
 	borrar_pantalla
 
 	; inicializar el manejador de memoria
@@ -95,9 +96,8 @@ start:
 	; inicializar el directorio de paginas
 	call mmu_inicializar_dir_kernel
 
-	xchg bx, bx
-
 	; inicializar memoria de tareas
+	call mmu_inicializar
 
 	; habilitar paginacion
 	mov eax, 0x00021000 ; KERNEL_PAGE_DIR = 0x00021000
@@ -106,7 +106,7 @@ start:
 	or eax, 0x80000000 ; habilitamos paginacion
 	mov cr0, eax
 
-
+	; pintar pantalla, todos los colores, que bonito!
 	imprimir_texto_mp bienvenida_msg, bienvenida_len, 0x06, 0, 0
 
 	; inicializar tarea idle
@@ -120,10 +120,12 @@ start:
 	; inicializar la IDT
 	call idt_inicializar
 	lidt [IDT_DESC]
-	;Para testear divido por 0
-	mov eax, 12d
-	mov ebx, 0d
-	;div ebx
+
+	; Para testear divido por 0
+	; mov eax, 12d
+	; mov ebx, 0d
+	; div ebx
+
 	; configurar controlador de interrupciones
 
 	; cargo la primer tarea null

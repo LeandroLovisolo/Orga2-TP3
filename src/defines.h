@@ -24,19 +24,16 @@ NOTA:
 
 /* INDICES EN LA GDT */
 #define GDT_IDX_NULL_DESC		0
-#define KERNEL_CODE_SEGMENT 8
+#define KERNEL_CODE_SEGMENT     8
+
 /* DIRECCIONES VIRTUALES DE CÓDIGO, PILA y DATOS */
 #define TASK_CODE    			0x003A0000 /* direccion virtual codigo */
-										 	// page_directory 0000 0000 00   page_table 11 1010 0000  offset 0000 0000 0000 
 #define TASK_STACK   			0x003B0000 /* direccion virtual stack  */
-											// page_directory  COMPLETAR  page_table COMPLETAR  offset COMPLETAR
 #define TABLERO_ADDR 			0x003C0000 /* direccion virtual del tablero */
-											// page_directory COMPLETAR  page_table  COMPLETAR offset COMPLETAR
 #define VIDEO_ADDR 				0x000B8000 /* direccion virtual de la memoria de video */
 
 /* MISC */
 #define TAMANO_PAGINA 			0x00001000
-
 
 /* DIRECCIONES DE MEMORIA */
 #define BOOTSECTOR    			0x00001000 /* direccion fisica de comienzo del bootsector (copiado) */
@@ -94,7 +91,6 @@ NOTA:
 #define TASK_3_PAGE_TABLE		0x00037000 /* direccion fisica para la tabla de paginas de la tarea 3 */
 #define TASK_4_PAGE_TABLE		0x00038000 /* direccion fisica para la tabla de paginas de la tarea 4 */
 #define TASK_5_PAGE_TABLE		0x00049000 /* direccion fisica para la tabla de paginas de la tarea 5 */
-
 
 /* BOOL */
 #define TRUE					0x00000001
