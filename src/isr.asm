@@ -230,10 +230,12 @@ jmp $
 
 ISR 32
 cli 				; deshabilita las interrupciones
+pushfd 				; guarda del valor de los flags
 Push ebx 			; pushea ebx, ya que es utilizado dentro del handler del reloj
 call fin_intr_pic1 	; le comunica al pic que ya se atendio la interrupción
 call proximo_reloj 	; llama al handler del reloj
 pop ebx 			; restablece el valor de ebx
+popfd 				; restablece el valor de los flags
 sti 				; habilita las interrupciones
 iret 				; retornar de la interrupción
 
@@ -246,6 +248,12 @@ ISR 33
 ;;
 ;; Rutinas de atención de las SYSCALLS
 ;;
+
+;;
+;; Rutina de atencion x80
+;;
+ISR 50
+
 
 proximo_reloj:
 	pushad
