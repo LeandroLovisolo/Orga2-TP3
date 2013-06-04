@@ -234,37 +234,33 @@ jmp $
 ;;
 
 ISR 32
-cli 				; deshabilita las interrupciones
 pushfd 				; guarda del valor de los flags
-Push ebx 			; pushea ebx, ya que es utilizado dentro del handler del reloj
 call fin_intr_pic1 	; le comunica al pic que ya se atendio la interrupción
 call proximo_reloj 	; llama al handler del reloj
-pop ebx 			; restablece el valor de ebx
 popfd 				; restablece el valor de los flags
-sti 				; habilita las interrupciones
 iret 				; retornar de la interrupción
 
 ;;
 ;; Rutina de atención del TECLADO
 ;;
 ISR 33
-cli
 pushfd
 call fin_intr_pic1
 push eax
 in al, 0x60 ;Lectura del teclado
-cmp al, 93 ;Veo si soltó R
+cmp al, 0x93 ;Veo si soltó R
+
 jne .verTeclaP
 imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
 ;Renaudo tarea
 .verTeclaP:
-cmp al, 99 ;Veo si soltó P
+cmp al, 0x99 ;Veo si soltó P
+jne .fin
 imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
 ;Pauso tarea
 .fin:
 pop eax
 popfd
-sti
 iret
 ;;
 ;; Rutinas de atención de las SYSCALLS
@@ -304,9 +300,8 @@ iret 				; retorna de las interrupciones
 
 proximo_reloj:
 	pushad
-
 	inc DWORD [reloj_numero]
-	mov ebx, [reloj]
+	mov ebx, [reloj_numero]
 	cmp ebx, 0x4
 	jl .ok
 		mov DWORD [reloj_numero], 0x0
