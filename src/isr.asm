@@ -249,6 +249,7 @@ imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
 ;Renaudo tarea
 .verTeclaP:
 cmp al, 99 ;Veo si soltó P
+jne .fin
 imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
 ;Pauso tarea
 .fin:
