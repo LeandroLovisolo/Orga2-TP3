@@ -127,7 +127,9 @@ modo_protegido:
 	; div ebx
 
 	; configurar controlador de interrupciones
-
+	call deshabilitar_pic
+	call resetear_pic
+	call habilitar_pic
 	; cargo la primer tarea null
 
 	; aca salto a la primer tarea

@@ -227,10 +227,13 @@ jmp $
 ;;
 ;; Rutina de atención del RELOJ
 ;;
+ISR 32
 
 ;;
 ;; Rutina de atención del TECLADO
 ;;
+ISR 33
+
 
 ;;
 ;; Rutinas de atención de las SYSCALLS
