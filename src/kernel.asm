@@ -27,6 +27,7 @@ extern mmu_inicializar
 extern mmu_inicializar_dir_kernel
 
 ;; PIC
+extern deshabilitar_pic
 extern resetear_pic
 extern habilitar_pic
 
@@ -130,6 +131,7 @@ modo_protegido:
 	call deshabilitar_pic
 	call resetear_pic
 	call habilitar_pic
+	;sti
 	; cargo la primer tarea null
 
 	; aca salto a la primer tarea
