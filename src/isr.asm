@@ -25,6 +25,11 @@ borrar_pantalla:
 
 BITS 32
 
+extern game_iniciar
+extern game_terminar
+extern game_migrar
+extern game_duplicar
+
 %define TAREA_QUANTUM		2
 excepcion_msg db		'Ch, ch, que andas haciendo? Toma una excepcion pebete!'
 excepcion_msg_len equ	$ - excepcion_msg
@@ -89,6 +94,11 @@ excepcion_xm_msg_len equ	$ - excepcion_xm_msg
 excepcion_ve_msg db		'Virtualization Exception'
 excepcion_ve_msg_len equ	$ - excepcion_ve_msg
 
+soltarR_ve_msg db		'Tecla R'
+soltarR_ve_msg_len equ	$ - soltarR_ve_msg
+
+soltarP_ve_msg db		'Tecla P'
+soltarP_ve_msg_len equ	$ - soltarP_ve_msg
 
 ;; PIC
 extern fin_intr_pic1
@@ -227,23 +237,107 @@ jmp $
 ;;
 ;; Rutina de atención del RELOJ
 ;;
+
 ISR 32
+pushfd 				; guarda del valor de los flags
+call fin_intr_pic1 	; le comunica al pic que ya se atendio la interrupción
+call proximo_reloj 	; llama al handler del reloj
+popfd 				; restablece el valor de los flags
+iret 				; retornar de la interrupción
 
 ;;
 ;; Rutina de atención del TECLADO
 ;;
 ISR 33
-
-
+pushfd
+call fin_intr_pic1
+push eax
+in al, 0x60 ;Lectura del teclado
+cmp al, 0x93 ;Veo si soltó R
+jne .verTeclaP
+imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
+;Renaudo tarea
+jmp .fin
+.verTeclaP:
+cmp al, 0x99 ;Veo si soltó P
+jne .fin
+imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
+;Pauso tarea
+.fin:
+pop eax
+popfd
+iret
 ;;
 ;; Rutinas de atención de las SYSCALLS
 ;;
 
+;;
+;; Rutina de atencion x80
+;;
+ISR 128
+pushfd 				; pushea el estado de los flags
+call fin_intr_pic1 	; comunica al PIC que la interrupción fue atendida
+
+; se fija que acción debe llevar a cabo, esto depende del valor que pasaron en eax
+cmp eax,111
+Je .duplicar_128
+; si no saltó puede asumir que el valor de eax es 222, en otro caso no le importa ya que no dice que hacer
+
+; esta función devuelve en eax el número del jugagor al que pertence la tarea HACER
+call obtener_id_jugador 	
+
+; le paso los parámetros a traves de la pila
+push esi
+push edx
+push ecx
+push ebx
+push eax
+call game_migrar
+add esp,20 	 		; pongo el puntero de la pila en la posición correcta		
+
+jmp .salir_128
+
+.duplicar_128:
+; si entro aca es porque eax es 1 y tiene que llamar a duplicar
+; esta función devuelve en eax el número del jugagor al que pertence la tarea HACER
+call obtener_id_jugador 	
+							
+; le paso los parámetros a traves de la pila y llama a la función que debe ejecutar
+push ecx
+push ebx
+push eax
+call game_duplicar 	; me devuelve en eax el valor de si se pudo llevar a cabo o no
+add esp,8 			; pongo el puntero de la pila en la posición correcta
+
+.salir_128:
+
+; restablece los registros pusheados
+popfd 				; restablece el estado de los flags
+iret 				; retorna de las interrupciones
+
+ISR 144
+pushfd
+cmp eax, 200 ;Veo si hay que terminar el juego
+jne .iniciarJuego
+;Termino el juego
+call game_terminar
+jmp .fin
+.iniciarJuego:
+cmp eax, 300 ;Veo si hay que iniciar el juego
+jne .fin
+;Inicializar juego
+call game_iniciar
+.fin:
+popfd
+
+; --------------------  funciones auxiliares ------------------------------
+obtener_id_jugador:
+ret
+
 proximo_reloj:
 	pushad
-
 	inc DWORD [reloj_numero]
-	mov ebx, [reloj]
+	mov ebx, [reloj_numero]
 	cmp ebx, 0x4
 	jl .ok
 		mov DWORD [reloj_numero], 0x0
