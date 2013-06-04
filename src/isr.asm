@@ -27,6 +27,8 @@ BITS 32
 
 extern game_iniciar
 extern game_terminar
+extern game_migrar
+extern game_duplicar
 
 %define TAREA_QUANTUM		2
 excepcion_msg db		'Ch, ch, que andas haciendo? Toma una excepcion pebete!'
