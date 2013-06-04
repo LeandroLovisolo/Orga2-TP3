@@ -273,7 +273,33 @@ iret
 ;;
 ;; Rutina de atencion x80
 ;;
-ISR 50
+ISR 128
+cli 				; deshabilita las interrupciones
+pushfd 				; pushea el estado de los flags
+; pushea los registros que utiliza
+
+call fin_intr_pic1 	; comunica al PIC que la interrupción fue atendida
+
+cmp eax,111
+Je .duplicar_128
+; si no salto puede asumir que el valor de eax es 222 en otro caso no le importa ya que no dice que hacer
+
+jmp .salir_128
+
+.duplicar_128:
+; si entro aca es porque eax es 1 y tiene que llamar a duplicar
+
+; le paso los parametros a traves de la pila
+
+push ecx
+push ebx
+call game_duplicar
+add esp,8 			;
+
+.salir_128:
+; restablece los registros pusheados
+popfd 				; restablece el estado de los flags
+iret 				; retorna de las interrupciones
 
 
 proximo_reloj:
