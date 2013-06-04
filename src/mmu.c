@@ -8,6 +8,7 @@
 #include "mmu.h"
 #include "i386.h"
 
+// Declaración de funciones
 void inicializar_kernel_page_directory();
 void inicializar_kernel_table_directory();
 
@@ -16,6 +17,9 @@ void mmu_inicializar_dir_kernel() {
 	inicializar_kernel_table_directory();
 }
 
+void mmu_inicializar_tarea_arbitro();
+
+// Implementación de funciones
 void inicializar_kernel_page_directory() {
 	pd_entry* page_directory = (pd_entry*) KERNEL_PAGE_DIR;
 	int i;
@@ -47,7 +51,6 @@ void mmu_inicializar_tarea_jugador(
 	pt_entry* page_table,
 	unsigned int code_address,
 	unsigned int stack_address);
-void mmu_inicializar_tarea_arbitro();
 
 void mmu_inicializar() {
 	// Jugador 1
