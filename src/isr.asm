@@ -227,7 +227,15 @@ jmp $
 ;;
 ;; Rutina de atención del RELOJ
 ;;
+
 ISR 32
+cli 				; deshabilita las interrupciones
+Push ebx 			; pushea ebx, ya que es utilizado dentro del handler del reloj
+call fin_intr_pic1 	; le comunica al pic que ya se atendio la interrupción
+call proximo_reloj 	; llama al handler del reloj
+pop ebx 			; restablece el valor de ebx
+sti 				; habilita las interrupciones
+iret 				; retornar de la interrupción
 
 ;;
 ;; Rutina de atención del TECLADO
