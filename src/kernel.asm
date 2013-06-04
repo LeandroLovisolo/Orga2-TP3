@@ -75,7 +75,7 @@ start:
 	jmp 0x8:modo_protegido
 	BITS 32
 modo_protegido:
-
+	cli
 	; acomodar los segmentos
 	mov ax, 32			; Muevo al stack segment el índice 4 
 	mov ss, ax 			; de la GDT relacionado a datos de
@@ -131,7 +131,7 @@ modo_protegido:
 	call deshabilitar_pic
 	call resetear_pic
 	call habilitar_pic
-	;sti
+	sti
 	; cargo la primer tarea null
 
 	; aca salto a la primer tarea
