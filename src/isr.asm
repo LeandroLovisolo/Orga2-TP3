@@ -89,6 +89,11 @@ excepcion_xm_msg_len equ	$ - excepcion_xm_msg
 excepcion_ve_msg db		'Virtualization Exception'
 excepcion_ve_msg_len equ	$ - excepcion_ve_msg
 
+soltarR_ve_msg db		'Tecla R'
+soltarR_ve_msg_len equ	$ - soltarR_ve_msg
+
+soltarP_ve_msg db		'Tecla P'
+soltarP_ve_msg_len equ	$ - soltarP_ve_msg
 
 ;; PIC
 extern fin_intr_pic1
@@ -233,8 +238,24 @@ ISR 32
 ;; Rutina de atención del TECLADO
 ;;
 ISR 33
-
-
+cli
+pushfd
+call fin_intr_pic1
+push eax
+in al, 0x60 ;Lectura del teclado
+cmp al, 93 ;Veo si soltó R
+jne .verTeclaP
+imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
+;Renaudo tarea
+.verTeclaP:
+cmp al, 99 ;Veo si soltó P
+imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
+;Pauso tarea
+.fin:
+pop eax
+popfd
+sti
+iret
 ;;
 ;; Rutinas de atención de las SYSCALLS
 ;;
