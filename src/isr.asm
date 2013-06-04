@@ -25,6 +25,9 @@ borrar_pantalla:
 
 BITS 32
 
+extern game_iniciar
+extern game_terminar
+
 %define TAREA_QUANTUM		2
 excepcion_msg db		'Ch, ch, que andas haciendo? Toma una excepcion pebete!'
 excepcion_msg_len equ	$ - excepcion_msg
@@ -249,10 +252,10 @@ call fin_intr_pic1
 push eax
 in al, 0x60 ;Lectura del teclado
 cmp al, 0x93 ;Veo si soltó R
-
 jne .verTeclaP
 imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
 ;Renaudo tarea
+jmp .fin
 .verTeclaP:
 cmp al, 0x99 ;Veo si soltó P
 jne .fin
@@ -271,7 +274,20 @@ iret
 ;;
 ISR 50
 
-
+ISR 144
+pushfd
+cmp eax, 200 ;Veo si hay que terminar el juego
+jne .iniciarJuego
+;Termino el juego
+call game_terminar
+jmp .fin
+.iniciarJuego:
+cmp eax, 300 ;Veo si hay que iniciar el juego
+jne .fin
+;Inicializar juego
+call game_iniciar
+.fin:
+popfd
 proximo_reloj:
 	pushad
 	inc DWORD [reloj_numero]
