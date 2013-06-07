@@ -27,7 +27,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		(unsigned char)		0x00,			/* base[31:24]  */
 	},
 
-	//Código 1, privilegio 0
+	// Código 1, privilegio 0
 	[1] = {
 		//Límite: máximo offset que puede tener un byte en un segmento
 		.limit_0_15  = 0xFFFF,
@@ -67,7 +67,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.base_31_24  = 0,
 	},
 
-	//Código 2, privilegio 2
+	// Código 2, privilegio 2
 	[2] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
@@ -84,7 +84,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.base_31_24  = 0,
 	},
 
-		//Código 3, privilegio 3
+	// Código 3, privilegio 3
 	[3] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
@@ -100,13 +100,14 @@ gdt_entry gdt[GDT_COUNT] = {
 		.g           = 1,
 		.base_31_24  = 0,
 	},
-	//Datos 1, privilegio 0
+
+	// Datos 1, privilegio 0
 	[4] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
 		.base_23_16  = 0,
 		.type        = 2, //0010
-		.s           = 1,
+		.s Datos          = 1,
 		.dpl         = 0,
 		.p           = 1,
 		.limit_16_19 = 0x7,
@@ -117,7 +118,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.base_31_24  = 0,
 	},
 
-		//Datos 2, privilegio 2
+	// Datos 2, privilegio 2
 	[5] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
@@ -134,7 +135,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.base_31_24  = 0,
 	},
 
-	//Datos 3, privilegio 3
+	// Datos 3, privilegio 3
 	[6] = {
 		.limit_0_15  = 0xFFFF,
 		.base_0_15   = 0,
@@ -151,7 +152,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.base_31_24  = 0,
 	},
 
-	//Memoria en pantalla, privilegio 0
+	// Memoria en pantalla, privilegio 0
 	[7] = {
 		//Memoria de pantalla de 0xB8000 a 0xC0000
 		//0xB8000 - 0xC0000 = 32 768 -1 = 32 767 = 0x7FFF
@@ -168,6 +169,56 @@ gdt_entry gdt[GDT_COUNT] = {
 		.db          = 1,
 		.g           = 1,
 		.base_31_24  = 0,
+	},
+
+	// SEGEMENTOS PARA LAS TAREAS
+
+	// Tarea inicial
+	[8] = {
+		.limit_0_15  = 0x67,
+		.base_0_15   = &tarea_inicial,
+		.base_23_16  = &tarea_inicial >> 16,
+		.type        = 9,
+		.s           = 1,
+		.dpl         = 3,
+		.p           = 1,
+		.limit_16_19 = 0,
+		.avl         = 0,
+		.l           = 0,
+		.db          = 1,
+		.g           = 1,	[4] = {
+				.limit_0_15  = 0xFFFF,
+				.base_0_15   = 0,
+				.base_23_16  = 0,
+				.type        = 2, //0010
+				.s           = 1,
+				.dpl         = 0,
+				.p           = 1,
+				.limit_16_19 = 0x7,
+				.avl         = 0,
+				.l           = 0,
+				.db          = 1,
+				.g           = 1,
+				.base_31_24  = 0,
+			},
+		.base_31_24  = &tarea_inicial >> 24,
+	},
+
+	// Tarea Idle
+	[9] = {
+		.limit_0_15  = 0x67,
+		.base_0_15   = &tarea_idle,
+		.base_23_16  = &tarea_idle >> 16,
+		.type        = 9,
+		.s           = 1,
+		.dpl         = 0,
+		.p           = 1,
+		.limit_16_19 = 0,
+		.avl         = 0,
+		.l           = 0,
+		.db          = 1,
+		.g           = 1,
+		.base_31_24  = &tarea_idle >> 24,
 	}
 };
 
