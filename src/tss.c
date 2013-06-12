@@ -10,37 +10,100 @@
 #include "tss.h"
 #include "i386.h"
 
-tss tarea_inicial;
+tss tss_inicial;
 tss tarea_idle;
 tss tarea_dibujar;
 
 tss tsss[CANT_TAREAS];
 
 void tss_inicializar() {
-
-	// tss de la tarea inicial
-	tarea_inicial.eip = 0;
-	tarea_inicial.cr3 = 0;
-	tarea_inicial.
-
 	// tss de la tarea idle
-	
+	tarea_idle.esp 		= 0x0003F000;
+	tarea_idle.ebp 		= 0x0003F000;
+	tarea_idle.eip  	= TASK_CODE;
+	tarea_idle.cr3 		= KERNEL_PAGE_DIR;
+	tarea_idle.es 		= 32; 	// no lo usamos
+	tarea_idle.cs 		= 8; 	// segmento de codigo privilegio 0
+	tarea_idle.ss 		= 32; 	// segmento de datos privilegio 0
+	tarea_idle.ds 		= 32; 	// segmento de datos privilegio 0
+	tarea_idle.fs 		= 56; 	// segmento de video
+	tarea_idle.gs 		= 32; 	// no lo usamos
+	tarea_idle.eflags 	= 0x00000202;
+	tarea_idle.iomap 	= 0xFFFF;
+	tarea_idle.esp0     = TASK_IDLE_STACK_RING_0;
 
-	/*
-	mov edi,tsss
-	add edi,104*<indice>
-	mov eax,cr3
-	mov [edi+28],eax
-	mov dword [edi+32],<eip>
-	mov dword [edi+36],<flags>
-	mov dword [edi+56],<pila>
-	mov dword [edi+60],<pila>
-	mov word [edi+72],<seg.dat>
-	mov word [edi+76],<seg.cod>
-	mov word [edi+80],<seg.dat>
-	mov word [edi+84],<seg.dat>
-	mov word [edi+88],<seg.dat>
-	mov word [edi+92],<seg.dat>
-	mov word [edi+102],0xFFFF
-	*/
+	//Tarea 1
+	tsss[0].esp 	= TASK_STACK;
+	tsss[0].ebp 	= TASK_STACK;
+	tsss[0].eip    	= TASK_CODE;
+	tsss[0].cr3 	= TASK_1_PAGE_DIR;
+	tsss[0].es 		= 32; 	// no lo usamos
+	tsss[0].cs 		= 8; 	// segmento de codigo privilegio 0
+	tsss[0].ss 		= 32; 	// segmento de datos privilegio 0
+	tsss[0].ds 		= 32; 	// segmento de datos privilegio 0
+	tsss[0].fs 		= 56; 	// segmento de video
+	tsss[0].gs 		= 32; 	// no lo usamos
+	tsss[0].eflags 	= 0x00000202;
+	tsss[0].iomap 	= 0xFFFF;
+	tsss[1].esp0 	= TASK_1_STACK_RING_0;
+
+	//Tarea 2
+	tsss[1].esp 	= TASK_STACK;
+	tsss[1].ebp 	= TASK_STACK;
+	tsss[1].eip    	= TASK_CODE;
+	tsss[1].cr3 	= TASK_2_PAGE_DIR;
+	tsss[1].es 		= 32; 	// no lo usamos
+	tsss[1].cs 		= 8; 	// segmento de codigo privilegio 0
+	tsss[1].ss 		= 32; 	// segmento de datos privilegio 0
+	tsss[1].ds 		= 32; 	// segmento de datos privilegio 0
+	tsss[1].fs 		= 56; 	// segmento de video
+	tsss[1].gs 		= 32; 	// no lo usamos
+	tsss[1].eflags 	= 0x00000202;
+	tsss[1].iomap 	= 0xFFFF;
+	tsss[1].esp0 	= TASK_2_STACK_RING_0;
+
+	//Tarea 3
+	tsss[2].esp 	= TASK_STACK;
+	tsss[2].ebp 	= TASK_STACK;
+	tsss[2].eip    	= TASK_CODE;
+	tsss[2].cr3 	= TASK_3_PAGE_DIR;
+	tsss[2].es 		= 32; 	// no lo usamos
+	tsss[2].cs 		= 8; 	// segmento de codigo privilegio 0
+	tsss[2].ss 		= 32; 	// segmento de datos privilegio 0
+	tsss[2].ds 		= 32; 	// segmento de datos privilegio 0
+	tsss[2].fs 		= 56; 	// segmento de video
+	tsss[2].gs 		= 32; 	// no lo usamos
+	tsss[2].eflags 	= 0x00000202;
+	tsss[2].iomap 	= 0xFFFF;
+	tsss[2].esp0 	= TASK_3_STACK_RING_0;
+
+	//Tarea 4
+	tsss[3].esp 	= TASK_STACK;
+	tsss[3].ebp 	= TASK_STACK;
+	tsss[3].eip    	= TASK_CODE;
+	tsss[3].cr3 	= TASK_4_PAGE_DIR;
+	tsss[3].es 		= 32; 	// no lo usamos
+	tsss[3].cs 		= 8; 	// segmento de codigo privilegio 0
+	tsss[3].ss 		= 32; 	// segmento de datos privilegio 0
+	tsss[3].ds 		= 32; 	// segmento de datos privilegio 0
+	tsss[3].fs 		= 56; 	// segmento de video
+	tsss[3].gs 		= 32; 	// no lo usamos
+	tsss[3].eflags 	= 0x00000202;
+	tsss[3].iomap 	= 0xFFFF;
+	tsss[3].esp0 	= TASK_4_STACK_RING_0;
+
+	//Tarea 5 (Arbitro)
+	tsss[4].esp 	= TASK_STACK;
+	tsss[4].ebp 	= TASK_STACK;
+	tsss[4].eip    	= TASK_CODE;
+	tsss[4].cr3 	= TASK_5_PAGE_DIR;
+	tsss[4].es 		= 32; 	// no lo usamos
+	tsss[4].cs 		= 8; 	// segmento de codigo privilegio 0
+	tsss[4].ss 		= 32; 	// segmento de datos privilegio 0
+	tsss[4].ds 		= 32; 	// segmento de datos privilegio 0
+	tsss[4].fs 		= 56; 	// segmento de video
+	tsss[4].gs 		= 32; 	// no lo usamos
+	tsss[4].eflags 	= 0x00000202;
+	tsss[4].iomap 	= 0xFFFF;
+	tsss[4].esp0 	= TASK_5_STACK_RING_0;
 }

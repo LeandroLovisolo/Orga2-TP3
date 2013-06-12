@@ -17,7 +17,8 @@ global start
 
 ;; GDT
 extern GDT_DESC
-
+extern gdt_tareas_ii
+extern tss_inicializar
 ;; IDT
 extern IDT_DESC
 extern idt_inicializar
@@ -110,11 +111,12 @@ modo_protegido:
 	; pintar pantalla, todos los colores, que bonito!
 	imprimir_texto_mp bienvenida_msg, bienvenida_len, 0x06, 0, 0
 
-	; inicializar tarea idle
 
 	; inicializar todas las tsss
+	call tss_inicializar
 
 	; inicializar entradas de la gdt de tss
+	call gdt_tareas_ii
 
 	; inicializar el scheduler
 
@@ -132,9 +134,13 @@ modo_protegido:
 	call resetear_pic
 	call habilitar_pic
 	sti
-	; cargo la primer tarea null
 
-	; aca salto a la primer tarea
+	; Cargo la primer tarea null
+	mov ax, 64 
+	ltr ax
+
+	; Salto a tarea idle
+	jmp 72:0
 
 	; Ciclar infinitamente (por si algo sale mal)
 	jmp $

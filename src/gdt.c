@@ -107,7 +107,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.base_0_15   = 0,
 		.base_23_16  = 0,
 		.type        = 2, //0010
-		.s Datos          = 1,
+		.s           = 1,
 		.dpl         = 0,
 		.p           = 1,
 		.limit_16_19 = 0x7,
@@ -172,57 +172,116 @@ gdt_entry gdt[GDT_COUNT] = {
 	},
 
 	// SEGEMENTOS PARA LAS TAREAS
-
-	// Tarea inicial
-	[8] = {
-		.limit_0_15  = 0x67,
-		.base_0_15   = &tarea_inicial,
-		.base_23_16  = &tarea_inicial >> 16,
-		.type        = 9,
-		.s           = 1,
-		.dpl         = 3,
-		.p           = 1,
-		.limit_16_19 = 0,
-		.avl         = 0,
-		.l           = 0,
-		.db          = 1,
-		.g           = 1,	[4] = {
-				.limit_0_15  = 0xFFFF,
-				.base_0_15   = 0,
-				.base_23_16  = 0,
-				.type        = 2, //0010
-				.s           = 1,
-				.dpl         = 0,
-				.p           = 1,
-				.limit_16_19 = 0x7,
-				.avl         = 0,
-				.l           = 0,
-				.db          = 1,
-				.g           = 1,
-				.base_31_24  = 0,
-			},
-		.base_31_24  = &tarea_inicial >> 24,
-	},
-
-	// Tarea Idle
-	[9] = {
-		.limit_0_15  = 0x67,
-		.base_0_15   = &tarea_idle,
-		.base_23_16  = &tarea_idle >> 16,
-		.type        = 9,
-		.s           = 1,
-		.dpl         = 0,
-		.p           = 1,
-		.limit_16_19 = 0,
-		.avl         = 0,
-		.l           = 0,
-		.db          = 1,
-		.g           = 1,
-		.base_31_24  = &tarea_idle >> 24,
-	}
 };
 
 gdt_descriptor GDT_DESC = {
 	sizeof(gdt) - 1,
 	(unsigned int) &gdt
 };
+
+void gdt_tareas_ii(){
+	// Tarea inicial
+	gdt[8].limit_0_15  = 0x67;
+	gdt[8].base_0_15   = (unsigned int)&tss_inicial;
+	gdt[8].base_23_16  = (unsigned int)&tss_inicial >> 16;
+	gdt[8].type        = 9;
+	gdt[8].s           = 0;
+	gdt[8].dpl         = 3;
+	gdt[8].p           = 1;
+	gdt[8].limit_16_19 = 0;
+	gdt[8].avl         = 0;
+	gdt[8].l           = 0;
+	gdt[8].db          = 1;
+	gdt[8].g           = 1;
+	gdt[8].base_31_24  = (unsigned int)&tss_inicial >> 24;
+
+	// Tarea Idle
+	gdt[9].limit_0_15  = 0x67;
+	gdt[9].base_0_15   = (unsigned int)&tarea_idle;
+	gdt[9].base_23_16  = (unsigned int)&tarea_idle >> 16;
+	gdt[9].type        = 9;
+	gdt[9].s           = 0;
+	gdt[9].dpl         = 0;
+	gdt[9].p           = 1;
+	gdt[9].limit_16_19 = 0;
+	gdt[9].avl         = 0;
+	gdt[9].l           = 0;
+	gdt[9].db          = 1;
+	gdt[9].g           = 1;
+	gdt[9].base_31_24  = (unsigned int)&tarea_idle >> 24;
+
+	// Tarea 1
+	gdt[10].limit_0_15  = 0x67;
+	gdt[10].base_0_15   = (unsigned int)&tsss[0];
+	gdt[10].base_23_16  = (unsigned int)&tsss[0] >> 16;
+	gdt[10].type        = 9;
+	gdt[10].s           = 0;
+	gdt[10].dpl         = 3;
+	gdt[10].p           = 1;
+	gdt[10].limit_16_19 = 0;
+	gdt[10].avl         = 0;
+	gdt[10].l           = 0;
+	gdt[10].db          = 1;
+	gdt[10].g           = 1;
+	gdt[10].base_31_24  = (unsigned int)&tsss[0] >> 24;
+
+	// Tarea 2
+	gdt[11].limit_0_15  = 0x67;
+	gdt[11].base_0_15   = (unsigned int)&tsss[1];
+	gdt[11].base_23_16  = (unsigned int)&tsss[1] >> 16;
+	gdt[11].type        = 9;
+	gdt[11].s           = 0;
+	gdt[11].dpl         = 3;
+	gdt[11].p           = 1;
+	gdt[11].limit_16_19 = 0;
+	gdt[11].avl         = 0;
+	gdt[11].l           = 0;
+	gdt[11].db          = 1;
+	gdt[11].g           = 1;
+	gdt[11].base_31_24  = (unsigned int)&tsss[1] >> 24;
+
+	// Tarea 3
+	gdt[12].limit_0_15  = 0x67;
+	gdt[12].base_0_15   = (unsigned int)&tsss[2];
+	gdt[12].base_23_16  = (unsigned int)&tsss[2] >> 16;
+	gdt[12].type        = 9;
+	gdt[12].s           = 0;
+	gdt[12].dpl         = 3;
+	gdt[12].p           = 1;
+	gdt[12].limit_16_19 = 0;
+	gdt[12].avl         = 0;
+	gdt[12].l           = 0;
+	gdt[12].db          = 1;
+	gdt[12].g           = 1;
+	gdt[12].base_31_24  = (unsigned int)&tsss[2] >> 24;
+
+	// Tarea 4
+	gdt[13].limit_0_15  = 0x67;
+	gdt[13].base_0_15   = (unsigned int)&tsss[3];
+	gdt[13].base_23_16  = (unsigned int)&tsss[3] >> 16;
+	gdt[13].type        = 9;
+	gdt[13].s           = 0;
+	gdt[13].dpl         = 3;
+	gdt[13].p           = 1;
+	gdt[13].limit_16_19 = 0;
+	gdt[13].avl         = 0;
+	gdt[13].l           = 0;
+	gdt[13].db          = 1;
+	gdt[13].g           = 1;
+	gdt[13].base_31_24  = (unsigned int)&tsss[3] >> 24;
+
+	// Tarea 5 (arbitro)
+	gdt[14].limit_0_15  = 0x67;
+	gdt[14].base_0_15   = (unsigned int)&tsss[4];
+	gdt[14].base_23_16  = (unsigned int)&tsss[4] >> 16;
+	gdt[14].type        = 9;
+	gdt[14].s           = 0;
+	gdt[14].dpl         = 2;
+	gdt[14].p           = 1;
+	gdt[14].limit_16_19 = 0;
+	gdt[14].avl         = 0;
+	gdt[14].l           = 0;
+	gdt[14].db          = 1;
+	gdt[14].g           = 1;
+	gdt[14].base_31_24  = (unsigned int)&tsss[4] >> 24;
+}

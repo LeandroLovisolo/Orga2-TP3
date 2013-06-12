@@ -49,7 +49,7 @@ typedef struct str_tss {
 	unsigned short	iomap;
 } __attribute__((__packed__, aligned (8))) tss;
 
-extern tss tarea_inicial;
+extern tss tss_inicial;
 extern tss tarea_idle;
 extern tss tarea_dibujar;
 

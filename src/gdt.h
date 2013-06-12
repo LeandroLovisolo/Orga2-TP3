@@ -34,5 +34,5 @@ typedef struct str_gdt_entry {
 /** Tabla GDT **/
 extern gdt_entry gdt[];
 extern gdt_descriptor GDT_DESC;
-
+void gdt_tareas_ii();
 #endif	/* !__GDT_H__ */

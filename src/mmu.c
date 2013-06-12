@@ -10,10 +10,17 @@
 
 void inicializar_kernel_page_directory();
 void inicializar_kernel_table_directory();
+void mmu_mappear_pagina(unsigned int virtual,
+                       unsigned int fisica,
+                       pd_entry* page_directory,
+                       unsigned char user_supervisor,
+                       unsigned char read_write);
+void mmu_inicializar_tarea_idle();
 
 void mmu_inicializar_dir_kernel() {
     inicializar_kernel_page_directory();
     inicializar_kernel_table_directory();
+    mmu_inicializar_tarea_idle();
 }
 
 void inicializar_kernel_page_directory() {
@@ -25,7 +32,7 @@ void inicializar_kernel_page_directory() {
     page_directory[0].user_supervisor = 0;
     page_directory[0].address = KERNEL_PAGE_TABLE >> 12;
     page_directory[0].read_write = 1;
-    page_directory[0].present = 1;
+    page_directory[0].present = 1; 
 }
 
 void inicializar_kernel_table_directory() {
@@ -40,6 +47,10 @@ void inicializar_kernel_table_directory() {
         page_table[i].read_write = 1;
         page_table[i].present = 1;
     }
+}
+
+void mmu_inicializar_tarea_idle() {
+    mmu_mappear_pagina(TASK_CODE, 0x00010000, (pd_entry*) KERNEL_PAGE_DIR, 0, 1);
 }
 
 void mmu_inicializar_tarea_arbitro();
@@ -130,8 +141,8 @@ void mmu_inicializar_tarea_jugador(
     }
 
     // Mappeo la memoria
-    mmu_mappear_pagina(TASK_CODE, code_address, page_directory, 1, 1);
-    mmu_mappear_pagina(TASK_STACK, stack_address, page_directory, 1, 1);
+    mmu_mappear_pagina(TASK_CODE,    code_address, page_directory,    1, 1);
+    mmu_mappear_pagina(TASK_STACK,   stack_address, page_directory,   1, 1);
     mmu_mappear_pagina(TABLERO_ADDR, TABLERO_ADDR_PA, page_directory, 1, 0);
 }
 
