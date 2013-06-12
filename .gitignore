@@ -19,6 +19,9 @@
 *.tsko
 *.tmp
 
+# Sistema operativo
+diskette.img
+
 # Sublime Text
 *.sublime-project
 *.sublime-workspace
