@@ -235,50 +235,73 @@ ISR 20
 imprimir_excepcion excepcion_ve_msg, excepcion_ve_msg_len
 jmp $
 
-pausado: db 0
+;;
+;; variables del handler del RELOJ
+;;
+
+pausado: 		db 0
 pausarReanudar: db 0 
+quantum: 		db TAREA_QUANTUM
+proximaTarea: 	dw 0
 
 ;;
 ;; Rutina de atención del RELOJ
 ;;
-quantum: db TAREA_QUANTUM
-ISR 32
-pushfd 				; guarda del valor de los flags
-push eax
-call fin_intr_pic1 	; le comunica al pic que ya se atendio la interrupción
-cmp byte [quantum], 0
-jne .finYDec32
-mov byte [quantum], 2 ;Reestablezco quantum
-cmp byte [pausado], 0 ;Pregunta si no esta pausado
-jne .noPausar32
-cmp byte [pausarReanudar], 1 ;Me fijo si hay que pausar
-jne .cambiarTarea32
-mov byte [pausado], 1
-;Salto a idle
-jmp 72:00
-jmp .fin32 ;Al volver a la tarea quiero que se siga ejecutando
 
+ISR 32
+	pushfd 					; guarda del valor de los flags
+	push eax
+	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
+	
+	; se fija si se le acabó el cuantum a la tarea actual
+	cmp byte [quantum], 0
+	jne .finYDec32 			; si no se le acabo salta a la sección donde decrementa el cuantum y sale
+	
+	; si llego aca es porque el cuantum de la tarea actual se acabo
+	mov byte [quantum], 2 	; Reestablezco quantum
+	; se fija si el programa no está actualmente pausado
+	cmp byte [pausado], 0 
+	jne .noPausar32 		; si no es 0 es porque esta pausado, en ese caso hay que preguntar si se debe despausarlo
+
+	; si no salto es porque no esta pausado y en ese caso me fijo si hay que pausarlo
+	cmp byte [pausarReanudar], 1
+	jne .cambiarTarea32 	; si salta es porque no hay que pausar
+
+	; si no salta es porque hay que pausarlo, en ese caso seteamos el bit de pausado a 1 para informar que pasa a ser pausado
+	mov byte [pausado], 1
+	;Salto a idle
+	jmp far 72:00
+	jmp .fin32 ; Al volver a la tarea quiero que se siga ejecutando
+
+	; si entra en esta etiqueta es porque ya esta pausado, en este caso hay que ver si hay que despausarlo
 .noPausar32:
-	cmp byte [pausarReanudar], 0 ;Veo si tengo que despausar
-	jne .fin32
-	mov byte [pausado], 0
-	.cambiarTarea32:
-	;Pushear registros
+	cmp byte [pausarReanudar], 0 ; Veo si tengo que despausar
+	jne .fin32 					 ; si salta es porque no hay que reanudar
+
+	; si no salta es porque hay que reanudar el hilo de las tareas 
+	mov byte [pausado], 0 		 ; informamos que ya dejara de estar pausado seteando en 0 pausado
+	.cambiarTarea32: 			 ; paso a la proxima tarea
+
+	pushad 						; Push EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
 	call sched_proximo_indice
-	pop es ;Consigo resultado
-	jmp far [aca ta]
+	pop al 						; Consigo resultado
+	mov [proximaTarea],al 	
+	jmp far [proximaTarea]:0000
+	popad 						; Pop EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
 	jmp .fin32
 
 .finYDec32:
+
 	;Decremento el quantum
 	mov al, [quantum]
 	dec al
 	mov byte [quantum], al
+
 .fin32:
-call proximo_reloj 	; llama al handler del reloj
-pop eax
-popfd 				; restablece el valor de los flags
-iret 				; retornar de la interrupción
+	call proximo_reloj 	; llama al handler del reloj
+	pop eax 			
+	popfd 				; restablece el valor de los flags
+	iret 				; retorna de la interrupción
 
 ;;
 ;; Rutina de atención del TECLADO
