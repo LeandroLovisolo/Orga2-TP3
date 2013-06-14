@@ -7,9 +7,11 @@
 #include "defines.h"
 #include "screen.h"
 #include "sched.h"
+#define true 1
+#define false 0
 
 unsigned short tareas[CANT_TAREAS];
-bool 		   arbitro			= false;
+char 		   arbitro			= false;
 unsigned short posArbitro 		= 112;
 unsigned short posicion 		= 0;
 
@@ -25,13 +27,13 @@ unsigned short sched_proximo_indice() {
 	unsigned short 	result;
 	int 			cant = 0;
 
-	if (!abitro) {
+	if (!arbitro) {
 
 		result 	= posArbitro;
 		arbitro = true;
 	} else {
 
-		while (tarea[posicion] == 0 && cant < 4) {
+		while (tareas[posicion] == 0 && cant < 4) {
 
 			++posicion;
 			++cant;
@@ -41,7 +43,7 @@ unsigned short sched_proximo_indice() {
 			return posArbitro;
 		}
 
-		result 	= tarea[posicion];
+		result 	= tareas[posicion];
 		arbitro = false;
 		++posicion;
 	} 

@@ -252,7 +252,7 @@ ISR 32
 	pushfd 					; guarda del valor de los flags
 	push eax
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
-	
+	xchg bx, bx
 	; se fija si se le acabó el cuantum a la tarea actual
 	cmp byte [quantum], 0
 	jne .finYDec32 			; si no se le acabo salta a la sección donde decrementa el cuantum y sale
@@ -270,7 +270,7 @@ ISR 32
 	; si no salta es porque hay que pausarlo, en ese caso seteamos el bit de pausado a 1 para informar que pasa a ser pausado
 	mov byte [pausado], 1
 	;Salto a idle
-	jmp far 72:00
+	jmp 72:00
 	jmp .fin32 ; Al volver a la tarea quiero que se siga ejecutando
 
 	; si entra en esta etiqueta es porque ya esta pausado, en este caso hay que ver si hay que despausarlo
@@ -284,9 +284,8 @@ ISR 32
 
 	pushad 						; Push EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
 	call sched_proximo_indice
-	pop al 						; Consigo resultado
-	mov [proximaTarea],al 	
-	jmp far [proximaTarea]:0000
+	mov [proximaTarea],ax 	
+	jmp far [proximaTarea]
 	popad 						; Pop EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
 	jmp .fin32
 
@@ -315,14 +314,14 @@ cmp al, 0x93 ;Veo si soltó R
 jne .verTeclaP
 ;imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
 ;Reanudo tarea
-mov [pausarReanudar], 0
+mov byte [pausarReanudar], 0
 jmp .fin33
 .verTeclaP:
 cmp al, 0x99 ;Veo si soltó P
-jne .fin
+jne .fin33
 ;imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
 ;Pauso tarea
-mov [pausarReanudar], 1
+mov byte [pausarReanudar], 1
 .fin33:
 pop eax
 popfd
