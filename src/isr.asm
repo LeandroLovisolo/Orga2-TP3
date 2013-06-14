@@ -29,7 +29,7 @@ extern game_iniciar
 extern game_terminar
 extern game_migrar
 extern game_duplicar
-extern pausado
+extern sched_proximo_indice
 
 %define TAREA_QUANTUM		2
 excepcion_msg db		'Ch, ch, que andas haciendo? Toma una excepcion pebete!'
@@ -235,6 +235,9 @@ ISR 20
 imprimir_excepcion excepcion_ve_msg, excepcion_ve_msg_len
 jmp $
 
+pausado: db 0
+pausarReanudar: db 0 
+
 ;;
 ;; Rutina de atención del RELOJ
 ;;
@@ -248,7 +251,7 @@ jne .finYDec32
 mov byte [quantum], 2 ;Reestablezco quantum
 cmp byte [pausado], 0 ;Pregunta si no esta pausado
 jne .noPausar32
-cmp byte [pausar], 1 ;Me fijo si hay que pausar
+cmp byte [pausarReanudar], 1 ;Me fijo si hay que pausar
 jne .cambiarTarea32
 mov byte [pausado], 1
 ;Salto a idle
@@ -256,29 +259,27 @@ jmp 72:00
 jmp .fin32 ;Al volver a la tarea quiero que se siga ejecutando
 
 .noPausar32:
-	cmp [pausar], 0 ;Veo si tengo que despausar
+	cmp byte [pausarReanudar], 0 ;Veo si tengo que despausar
 	jne .fin32
 	mov byte [pausado], 0
 	.cambiarTarea32:
 	;Pushear registros
 	call sched_proximo_indice
-	pop ax ;Consigo resultado
-	jmp ax:00
+	pop es ;Consigo resultado
+	jmp far [aca ta]
 	jmp .fin32
 
 .finYDec32:
 	;Decremento el quantum
 	mov al, [quantum]
 	dec al
-	mov [quantum], al
+	mov byte [quantum], al
 .fin32:
 call proximo_reloj 	; llama al handler del reloj
 pop eax
 popfd 				; restablece el valor de los flags
 iret 				; retornar de la interrupción
 
-pausado: db 0
-pausarReanudar: db 0 
 ;;
 ;; Rutina de atención del TECLADO
 ;;

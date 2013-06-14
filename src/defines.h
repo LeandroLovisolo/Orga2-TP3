@@ -20,7 +20,7 @@ NOTA:
 
 
 /* TAREAS */
-#define CANT_TAREAS   			5
+#define CANT_TAREAS   			4 //Cambiamos el arbitro
 
 /* INDICES EN LA GDT */
 #define GDT_IDX_NULL_DESC		0
