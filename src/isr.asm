@@ -242,6 +242,7 @@ jmp $
 pausado: 		db 0
 pausarReanudar: db 0 
 quantum: 		db TAREA_QUANTUM
+offset:			dd 0
 proximaTarea: 	dw 0
 
 ;;
@@ -284,8 +285,8 @@ ISR 32
 
 	pushad 						; Push EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
 	call sched_proximo_indice
-	mov [proximaTarea],ax 	
-	jmp far [proximaTarea]
+	mov [proximaTarea],ax
+	jmp far [offset]
 	popad 						; Pop EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
 	jmp .fin32
 
