@@ -29,6 +29,7 @@ extern game_iniciar
 extern game_terminar
 extern game_migrar
 extern game_duplicar
+extern pausado
 
 %define TAREA_QUANTUM		2
 excepcion_msg db		'Ch, ch, que andas haciendo? Toma una excepcion pebete!'
@@ -237,14 +238,47 @@ jmp $
 ;;
 ;; Rutina de atención del RELOJ
 ;;
-
+quantum: db TAREA_QUANTUM
 ISR 32
 pushfd 				; guarda del valor de los flags
+push eax
 call fin_intr_pic1 	; le comunica al pic que ya se atendio la interrupción
+cmp byte [quantum], 0
+jne .finYDec32
+mov byte [quantum], 2 ;Reestablezco quantum
+cmp byte [pausado], 0 ;Pregunta si no esta pausado
+jne .noPausar32
+cmp byte [pausar], 1 ;Me fijo si hay que pausar
+jne .cambiarTarea32
+mov byte [pausado], 1
+;Salto a idle
+jmp 72:00
+jmp .fin32 ;Al volver a la tarea quiero que se siga ejecutando
+
+.noPausar32:
+	cmp [pausar], 0 ;Veo si tengo que despausar
+	jne .fin32
+	mov byte [pausado], 0
+	.cambiarTarea32:
+	;Pushear registros
+	call sched_proximo_indice
+	pop ax ;Consigo resultado
+	jmp ax:00
+	jmp .fin32
+
+.finYDec32:
+	;Decremento el quantum
+	mov al, [quantum]
+	dec al
+	mov [quantum], al
+.fin32:
 call proximo_reloj 	; llama al handler del reloj
+pop eax
 popfd 				; restablece el valor de los flags
 iret 				; retornar de la interrupción
 
+pausado: db 0
+pausarReanudar: db 0 
 ;;
 ;; Rutina de atención del TECLADO
 ;;
@@ -255,15 +289,17 @@ push eax
 in al, 0x60 ;Lectura del teclado
 cmp al, 0x93 ;Veo si soltó R
 jne .verTeclaP
-imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
-;Renaudo tarea
-jmp .fin
+;imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
+;Reanudo tarea
+mov [pausarReanudar], 0
+jmp .fin33
 .verTeclaP:
 cmp al, 0x99 ;Veo si soltó P
 jne .fin
-imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
+;imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
 ;Pauso tarea
-.fin:
+mov [pausarReanudar], 1
+.fin33:
 pop eax
 popfd
 iret
@@ -321,13 +357,13 @@ cmp eax, 200 ;Veo si hay que terminar el juego
 jne .iniciarJuego
 ;Termino el juego
 call game_terminar
-jmp .fin
+jmp .fin144
 .iniciarJuego:
 cmp eax, 300 ;Veo si hay que iniciar el juego
-jne .fin
+jne .fin144
 ;Inicializar juego
 call game_iniciar
-.fin:
+.fin144:
 popfd
 
 ; --------------------  funciones auxiliares ------------------------------
