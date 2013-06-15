@@ -47,7 +47,6 @@ unsigned short sched_proximo_indice() {
 		arbitro = false;
 		++posicion;
 	} 
-
 	return result;
 }
 
