@@ -33,8 +33,8 @@ void tss_inicializar() {
 	tarea_idle.esp0     = TASK_IDLE_STACK_RING_0;
 
 	//Tarea 1
-	tsss[0].esp 	= TASK_STACK;
-	tsss[0].ebp 	= TASK_STACK;
+	tsss[0].esp 	= TASK_STACK + 0x1000;
+	tsss[0].ebp 	= TASK_STACK + 0x1000;
 	tsss[0].eip    	= TASK_CODE;
 	tsss[0].cr3 	= TASK_1_PAGE_DIR;
 	tsss[0].es 		= 32; 	// no lo usamos
@@ -48,8 +48,8 @@ void tss_inicializar() {
 	tsss[1].esp0 	= TASK_1_STACK_RING_0;
 
 	//Tarea 2
-	tsss[1].esp 	= TASK_STACK;
-	tsss[1].ebp 	= TASK_STACK;
+	tsss[1].esp 	= TASK_STACK + 0x1000;
+	tsss[1].ebp 	= TASK_STACK + 0x1000;
 	tsss[1].eip    	= TASK_CODE;
 	tsss[1].cr3 	= TASK_2_PAGE_DIR;
 	tsss[1].es 		= 32; 	// no lo usamos
@@ -63,8 +63,8 @@ void tss_inicializar() {
 	tsss[1].esp0 	= TASK_2_STACK_RING_0;
 
 	//Tarea 3
-	tsss[2].esp 	= TASK_STACK;
-	tsss[2].ebp 	= TASK_STACK;
+	tsss[2].esp 	= TASK_STACK + 0x1000;
+	tsss[2].ebp 	= TASK_STACK + 0x1000;
 	tsss[2].eip    	= TASK_CODE;
 	tsss[2].cr3 	= TASK_3_PAGE_DIR;
 	tsss[2].es 		= 32; 	// no lo usamos
@@ -78,8 +78,8 @@ void tss_inicializar() {
 	tsss[2].esp0 	= TASK_3_STACK_RING_0;
 
 	//Tarea 4
-	tsss[3].esp 	= TASK_STACK;
-	tsss[3].ebp 	= TASK_STACK;
+	tsss[3].esp 	= TASK_STACK + 0x1000;
+	tsss[3].ebp 	= TASK_STACK + 0x1000;
 	tsss[3].eip    	= TASK_CODE;
 	tsss[3].cr3 	= TASK_4_PAGE_DIR;
 	tsss[3].es 		= 32; 	// no lo usamos
@@ -93,8 +93,8 @@ void tss_inicializar() {
 	tsss[3].esp0 	= TASK_4_STACK_RING_0;
 
 	//Tarea 5 (Arbitro)
-	tsss[4].esp 	= TASK_STACK;
-	tsss[4].ebp 	= TASK_STACK;
+	tsss[4].esp 	= TASK_STACK + 0x1000;
+	tsss[4].ebp 	= TASK_STACK + 0x1000;
 	tsss[4].eip    	= TASK_CODE;
 	tsss[4].cr3 	= TASK_5_PAGE_DIR;
 	tsss[4].es 		= 32; 	// no lo usamos
