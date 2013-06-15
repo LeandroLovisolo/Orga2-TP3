@@ -186,7 +186,7 @@ void gdt_tareas_ii(){
 	gdt[8].base_23_16  = (unsigned int)&tss_inicial >> 16;
 	gdt[8].type        = 9;
 	gdt[8].s           = 0;
-	gdt[8].dpl         = 3;
+	gdt[8].dpl         = 0;
 	gdt[8].p           = 1;
 	gdt[8].limit_16_19 = 0;
 	gdt[8].avl         = 0;
@@ -210,13 +210,13 @@ void gdt_tareas_ii(){
 	gdt[9].g           = 1;
 	gdt[9].base_31_24  = (unsigned int)&tarea_idle >> 24;
 
-	// Tarea 1
+	// Tarea 1 (DPLS de tareas 0)
 	gdt[10].limit_0_15  = 0x67;
 	gdt[10].base_0_15   = (unsigned int)&tsss[0];
 	gdt[10].base_23_16  = (unsigned int)&tsss[0] >> 16;
 	gdt[10].type        = 9;
 	gdt[10].s           = 0;
-	gdt[10].dpl         = 3;
+	gdt[10].dpl         = 0;
 	gdt[10].p           = 1;
 	gdt[10].limit_16_19 = 0;
 	gdt[10].avl         = 0;
@@ -231,7 +231,7 @@ void gdt_tareas_ii(){
 	gdt[11].base_23_16  = (unsigned int)&tsss[1] >> 16;
 	gdt[11].type        = 9;
 	gdt[11].s           = 0;
-	gdt[11].dpl         = 3;
+	gdt[11].dpl         = 0;
 	gdt[11].p           = 1;
 	gdt[11].limit_16_19 = 0;
 	gdt[11].avl         = 0;
@@ -246,7 +246,7 @@ void gdt_tareas_ii(){
 	gdt[12].base_23_16  = (unsigned int)&tsss[2] >> 16;
 	gdt[12].type        = 9;
 	gdt[12].s           = 0;
-	gdt[12].dpl         = 3;
+	gdt[12].dpl         = 0;
 	gdt[12].p           = 1;
 	gdt[12].limit_16_19 = 0;
 	gdt[12].avl         = 0;
@@ -261,7 +261,7 @@ void gdt_tareas_ii(){
 	gdt[13].base_23_16  = (unsigned int)&tsss[3] >> 16;
 	gdt[13].type        = 9;
 	gdt[13].s           = 0;
-	gdt[13].dpl         = 3;
+	gdt[13].dpl         = 0;
 	gdt[13].p           = 1;
 	gdt[13].limit_16_19 = 0;
 	gdt[13].avl         = 0;
@@ -276,7 +276,7 @@ void gdt_tareas_ii(){
 	gdt[14].base_23_16  = (unsigned int)&tsss[4] >> 16;
 	gdt[14].type        = 9;
 	gdt[14].s           = 0;
-	gdt[14].dpl         = 2;
+	gdt[14].dpl         = 0;
 	gdt[14].p           = 1;
 	gdt[14].limit_16_19 = 0;
 	gdt[14].avl         = 0;
