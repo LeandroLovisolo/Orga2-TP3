@@ -16,7 +16,7 @@ char 		   arbitro			= FALSE;
 unsigned short posArbitro 		= 112;
 unsigned short posicion 		= 0;
 
-char		   pausarRenaudar	= 0;
+char		   pausarReanudar	= 0;
 char		   pausado			= 0;
 char		   quantum			= 2;
 char		   finalizado		= 0;
@@ -33,12 +33,12 @@ void sched() {
 	if(finalizado == 1) return;
 	if(quantum == 0) {
 		quantum = 2;
-		if(pausado == 0 && pausarRenaudar == 1) {
+		if(pausado == 0 && pausarReanudar == 1) {
 			pausado = 1;
 			jmpToTask(72); //Salto a la tarea idle
 			return;
 		}
-		else if(pausado == 1 && pausarRenaudar == 0) {
+		else if(pausado == 1 && pausarReanudar == 0) {
 			pausado = 0;
 		}
 		unsigned short proxTarea = sched_proximo_indice();

@@ -339,16 +339,14 @@ cmp al, 0x93 ;Veo si soltó R
 jne .verTeclaP
 ;imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
 ;Reanudo tarea
-;mov byte [pausarReanudar], 0
-mov byte [pausar], 0
+mov byte [pausarReanudar], 0
 jmp .fin33
 .verTeclaP:
 cmp al, 0x99 ;Veo si soltó P
 jne .fin33
 ;imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
 ;Pauso tarea
-;mov byte [pausarReanudar], 1
-mov byte [pausar], 0
+mov byte [pausarReanudar], 1
 .fin33:
 pop eax
 popfd
