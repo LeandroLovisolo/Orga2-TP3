@@ -242,8 +242,6 @@ jmp $
 pausado: 		db 0
 pausarReanudar: db 0 
 quantum: 		db TAREA_QUANTUM
-offset:			dd 0
-proximaTarea: 	dw 0
 
 ;;
 ;; Rutina de atención del RELOJ
@@ -253,7 +251,7 @@ ISR 32
 	pushfd 					; guarda del valor de los flags
 	push eax
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
-	xchg bx, bx
+
 	; se fija si se le acabó el cuantum a la tarea actual
 	cmp byte [quantum], 0
 	jne .finYDec32 			; si no se le acabo salta a la sección donde decrementa el cuantum y sale
@@ -285,8 +283,15 @@ ISR 32
 
 	pushad 						; Push EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
 	call sched_proximo_indice
-	mov [proximaTarea],ax
-	jmp far [offset]
+
+	xchg bx, bx
+
+	; Sacado de http://forum.osdev.org/viewtopic.php?f=1&t=17813
+    push    eax              	; ax contains your TSS selector
+    push    0         			; offset is ignored
+    jmp     far [esp+0]
+    add     esp, 8              ; remove the dwords pushed onto the stack
+
 	popad 						; Pop EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
 	jmp .fin32
 
