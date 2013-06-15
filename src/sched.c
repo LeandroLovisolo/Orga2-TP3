@@ -7,11 +7,9 @@
 #include "defines.h"
 #include "screen.h"
 #include "sched.h"
-#define true 1
-#define false 0
 
 unsigned short tareas[CANT_TAREAS];
-char 		   arbitro			= false;
+char 		   arbitro			= FALSE;
 unsigned short posArbitro 		= 112;
 unsigned short posicion 		= 0;
 
@@ -23,18 +21,24 @@ void sched_inicializar() {
 }
 
 unsigned short sched_proximo_indice() {
-	
-	unsigned short 	result;
-	int 			cant = 0;
+	/* Implementación alternativa: Ejecutar sólo la tarea 1 */
+	return 80;
+
+	/* Implementación alternativa: Excluye tarea árbitro
+	posicion++;
+	if(posicion >= 4) posicion = 0;
+	return tareas[posicion];
+	*/
+
+	/* Implementación real
+	unsigned short result;
+	int cant = 0;
 
 	if (!arbitro) {
-
-		result 	= posArbitro;
-		arbitro = true;
+		result = posArbitro;
+		arbitro = TRUE;
 	} else {
-
 		while (tareas[posicion] == 0 && cant < 4) {
-
 			++posicion;
 			++cant;
 		}
@@ -44,10 +48,12 @@ unsigned short sched_proximo_indice() {
 		}
 
 		result 	= tareas[posicion];
-		arbitro = false;
+		arbitro = FALSE;
 		++posicion;
 	} 
+
 	return result;
+	*/
 }
 
 void sched_remover_tarea(unsigned int process_id) {
