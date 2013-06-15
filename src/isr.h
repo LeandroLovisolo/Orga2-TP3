@@ -33,7 +33,7 @@ void _isr32();
 void _isr33();
 void _isr128();
 void _isr144();
-
+void jmpToTask(unsigned short tarea);
 
 
 

@@ -7,17 +7,54 @@
 #include "defines.h"
 #include "screen.h"
 #include "sched.h"
+#include "isr.h"
+
+//extern jmpToTask
 
 unsigned short tareas[CANT_TAREAS];
 char 		   arbitro			= FALSE;
 unsigned short posArbitro 		= 112;
 unsigned short posicion 		= 0;
 
+char		   pausarRenaudar	= 0;
+char		   pausado			= 0;
+char		   quantum			= 2;
+char		   finalizado		= 0;
+char 		   contador			= 0;
+
 void sched_inicializar() {
 	tareas[0] = 80;
 	tareas[1] = 88;
 	tareas[2] = 96;
 	tareas[3] = 104;
+}
+
+void sched() {
+	if(finalizado == 1) return;
+	if(quantum == 0) {
+		quantum = 2;
+		if(pausado == 0 && pausarRenaudar == 1) {
+			pausado = 1;
+			jmpToTask(72); //Salto a la tarea idle
+			return;
+		}
+		else if(pausado == 1 && pausarRenaudar == 0) {
+			pausado = 0;
+		}
+		unsigned short proxTarea = sched_proximo_indice();
+		if(proxTarea != -1) { //Si hay tareas activas
+			if(contador != 1) { //Esto es solamente por ahora porque tenemos una sola tarea corriendo
+				contador = 1;
+				jmpToTask(proxTarea);
+			}
+		}
+		else {
+			finalizado = 1;
+			jmpToTask(72); //Salto a la tarea idle
+		}
+	}
+	quantum--;
+	return;
 }
 
 unsigned short sched_proximo_indice() {
