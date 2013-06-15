@@ -125,8 +125,26 @@ qué?}
 
 \subsection{¿Qué ocurre si no se setean todos los registros de segmento al entrar en
 modo protegido? ¿Es necesario setearlos todos? ¿Por qué?}
+Si no se setean los registros al entrar en modo protegido corremos el riesgo de que, en algún momento intentemos utilizarlos y al no tener un selector correcto (existente, distinto del 0 y del segmento que deberíamos utilizar), obtengamos un GPE.
 
-\subsection{¿Cómo se puede hacer para generar una excepción sin utilizar la ins-trucción int? Mencionar al menos 3 formas posibles.}
+También hay que tener en cuenta de utilizar el selector correcto (código, nivel 0) a la hora de pasar a modo protegido.
+
+Ejemplos de la situación:
+\begin{enumerate}
+	\item No haber seteado el registro de segmento de datos e intentar acceder a un dato
+	\item No haber seteado el registro de segmento del stack y querer utilizarlo
+\end{enumerate}
+
+\subsection{¿Cómo se puede hacer para generar una excepción sin utilizar la instrucción int? Mencionar al menos 3 formas posibles.}
+Otras formas de realizar una excepción:
+\begin{enumerate}
+	\item \textbf{General Protection Exception:}
+	Ocurre por diversas acciones, por ejemplo, acceder a memoria fuera del segmento asignado.
+	\item \textbf{Divide by 0:}
+	Ocurre cuando se intenta realizar una división por 0.
+	\item \textbf{Page fault:}
+	Excepción relacionada con paginación, puede ocurrir al intentar acceder a memoria que no fue mapeada.
+\end{enumerate}
 
 \subsection{¿Cuáles son los valores del stack cuando se genera una interrupción? ¿Qué significan? Indicar para el caso de operar en nivel 3 y nivel 0}
 
@@ -153,6 +171,7 @@ verificar, utilizando el debugger de Bochs, que la tarea se cargó correctamente
 llega a esta conclusión?}
 
 \subsection{¿Cómo se puede verificar si la conmutación de tarea fue exitosa?}
+Si la conmutación de la tarea fue exitosa, esta comenzará a ejecutarse, pudiendose ver en el debugger de Bochs su ejecución. Además de esto, es posible verificar, utilizando \textbf{info tss} si la TSS fue cargada correctamente observando los valores correspondientes a la tarea.
 
 \subsection{Se sabe que las tareas llaman a la interrupción 0x80 y por 0x90. ¿Qué ocurre si esta no está implementada? ¿Por qué?}
 
