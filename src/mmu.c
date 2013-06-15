@@ -136,20 +136,18 @@ void mmu_inicializar_tarea_jugador(
     page_directory[0].present = 1;
 
     // Inicializo la tabla con todas las entradas vacías
-    /*
     for (i = 0; i < 1024; i++) {
         *((unsigned int*) &(page_table[i])) = 0;
     }
-    */
-    for (i = 0; i < 1024; i++) {
-        *((unsigned int*) &(page_table[i])) = 0;
-    }
+
+    // Mappeo memoria del kernel
     for (i = 0; i < 0x164; i++) {
         page_table[i].user_supervisor = 0;
         page_table[i].address = i;
         page_table[i].read_write = 1;
         page_table[i].present = 1;
     }
+    
     // Mappeo la memoria
     mmu_mappear_pagina(TASK_CODE,    code_address, page_directory,    1, 1);
     mmu_mappear_pagina(TASK_STACK,   stack_address, page_directory,   1, 1);
