@@ -31,6 +31,15 @@ extern game_migrar
 extern game_duplicar
 extern sched_proximo_indice
 
+;;
+;;Extern de tareas
+;;
+extern pausado
+extern pausarReanudar
+extern sched
+extern tareaActiva
+
+
 %define TAREA_QUANTUM		2
 excepcion_msg db		'Ch, ch, que andas haciendo? Toma una excepcion pebete!'
 excepcion_msg_len equ	$ - excepcion_msg
@@ -239,15 +248,12 @@ jmp $
 ;; variables del handler del RELOJ
 ;;
 
-extern pausado
-extern pausarReanudar
-extern sched
-
-;pausado: 		db 0
-;pausarReanudar: db 0 
-quantum: 		db TAREA_QUANTUM
 offset:      dd 0
 proximaTarea:   dw 0 
+
+;;
+;;	Función jmpToTask para saltar de tareas
+;;
 
 global jmpToTask
 jmpToTask:

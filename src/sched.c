@@ -8,6 +8,7 @@
 #include "screen.h"
 #include "sched.h"
 #include "isr.h"
+#include "gdt.h"
 
 //extern jmpToTask
 
@@ -97,3 +98,16 @@ void sched_remover_tarea(unsigned int process_id) {
 	tareas[process_id] = 0;
 }
 
+//Tener en cuenta que devuelve la posición en la GDT de la tarea
+//Para tener la posición en tareas[] hay que restarle 10 ya que empieza a contar desde la idle
+//y la idle no está en tareas[]
+unsigned short tareaActiva() {
+	int i;
+	unsigned short task = 0;
+	for(i = 9; i < 15; i++) {
+		unsigned short busy = gdt[i].type;
+		busy = busy & 0x0002; //Dejo únicamente el bit de busy
+		if(busy == 2) task = i;
+	}
+	return task;
+}
