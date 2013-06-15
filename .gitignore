@@ -1,3 +1,10 @@
+#Informe
+*.log
+*.toc
+*.aux
+*.pdf
+informe.synctex.gz
+
 # Compiled Object files
 *.slo
 *.lo
