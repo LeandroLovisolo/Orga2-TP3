@@ -14,6 +14,7 @@ global start
 		loop limpar
 %endmacro
 
+extern sched_inicializar
 
 ;; GDT
 extern GDT_DESC
@@ -114,12 +115,21 @@ modo_protegido:
 
 	; inicializar todas las tsss
 	call tss_inicializar
-
+	;Copio las tareas
+	mov eax, 0x00011000 ;De donde copiar las tareas
+	mov ebx, 0x00101000 ;A donde copiar las tareas
+	mov ecx, 5120 ;Copio 5*1024 dw
+	.copiarTarea:
+		mov esi, [eax]
+		mov [ebx], esi
+		inc eax
+		inc ebx
+		loop .copiarTarea
 	; inicializar entradas de la gdt de tss
 	call gdt_tareas_ii
 
 	; inicializar el scheduler
-
+	call sched_inicializar
 	; inicializar la IDT
 	call idt_inicializar
 	lidt [IDT_DESC]
