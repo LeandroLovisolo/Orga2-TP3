@@ -59,7 +59,7 @@ void sched() {
 
 unsigned short sched_proximo_indice() {
 	/* Implementación alternativa: Ejecutar sólo la tarea 1 */
-	return 80;
+	return posArbitro;
 
 	/* Implementación alternativa: Excluye tarea árbitro
 	posicion++;

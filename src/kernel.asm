@@ -122,8 +122,8 @@ modo_protegido:
 	.copiarTarea:
 		mov esi, [eax]
 		mov [ebx], esi
-		inc eax
-		inc ebx
+		add eax, 4
+		add ebx, 4
 		loop .copiarTarea
 	; inicializar entradas de la gdt de tss
 	call gdt_tareas_ii
