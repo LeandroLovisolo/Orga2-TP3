@@ -147,6 +147,17 @@ Otras formas de realizar una excepción:
 \end{enumerate}
 
 \subsection{¿Cuáles son los valores del stack cuando se genera una interrupción? ¿Qué significan? Indicar para el caso de operar en nivel 3 y nivel 0}
+teniendo en cuenta que un segmento de pila puede ser accedido por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la quel apuntado por ESP0 en la tss de la tarea actual.
+
+Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupcion debe resguardarse en la pila los registros
+\begin{itemize}
+ \item EFLAGS (que contiene informaci ́n del contexto de ejecución).
+ \item CS (que indica el segmento de código en el cual se estaba ejecutando el programa y permite luego poder volver a seguir corriendo en el mismo lugar).
+ \item EIP (que indica el punto exacto donde se estaba corriendo el programa).
+ \item C ́digo de Error (este campo no es obligatorio pero en caso de que la interrupción tenga código de error entonces se almacena aquí.
+\end{itemize}
+
+
 
 \subsection{¿Puede el directorio de páginas estar en cualquier posición arbitraria de memoria?}
 En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. \\
@@ -158,16 +169,18 @@ Algo a tener en cuenta es que este espacio debe estar reservado exclusívamente 
 \subsection{¿Es posible acceder a una página de nivel de kernel desde usuario?}
 
 \subsection{¿Se puede mapear una página física desde dos direcciones virtuales distintas, de manera tal que una esté mapeada con nivel de usuario y la otra a nivel de kernel? De ser posible, ¿Qué problemas puede traer?}
-Si, se puede hacer eso si se quisiera. Para esto, en los descriptores de páginas a los que apuntan las dos direcciones virtuales deben tener las misma dirección base. Además el offset que marcan las direcciones virtuales deben ser los mismos.
+Si, se puede hacer eso si se quisiera. Para esto, en los descriptores de páginas a los que apuntan las dos direcciones virtuales deben tener el mismo valor de adress.
 
-El problema que esta acción genera, es que un espacio de memoria del kernel que contiene código podria ser escrito por un usuario. Pudiendo asi modificar codigo de kernel rempiendo la seguridad del SO.
+Los problemas que esta acción puede generar, es que si los permisos asignados son incorrectos, un codigo con privilegio de usuario podria modificar o leer codigo o datos que no deberia poder generando problemas en el SO.
 
 \subsection{¿Qué permisos pueden tener las tablas y directorios de páginas? ¿Cuáles
 son los permisos efectivos de una dirección de memoria según los permisos del directorio
 y tablas de páginas?}
-A diferencia de la segementación, donde un segmento puede tener 4 niveles distintos de privilegios, siendo 0 el mas alto (privilegio de kernel) y 3 el más bajo. En paginación hay solo dos niveles de privilegios, User/supervisor. Por otro lado además de los permisos, se cuenta también con el tipo de acceso, el cual indica si una página es de solo lectura, o de lectura escritura.
+A diferencia de la segementación, donde un segmento puede tener 4 niveles distintos de privilegios, siendo 0 el más alto (privilegio de kernel) y 3 el más bajo. En paginación hay solo dos niveles de privilegios, User/supervisor. Por otro lado además de los permisos, se cuenta también con el tipo de acceso, el cual indica si una página es de solo lectura, o de lectura escritura.
 
 Tanto las tablas como los directorios de paginas pueden tener privilegios de user o de supervisor como accesos de lectura o lectura y escritura. El resultado para las distintas combinaciones se muestra en la siguiente tabla obtenida del manual de intel.
+
+\includegraphics[height=10cm]{privilegios.png} 
 
 \subsection{¿Es posible desde dos directorios de página, referenciar a una misma tabla de páginas?}
 Si, esto es posible ya que no hay restricciones al respecto. Cuando la unidad de paginación va al directorio de páginas lo que recupera es una dirección fisica alineada a $4Kb$ que le indica en que lugar de la memoria se encuentra el page table que buscamos, por lo que para lograr esto simplemente hay que asignarles la direccion de la tabla que se decea compartir en ambos directorios y listo.
