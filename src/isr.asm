@@ -341,8 +341,11 @@ iret
 ISR 128
 
 pushfd 				; pushea el estado de los flags
-call fin_intr_pic1 	; comunica al PIC que la interrupción fue atendida
 
+pushad
+call fin_intr_pic1 	; comunica al PIC que la interrupción fue atendida
+popad
+xchg bx, bx
 ; Verifico si solicita la operación 'duplicar'
 cmp eax, 111
 je .duplicar_128
@@ -357,8 +360,14 @@ jmp .salir_128
 
 .duplicar_128:
 ; Obtengo en eax el número de jugador actual
-call jugador_actual 	
-				
+
+push ecx 			; col
+push ebx 			; fila
+call jugador_actual 
+pop ebx
+pop ecx
+
+
 ; eax = unsigned int game_duplicar(int nro_jugador, int fila, int col);
 push ecx 			; col
 push ebx 			; fila
@@ -371,8 +380,11 @@ jmp .salir_128
 
 .migrar_128:
 ; Obtengo en eax el número de jugador actual
+push ecx 			; col
+push ebx 			; fila
 call jugador_actual 	
-
+pop ecx
+pop ebx
 ; eax = unsigned int game_migrar(int nro_jugador, int fil_src, int col_src,
 ;                                                 int fil_dst, int col_dst);
 push esi 			; col_dst
