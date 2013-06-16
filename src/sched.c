@@ -46,7 +46,6 @@ void sched() {
 					(pausado == 0 && pausarReanudar == 1)) { // hay que reanudar 
 			pausado = 0;
 			unsigned short proxTarea = sched_proximo_indice();
-			breakpoint();
 			if(proxTarea != 0)	{
 				jmpToTask(proxTarea); // salto a la proxima tarea
 			} else {

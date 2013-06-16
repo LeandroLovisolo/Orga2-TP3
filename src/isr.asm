@@ -261,9 +261,9 @@ jmpToTask:
 	push ebp
 	mov ebp, esp
 	pushad
-	xchg bx, bx
 	mov eax, [ebp+8]
 	mov [proximaTarea], ax
+	xchg bx, bx
     jmp far [offset]
     popad
    	pop ebp
@@ -274,10 +274,12 @@ jmpToTask:
 ;;
 
 ISR 32
+
 	pushfd 					; guarda del valor de los flags
 	push eax
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
 	pushad
+	xchg bx, bx
 	call sched
 	popad
 
@@ -370,7 +372,6 @@ iret
 ;; Rutina de atencion x80
 ;;
 ISR 128
-xchg bx,bx
 pushfd 				; pushea el estado de los flags
 call fin_intr_pic1 	; comunica al PIC que la interrupción fue atendida
 
