@@ -219,6 +219,7 @@ jmp $
 
 ISR 14
 pushfd
+pushad
 mov eax, cr2 ;Pusheo cr2 para tenerlo como parámetro
 push eax
 call asignarMemoria
@@ -235,6 +236,7 @@ add esp, 4 ;Restauro la pila
 ;imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
 ;Tal vez hay que saltar directamente al sched, ver esto (tal vez se puede llamar a la int del reloj)
 .fin14:
+popad
 popfd
 iret
 
@@ -299,9 +301,11 @@ jmpToTask:
 
 ISR 32
 	pushfd 					; guarda del valor de los flags
+	pushad
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
 ;    xchg bx, bx	
 	call sched			
+	popad
 	popfd 				; restablece el valor de los flags
 	iret 				; retorna de la interrupción
 
@@ -341,6 +345,13 @@ iret
 ISR 128
 
 pushfd 				; pushea el estado de los flags
+push edi
+push esi
+push ebp
+push esp
+push ebx
+push edx
+push ecx
 
 pushad
 call fin_intr_pic1 	; comunica al PIC que la interrupción fue atendida
@@ -383,8 +394,8 @@ jmp .salir_128
 push ecx 			; col
 push ebx 			; fila
 call jugador_actual 	
-pop ecx
 pop ebx
+push ecx
 ; eax = unsigned int game_migrar(int nro_jugador, int fil_src, int col_src,
 ;                                                 int fil_dst, int col_dst);
 push esi 			; col_dst
@@ -398,6 +409,13 @@ add esp, 20
 ; Terminamos la syscall, con el valor de retorno en eax devuelto por game_duplicar
 
 .salir_128:
+pop ecx
+pop edx
+pop ebx
+pop esp
+pop ebp
+pop esi
+pop edi
 popfd 				; restablece el estado de los flags
 iret 				; retorna de las interrupciones
 
@@ -410,6 +428,13 @@ iret 				; retorna de las interrupciones
 ISR 144
 
 pushfd
+push edi
+push esi
+push ebp
+push esp
+push ebx
+push edx
+push ecx
 
 ; Verifico si se solicita la operación 'terminar'
 cmp eax, 200
@@ -430,6 +455,13 @@ jmp .salir_144
 call game_iniciar
 
 .salir_144:
+pop ecx
+pop edx
+pop ebx
+pop esp
+pop ebp
+pop esi
+pop edi
 popfd
 iret
 
