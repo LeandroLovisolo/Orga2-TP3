@@ -52,7 +52,7 @@ No es necesario llevar el rastro de a que tarea se le asigna cual dirección fis
 Ya que no se necesita liberar memoria y las direcciones que ya se mapean no vuelven a tirar PF*/
 char asignarMemoria(unsigned int direccion) {
 	unsigned short tarea = tareaActiva()-10; //Me da el valor del indice de la tarea
-	if((direccion >= 0x003D0000) && (direccion < 0x003EF000) && (cantPaginas[tarea] <= 5)) {
+	if((direccion >= 0x003D0000) && (direccion < 0x003F0000) && (cantPaginas[tarea] <= 5)) {
 		cantPaginas[tarea]++;
 		mmu_mappear_pagina(direccion, ultimaDirfisica, directorioDeTareas[tarea], 0, 1);
 		ultimaDirfisica += 4096; //Ver si hay que sumarle uno también
