@@ -149,18 +149,33 @@ Otras formas de realizar una excepción:
 \subsection{¿Cuáles son los valores del stack cuando se genera una interrupción? ¿Qué significan? Indicar para el caso de operar en nivel 3 y nivel 0}
 
 \subsection{¿Puede el directorio de páginas estar en cualquier posición arbitraria de memoria?}
+En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. \\
+
+Con 32 bit direccionando a byte se pueden direccionar $2^{32}$ $bytes$ $=$ $4294967296$ $bytes$ $=$ $4$ $GB$ de memoria. Es por esto que se puede alojar el directorio de páginas de una tarea en cualquier posición de memoria. 
+
+Algo a tener en cuenta es que este espacio debe estar reservado exclusívamente para este uso, ya que en \textbf{CR3} hay una dirección física que no pasa por la unidad de paginación, y por lo tanto, si en ese espacio de memoria física no se encuentra el directorio de paginas, tendriamos un error.
 
 \subsection{¿Es posible acceder a una página de nivel de kernel desde usuario?}
 
 \subsection{¿Se puede mapear una página física desde dos direcciones virtuales distintas, de manera tal que una esté mapeada con nivel de usuario y la otra a nivel de kernel? De ser posible, ¿Qué problemas puede traer?}
+Si, se puede hacer eso si se quisiera. Para esto, en los descriptores de páginas a los que apuntan las dos direcciones virtuales deben tener las misma dirección base. Además el offset que marcan las direcciones virtuales deben ser los mismos.
+
+El problema que esta acción genera, es que un espacio de memoria del kernel que contiene código podria ser escrito por un usuario. Pudiendo asi modificar codigo de kernel rempiendo la seguridad del SO.
 
 \subsection{¿Qué permisos pueden tener las tablas y directorios de páginas? ¿Cuáles
 son los permisos efectivos de una dirección de memoria según los permisos del directorio
 y tablas de páginas?}
+A diferencia de la segementación, donde un segmento puede tener 4 niveles distintos de privilegios, siendo 0 el mas alto (privilegio de kernel) y 3 el más bajo. En paginación hay solo dos niveles de privilegios, User/supervisor. Por otro lado además de los permisos, se cuenta también con el tipo de acceso, el cual indica si una página es de solo lectura, o de lectura escritura.
+
+Tanto las tablas como los directorios de paginas pueden tener privilegios de user o de supervisor como accesos de lectura o lectura y escritura. El resultado para las distintas combinaciones se muestra en la siguiente tabla obtenida del manual de intel.
 
 \subsection{¿Es posible desde dos directorios de página, referenciar a una misma tabla de páginas?}
+Si, esto es posible ya que no hay restricciones al respecto. Cuando la unidad de paginación va al directorio de páginas lo que recupera es una dirección fisica alineada a $4Kb$ que le indica en que lugar de la memoria se encuentra el page table que buscamos, por lo que para lograr esto simplemente hay que asignarles la direccion de la tabla que se decea compartir en ambos directorios y listo.
 
-\subsection{¿Que es el TLB (Translation Lookaside Buffer) y para qué sirve?}
+\subsection{¿Que es el TLB (Translation Lookaside Buffer) y para qué sirve?}cache de traducciones
+La TLB es una cache de traducciones, en el mismo se guarda la dirección base de una pagina para obtener una direccion fisica más algunos bit de atributos necesarios, entre los cuales se encuentra LRU para saber cual es el próximo elemento de la TLB que debe ser desalojado en caso necesario.
+
+Esto tiene su utilidad ya que se cuenta con el criterio de vecindad, el cual dice que si por ejemplo la dirección almacenada pertenece a una página de código, seguramente la proximas instrucciones estén en la misma página ahorrandose asi la traducción de las mismas que ya se pueden calcular a traves de la TLB. 
 
 \subsection{¿Qué pasa si en la interrupción de teclado no se lee la tecla presionada?}
 
