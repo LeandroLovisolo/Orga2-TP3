@@ -38,7 +38,7 @@ extern sched_remover_tarea
 extern pausado
 extern pausarReanudar
 extern sched
-extern tareaActiva
+extern jugador_actual
 extern asignarMemoria
 
 
@@ -226,8 +226,8 @@ add esp, 4 ;Ver si está bien
 cmp ax, 0 ;Veo si el resultado es 0
 jne .fin14
 ;Borro la tarea
-call tareaActiva ;Me deja en ax la tarea
-sub ax, 10d ;Le resto 10 para tener el indice en tareas[]
+call jugador_actual 	; Me deja en ax el jugador actual
+sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
 push ax ;Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
 add esp, 4 ;Restauro la pila
@@ -302,9 +302,8 @@ ISR 32
 	pushfd 					; guarda del valor de los flags
 	push eax
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
-	xchg bx, bx
 	pushad
-	xchg bx, bx
+;    xchg bx, bx	
 	call sched
 	popad
 
@@ -389,72 +388,103 @@ mov byte [pausarReanudar], 0
 pop eax
 popfd
 iret
+
+
+
+
 ;;
 ;; Rutinas de atención de las SYSCALLS
 ;;
 
-;;
-;; Rutina de atencion x80
-;;
+
 ISR 128
+
 pushfd 				; pushea el estado de los flags
 call fin_intr_pic1 	; comunica al PIC que la interrupción fue atendida
 
-; se fija que acción debe llevar a cabo, esto depende del valor que pasaron en eax
-cmp eax,111
-Je .duplicar_128
-; si no saltó puede asumir que el valor de eax es 222, en otro caso no le importa ya que no dice que hacer
+; Verifico si solicita la operación 'duplicar'
+cmp eax, 111
+je .duplicar_128
 
-; esta función devuelve en eax el número del jugagor al que pertence la tarea HACER
-call obtener_id_jugador 	
+; Verifico si solicita la operación 'migrar'
+cmp eax, 222
+je .migrar_128
 
-; le paso los parámetros a traves de la pila
-push esi
-push edx
-push ecx
-push ebx
-push eax
-call game_migrar
-add esp,20 	 		; pongo el puntero de la pila en la posición correcta		
-
+; La operación solicitada es inválida (eax no es ni 111 ni 222). Devolvemos 0 en eax (error).
+mov eax, 0
 jmp .salir_128
 
 .duplicar_128:
-; si entro aca es porque eax es 1 y tiene que llamar a duplicar
-; esta función devuelve en eax el número del jugagor al que pertence la tarea HACER
-call obtener_id_jugador 	
-							
-; le paso los parámetros a traves de la pila y llama a la función que debe ejecutar
-push ecx
-push ebx
-push eax
+; Obtengo en eax el número de jugador actual
+call jugador_actual 	
+				
+; eax = unsigned int game_duplicar(int nro_jugador, int fila, int col);
+push ecx 			; col
+push ebx 			; fila
+push eax 			; nro_jugador
 call game_duplicar 	; me devuelve en eax el valor de si se pudo llevar a cabo o no
-add esp,8 			; pongo el puntero de la pila en la posición correcta
+add esp, 8
+
+; Terminamos la syscall, con el valor de retorno en eax devuelto por game_duplicar
+jmp .salir_128
+
+.migrar_128:
+; Obtengo en eax el número de jugador actual
+call jugador_actual 	
+
+; eax = unsigned int game_migrar(int nro_jugador, int fil_src, int col_src,
+;                                                 int fil_dst, int col_dst);
+push esi 			; col_dst
+push edx 			; fila_dst
+push ecx 			; col_src
+push ebx 			; fila_src
+push eax 			; nro_jugador
+call game_migrar
+add esp, 20
+
+; Terminamos la syscall, con el valor de retorno en eax devuelto por game_duplicar
 
 .salir_128:
-
-; restablece los registros pusheados
 popfd 				; restablece el estado de los flags
 iret 				; retorna de las interrupciones
 
+
+
+
+
+
+
 ISR 144
+
 pushfd
-cmp eax, 200 ;Veo si hay que terminar el juego
-jne .iniciarJuego
-;Termino el juego
+
+; Verifico si se solicita la operación 'terminar'
+cmp eax, 200
+je .terminar_144
+
+; Verifico si se solicita la operación 'iniciar'
+cmp eax, 300
+je .iniciar_144
+
+; La operación solicitada es inválida
+jmp .salir_144
+
+.terminar_144:
 call game_terminar
-jmp .fin144
-.iniciarJuego:
-cmp eax, 300 ;Veo si hay que iniciar el juego
-jne .fin144
-;Inicializar juego
+jmp .salir_144
+
+.iniciar_144:
 call game_iniciar
-.fin144:
+
+.salir_144:
 popfd
+iret
+
+
+
+
 
 ; --------------------  funciones auxiliares ------------------------------
-obtener_id_jugador:
-ret
 
 proximo_reloj:
 	pushad
