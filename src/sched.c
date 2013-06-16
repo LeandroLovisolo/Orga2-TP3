@@ -17,7 +17,7 @@ char 		   arbitro			= FALSE;
 unsigned short posArbitro 		= 112;
 unsigned short posicion 		= 0;
 
-char		   pausarReanudar	= 0;
+char		   pausarReanudar	= 1;
 char		   pausado			= 0;
 char		   quantum			= 2;
 char		   finalizado		= 0;
@@ -30,46 +30,37 @@ void sched_inicializar() {
 	tareas[3] = 104;
 }
 
+//pausado TRUE & pausarReanudar TRUE -> pausado FALSE
+//pausado TRUE & pausarReanudar FALSE -> pausado TRUE
+//pausado FALSE & pausarReanudar TRUE -> pausado FALSE
+//pausado FALSE & pausarReanudar FALSE -> pausado TRUE
+
 void sched() {
-
-	if(finalizado != 1) {
-
-		if(quantum == 0) {
-
-			quantum = 2;
-			if(pausado == 0 && pausarReanudar == 1) { // hay que pausar 
-
-				pausado 		= 1;
-				jmpToTask(72); 	// Salto a la tarea idle
-				return;
-			} else if(pausado == 1 && pausarReanudar == 0) { // hay que reanudar 
-
-				pausado 		= 0;
-				proxTarea 		= sched_proximo_indice();
-				if(proxTarea != -1)	{
-					jmpToTask(proxTarea); // salto a la proxima tarea
-				} else { 
-					finalizado = 1;
-				} 
-				return; 
-			} else if(pausado == 0) { // hay que pasar a la proxima tarea 
-
-				proxTarea = sched_proximo_indice();
-				
-				if(proxTarea != -1)	{
-					jmpToTask(proxTarea); // salto a la proxima tarea
-				} else { 
-					finalizado = 1;
-				}
-				return;
-			}
-		} else {
-			
-			quantum--;
-			return;
+	if(finalizado == 1) return;
+	if(quantum == 0) {
+		quantum = 2;
+		if(pausado == 0 && pausarReanudar == 0) { // hay que pausar 
+			pausado 		= 1;
+			jmpToTask(72); 	// Salto a la tarea idle
+		} else if((pausado == 1 && pausarReanudar == 1) || 
+					(pausado == 0 && pausarReanudar == 1)) { // hay que reanudar 
+			pausado = 0;
+			unsigned short proxTarea = sched_proximo_indice();
+			if(proxTarea != -1)	{
+				jmpToTask(proxTarea); // salto a la proxima tarea
+				breakpoint();
+			} else {
+				finalizado = 1;
+				jmpToTask(72); 	// Se terminó todo, salto a idle
+			} 
 		}
 	}
-	return;
+	else {
+		quantum--;
+	}
+return;
+
+
 	/*
 	if(finalizado == 1) return;
 
@@ -98,34 +89,25 @@ void sched() {
 }
 
 unsigned short sched_proximo_indice() {
-	
 	unsigned short 	result;
-	int 			cant 	= 0;
+	unsigned short	cant 	= 0;
 
 	if (arbitro == FALSE) {
-
 		result 	= posArbitro;
 		arbitro = TRUE;
 	} else {
-
 		while (tareas[posicion] == 0 && cant < 4) {
-			
 			++posicion;
 			++cant;
 		}
-
 		if(cant == 4) {
-			
-			return menosUno;
+			return -1;
 		}
-
 		result 	= tareas[posicion];
 		arbitro = FALSE;
 		++posicion;
 	} 
-
 	return result;
-	 	
 }
 
 void sched_remover_tarea(unsigned int process_id) {

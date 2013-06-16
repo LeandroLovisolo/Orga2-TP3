@@ -256,12 +256,18 @@ proximaTarea:   dw 0
 ;;
 
 global jmpToTask
+
 jmpToTask:
-	 mov eax, [esp+4]
-	 mov [proximaTarea], eax
-     mov bx, 1
-     jmp far [offset]
-     ret
+	push ebp
+	mov ebp, esp
+	pushad
+	xchg bx, bx
+	mov eax, [ebp+8]
+	mov [proximaTarea], eax
+    jmp far [offset]
+    popad
+   	pop ebp
+    ret
 
 ;;
 ;; Rutina de atención del RELOJ
@@ -345,14 +351,14 @@ cmp al, 0x93 ;Veo si soltó R
 jne .verTeclaP
 ;imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
 ;Reanudo tarea
-mov byte [pausarReanudar], 0
+mov byte [pausarReanudar], 1
 jmp .fin33
 .verTeclaP:
 cmp al, 0x99 ;Veo si soltó P
 jne .fin33
 ;imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
 ;Pauso tarea
-mov byte [pausarReanudar], 1
+mov byte [pausarReanudar], 0
 .fin33:
 pop eax
 popfd

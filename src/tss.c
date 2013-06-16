@@ -54,7 +54,8 @@ void tss_inicializar() {
 	tsss[0].gs 		= SEG_DATOS_3;
 	tsss[0].eflags 	= 0x00000202;
 	tsss[0].iomap 	= 0xFFFF;
-	tsss[1].esp0 	= TASK_1_STACK_RING_0;
+	tsss[0].esp0 	= TASK_1_STACK_RING_0;
+	tsss[0].ss0     = SEG_DATOS_0;
 
 	//Tarea 2
 	tsss[1].esp 	= TASK_STACK + 0x1000;
@@ -70,6 +71,7 @@ void tss_inicializar() {
 	tsss[1].eflags 	= 0x00000202;
 	tsss[1].iomap 	= 0xFFFF;
 	tsss[1].esp0 	= TASK_2_STACK_RING_0;
+	tsss[1].ss0     = SEG_DATOS_0;
 
 	//Tarea 3
 	tsss[2].esp 	= TASK_STACK + 0x1000;
@@ -85,6 +87,8 @@ void tss_inicializar() {
 	tsss[2].eflags 	= 0x00000202;
 	tsss[2].iomap 	= 0xFFFF;
 	tsss[2].esp0 	= TASK_3_STACK_RING_0;
+	tsss[2].ss0     = SEG_DATOS_0;
+
 
 	//Tarea 4
 	tsss[3].esp 	= TASK_STACK + 0x1000;
@@ -100,6 +104,7 @@ void tss_inicializar() {
 	tsss[3].eflags 	= 0x00000202;
 	tsss[3].iomap 	= 0xFFFF;
 	tsss[3].esp0 	= TASK_4_STACK_RING_0;
+	tsss[3].ss0     = SEG_DATOS_0;
 
 	//Tarea 5 (Arbitro)
 	tsss[4].esp 	= TASK_STACK + 0x1000;
@@ -115,4 +120,5 @@ void tss_inicializar() {
 	tsss[4].eflags 	= 0x00000202;
 	tsss[4].iomap 	= 0xFFFF;
 	tsss[4].esp0 	= TASK_5_STACK_RING_0;
+	tsss[4].ss0     = SEG_DATOS_0;
 }
