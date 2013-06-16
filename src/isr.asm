@@ -423,7 +423,7 @@ push ecx 			; col
 push ebx 			; fila
 push eax 			; nro_jugador
 call game_duplicar 	; me devuelve en eax el valor de si se pudo llevar a cabo o no
-add esp, 8
+add esp, 12
 
 ; Terminamos la syscall, con el valor de retorno en eax devuelto por game_duplicar
 jmp .salir_128
