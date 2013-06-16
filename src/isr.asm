@@ -341,6 +341,7 @@ iret
 ISR 128
 
 pushfd 				; pushea el estado de los flags
+
 pushad
 call fin_intr_pic1 	; comunica al PIC que la interrupción fue atendida
 popad
@@ -362,10 +363,11 @@ jmp .salir_128
 
 push ecx 			; col
 push ebx 			; fila
-call jugador_actual 	
-pop ecx
+call jugador_actual 
 pop ebx
-				
+pop ecx
+
+
 ; eax = unsigned int game_duplicar(int nro_jugador, int fila, int col);
 push ecx 			; col
 push ebx 			; fila
