@@ -42,6 +42,8 @@
 
 #define C_BLINK				(0x8 << 4)
 
+void screen_pintar(unsigned char* mensaje, unsigned char formato, 
+	unsigned short longitud, unsigned short fil, unsigned short col);
 void screen_pintar_pantalla();
 
 
