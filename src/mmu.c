@@ -62,6 +62,11 @@ void mmu_inicializar_tarea_jugador(
     unsigned int stack_address);
 
 void mmu_inicializar() {
+    directorioDeTareas[0] = (pd_entry*) TASK_1_PAGE_DIR;
+    directorioDeTareas[1] = (pd_entry*) TASK_2_PAGE_DIR;
+    directorioDeTareas[2] = (pd_entry*) TASK_3_PAGE_DIR;
+    directorioDeTareas[3] = (pd_entry*) TASK_4_PAGE_DIR;
+    directorioDeTareas[4] = (pd_entry*) TASK_5_PAGE_DIR;
     // Jugador 1
     mmu_inicializar_tarea_jugador(
         (pd_entry*) TASK_1_PAGE_DIR,

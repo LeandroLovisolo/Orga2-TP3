@@ -42,6 +42,13 @@ void mmu_inicializar_dir_kernel();
 
 // inicializa el mmu
 void mmu_inicializar();
+pd_entry* directorioDeTareas[5];
 
+// mapea direcciones de memoria
+void mmu_mappear_pagina(unsigned int virtual,
+                       unsigned int fisica,
+                       pd_entry* page_directory,
+                       unsigned char user_supervisor,
+                       unsigned char read_write);
 
 #endif	/* !__MMU_H__ */
