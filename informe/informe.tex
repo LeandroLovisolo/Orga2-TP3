@@ -21,6 +21,10 @@
 % el espacio vacío en cada página.
 \raggedbottom
 
+\newenvironment{pseudocodigo}
+    {\vspace{0.5em} \begin{algorithmic}}
+    {\end{algorithmic} \vspace{0.5em}}
+
 
 %%%%%%%%%% Configuración de Fancyhdr - Inicio %%%%%%%%%%
 \pagestyle{fancy}
@@ -118,7 +122,8 @@ Lautaro José Petaccio 		& 443/11 & lausuper@gmail.com\\
 bla bla bla
 
 \section{Desarrollo}
-\subsection{Ejercicio 1: Completando la tabla de descriptores de segmento GDT}
+\subsection{Ejercicio 1: GDT y modo protegido}
+\subsubsection{Completando la tabla de descriptores de segmento GDT}
 Teniendo en cuenta el manual de intel, la primer entrada de la GDT debe ser nula, por lo que la misma fue llenada toda con $0$.
 Además tenemos que crear $6$ entradas, $3$ para códigos de nivel $0$, $2$ y $3$, y $3$ para datos de nivel $0$, $2$ y $3$. 
 
@@ -128,19 +133,19 @@ A continuación se enuncia detalladamente como fueron cargados los descriptores.
 
 Segmento 1: ( segmento de código )
 \begin{itemize}
- \item $limit_0_15 = 0xFFFF$ (Se encuentran los primeros $16$ bits que indican el limite del segmento, poniendo este valor, como la base es $0$ obtenemos segmentos de $2GB$ como fue pedido en el enunciado del TP).
- \item $base_0_15 = 0$ 
- \item $base_23_16 = 0$
+ \item $limit\_0\_15 = 0xFFFF$ (Se encuentran los primeros $16$ bits que indican el limite del segmento, poniendo este valor, como la base es $0$ obtenemos segmentos de $2GB$ como fue pedido en el enunciado del TP).
+ \item $base\_0\_15 = 0$ 
+ \item $base\_23\_16 = 0$
  \item $type = 10$ (Para segmentos correspondientes a código el tipo debe ser $10$ = $1010$).
  \item $s = 1$ 	(Este bit en $1$ indica que el segmento no pertenece al sistema).
  \item $dpl = 0$ (En este bit declaramos que privilegios tiene el segmento).
  \item $p = 1$ (Seteando en $1$ este bit indicamos que el segmento está presente en la memoria.).
- \item $limit_16_19 = 0x7$ (acá están los últimos $4$ bits del limite).
+ \item $limit\_16\_19 = 0x7$ (acá están los últimos $4$ bits del limite).
  \item $avl = 0$
  \item $l = 0$ (como no trabajamos en modo $IA-32e$ debe estar en $0$).
  \item $db = 1$
  \item $g = 1$ (Esto indica la unidad de medida del campo límite. Estando en $1$ indica que cada unidad es de $4kb$).
- \item $base_31_24  = 0$
+ \item $base\_31\_24  = 0$
 \end{itemize}
 
 Segmento $2$: ( segmento de código ) \\
@@ -157,6 +162,51 @@ Es muy similar al segmento $4$, solo que cambia el nivel de privilegio definido 
 
 Segmento $3$: ( segmento de código ) \\
 Es muy similar al segmento $4$, solo que cambia es el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\ 
+
+Además de esto hay que declarar un segmento más para describir el área de la pantalla en memoria, el mismo esta definido de la siguiente manera: 
+\begin{itemize}
+ \item $limit\_0\_15 = 0x7FFF$
+ \item $base\_0\_15 = 0x8000$ 
+ \item $base\_23\_16 = 0xB$
+ \item $type = 2$
+ \item $s = 1$
+ \item $dpl = 3$
+ \item $p = 1$
+ \item $limit_16_19 = 0$
+ \item $avl = 0$
+ \item $l = 0$
+ \item $db = 1$
+ \item $g = 1$
+ \item $base\_31\_24  = 0$
+\end{itemize}
+
+Si observamos veremos que la base es $0xB8000$ y el limite es $0x07FFF$ lo cual es correcto.
+
+\subsubsection{Pasando a modo protegido}
+
+A continuación veremos el codigo que pasa de modo real a modo protegido.
+
+\begin{pseudocodigo}
+  \STATE
+  \STATE (Desabilitando las interrupciones)
+  \STATE cli
+  \STATE
+  \STATE call habilitar\_A20
+  \STATE
+  \STATE (carga la GDT definida anteriormente)
+  \STATE lgdt [GDT\_DESC]
+  \STATE
+  \STATE (setea el bit PE del registro CR0)
+  \STATE mov eax, cr0
+  \STATE or eax, 1
+  \STATE mov cr0, eax
+  \STATE
+  \STATE (pasa a modo protegido)
+  \STATE jmp 0x8:modo\_protegido
+  \STATE BITS 32
+\end{pseudocodigo}
+
+la función $habilitar\_A20$ creada por la catedra sirve para poder trabajar con espacios de memoria por ensima del primer Mbyte de memoria, la misma debe ser llamada antes de pasar al modo protegido, ya que si no se genera un general protection $\#GP$.
 
 \section{Preguntas y respuestas}
 \subsection{¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por
@@ -190,12 +240,13 @@ teniendo en cuenta que un segmento de pila puede ser accedido solamente por segm
 
 Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción debe resguardarse en la pila los registros
 \begin{itemize}
- \item EFLAGS (que contiene informaci ́n del contexto de ejecución).
+ \item EFLAGS (que contiene información del contexto de ejecución).
  \item CS (que indica el segmento de código en el cual se estaba ejecutando el programa y permite luego poder volver a seguir corriendo en el mismo lugar).
  \item EIP (que indica el punto exacto donde se estaba corriendo el programa).
- \item C ́digo de Error (este campo no es obligatorio pero en caso de que la interrupción tenga código de error entonces se almacena aquí.
+ \item Código de Error (este campo no es obligatorio pero en caso de que la interrupción tenga código de error entonces se almacena aquí.
 \end{itemize}
-Lo demas registros deben ser resguardados por la interrupción en caso que los utilize.\\
+
+Los demas registros deben ser resguardados por la interrupción en caso que los utilize.\\
 
 Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de  los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
 
