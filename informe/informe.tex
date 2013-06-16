@@ -115,9 +115,48 @@ Lautaro José Petaccio 		& 443/11 & lausuper@gmail.com\\
 
 \section{Introducción}
 
-Bla bla bla
+bla bla bla
 
 \section{Desarrollo}
+\subsection{Ejercicio 1: Completando la tabla de descriptores de segmento GDT}
+Teniendo en cuenta el manual de intel, la primer entrada de la GDT debe ser nula, por lo que la misma fue llenada toda con $0$.
+Además tenemos que crear $6$ entradas, $3$ para códigos de nivel $0$, $2$ y $3$, y $3$ para datos de nivel $0$, $2$ y $3$. 
+
+Como estamos definiendo nuestro SO con un sistema Flat, todas las bases de los $6$ segmentos mensionados son $0$. y su limite es $0x7FFFF$ lo cual nos da un espacio de memoria de $2GB$ pedidos en el enunciado del TP. \\
+
+A continuación se enuncia detalladamente como fueron cargados los descriptores. \\
+
+Segmento 1: ( segmento de código )
+\begin{itemize}
+ \item $limit_0_15 = 0xFFFF$ (Se encuentran los primeros $16$ bits que indican el limite del segmento, poniendo este valor, como la base es $0$ obtenemos segmentos de $2GB$ como fue pedido en el enunciado del TP).
+ \item $base_0_15 = 0$ 
+ \item $base_23_16 = 0$
+ \item $type = 10$ (Para segmentos correspondientes a código el tipo debe ser $10$ = $1010$).
+ \item $s = 1$ 	(Este bit en $1$ indica que el segmento no pertenece al sistema).
+ \item $dpl = 0$ (En este bit declaramos que privilegios tiene el segmento).
+ \item $p = 1$ (Seteando en $1$ este bit indicamos que el segmento está presente en la memoria.).
+ \item $limit_16_19 = 0x7$ (acá están los últimos $4$ bits del limite).
+ \item $avl = 0$
+ \item $l = 0$ (como no trabajamos en modo $IA-32e$ debe estar en $0$).
+ \item $db = 1$
+ \item $g = 1$ (Esto indica la unidad de medida del campo límite. Estando en $1$ indica que cada unidad es de $4kb$).
+ \item $base_31_24  = 0$
+\end{itemize}
+
+Segmento $2$: ( segmento de código ) \\
+Es muy similar al segmento $1$ solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $1$. \\
+
+Segmento $3$: ( segmento de código ) \\
+Es muy similar al segmento $1$ solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\
+
+Segmento $4$: ( segmento de datos ) \\
+Es muy similar al segmento $1$ cambiando el atributo $type$ por $2$ = $0010$. \\
+
+Segmento $3$: ( segmento de código ) \\
+Es muy similar al segmento $4$, solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $1$. \\
+
+Segmento $3$: ( segmento de código ) \\
+Es muy similar al segmento $4$, solo que cambia es el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\ 
 
 \section{Preguntas y respuestas}
 \subsection{¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por
@@ -147,20 +186,50 @@ Otras formas de realizar una excepción:
 \end{enumerate}
 
 \subsection{¿Cuáles son los valores del stack cuando se genera una interrupción? ¿Qué significan? Indicar para el caso de operar en nivel 3 y nivel 0}
+teniendo en cuenta que un segmento de pila puede ser accedido solamente por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la apuntada por el ESP0 de la tss de la tarea actual.
+
+Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción debe resguardarse en la pila los registros
+\begin{itemize}
+ \item EFLAGS (que contiene informaci ́n del contexto de ejecución).
+ \item CS (que indica el segmento de código en el cual se estaba ejecutando el programa y permite luego poder volver a seguir corriendo en el mismo lugar).
+ \item EIP (que indica el punto exacto donde se estaba corriendo el programa).
+ \item C ́digo de Error (este campo no es obligatorio pero en caso de que la interrupción tenga código de error entonces se almacena aquí.
+\end{itemize}
+Lo demas registros deben ser resguardados por la interrupción en caso que los utilize.\\
+
+Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de  los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
+
 
 \subsection{¿Puede el directorio de páginas estar en cualquier posición arbitraria de memoria?}
+En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. \\
+
+Con 32 bit direccionando a byte se pueden direccionar $2^{32}$ $bytes$ $=$ $4294967296$ $bytes$ $=$ $4$ $GB$ de memoria. Es por esto que se puede alojar el directorio de páginas de una tarea en cualquier posición de memoria. 
+
+Algo a tener en cuenta es que este espacio debe estar reservado exclusívamente para este uso, ya que en \textbf{CR3} hay una dirección física que no pasa por la unidad de paginación, y por lo tanto, si en ese espacio de memoria física no se encuentra el directorio de paginas, tendriamos un error.
 
 \subsection{¿Es posible acceder a una página de nivel de kernel desde usuario?}
 
 \subsection{¿Se puede mapear una página física desde dos direcciones virtuales distintas, de manera tal que una esté mapeada con nivel de usuario y la otra a nivel de kernel? De ser posible, ¿Qué problemas puede traer?}
+Si, se puede hacer eso si se quisiera. Para esto, en los descriptores de páginas a los que apuntan las dos direcciones virtuales deben tener el mismo valor de adress.
+
+Los problemas que esta acción puede generar, es que si los permisos asignados son incorrectos, un codigo con privilegio de usuario podria modificar o leer codigo o datos que no deberia poder generando problemas en el SO.
 
 \subsection{¿Qué permisos pueden tener las tablas y directorios de páginas? ¿Cuáles
 son los permisos efectivos de una dirección de memoria según los permisos del directorio
 y tablas de páginas?}
+A diferencia de la segementación, donde un segmento puede tener 4 niveles distintos de privilegios, siendo 0 el más alto (privilegio de kernel) y 3 el más bajo. En paginación hay solo dos niveles de privilegios, User/supervisor. Por otro lado además de los permisos, se cuenta también con el tipo de acceso, el cual indica si una página es de solo lectura, o de lectura escritura.
+
+Tanto las tablas como los directorios de paginas pueden tener privilegios de user o de supervisor como accesos de lectura o lectura y escritura. El resultado para las distintas combinaciones se muestra en la siguiente tabla obtenida del manual de intel.
+
+\includegraphics[height=10cm]{privilegios.png} 
 
 \subsection{¿Es posible desde dos directorios de página, referenciar a una misma tabla de páginas?}
+Si, esto es posible ya que no hay restricciones al respecto. Cuando la unidad de paginación va al directorio de páginas lo que recupera es una dirección fisica alineada a $4Kb$ que le indica en que lugar de la memoria se encuentra el page table que buscamos, por lo que para lograr esto simplemente hay que asignarles la direccion de la tabla que se decea compartir en ambos directorios y listo.
 
-\subsection{¿Que es el TLB (Translation Lookaside Buffer) y para qué sirve?}
+\subsection{¿Que es el TLB (Translation Lookaside Buffer) y para qué sirve?}cache de traducciones
+La TLB es una cache de traducciones, en el mismo se guarda la dirección base de una pagina para obtener una direccion fisica más algunos bit de atributos necesarios, entre los cuales se encuentra LRU para saber cual es el próximo elemento de la TLB que debe ser desalojado en caso necesario.
+
+Esto tiene su utilidad ya que se cuenta con el criterio de vecindad, el cual dice que si por ejemplo la dirección almacenada pertenece a una página de código, seguramente la proximas instrucciones estén en la misma página ahorrandose asi la traducción de las mismas que ya se pueden calcular a traves de la TLB. 
 
 \subsection{¿Qué pasa si en la interrupción de teclado no se lee la tecla presionada?}
 
