@@ -7,6 +7,7 @@
 #include "defines.h"
 #include "mmu.h"
 #include "i386.h"
+#include "sched.h"
 
 void inicializar_kernel_page_directory();
 void inicializar_kernel_table_directory();
@@ -62,11 +63,17 @@ void mmu_inicializar_tarea_jugador(
     unsigned int stack_address);
 
 void mmu_inicializar() {
-    directorioDeTareas[0] = (pd_entry*) TASK_1_PAGE_DIR;
-    directorioDeTareas[1] = (pd_entry*) TASK_2_PAGE_DIR;
-    directorioDeTareas[2] = (pd_entry*) TASK_3_PAGE_DIR;
-    directorioDeTareas[3] = (pd_entry*) TASK_4_PAGE_DIR;
-    directorioDeTareas[4] = (pd_entry*) TASK_5_PAGE_DIR;
+    directorioDeTareas[0] = (pd_entry*)TASK_1_PAGE_DIR;
+    directorioDeTareas[1] = (pd_entry*)TASK_2_PAGE_DIR;
+    directorioDeTareas[2] = (pd_entry*)TASK_3_PAGE_DIR;
+    directorioDeTareas[3] = (pd_entry*)TASK_4_PAGE_DIR;
+    directorioDeTareas[4] = (pd_entry*)TASK_5_PAGE_DIR;
+    ultimaDirfisica = 0x164000;
+    cantPaginas[0] = 0;
+    cantPaginas[1] = 0;
+    cantPaginas[2] = 0;
+    cantPaginas[3] = 0;
+    cantPaginas[4] = 0;
     // Jugador 1
     mmu_inicializar_tarea_jugador(
         (pd_entry*) TASK_1_PAGE_DIR,
@@ -169,3 +176,21 @@ void mmu_inicializar_tarea_arbitro() {
     mmu_mappear_pagina(VIDEO_ADDR, VIDEO_ADDR, (pd_entry*) TASK_5_PAGE_DIR, 1, 1);
 
 }
+
+/*
+La idea de asignar memoria es que si piden una dirección virtual entre las del enunciado
+le demos una página de memoria fisica. Cada tarea puede tener a lo sumo 5 páginas
+No es necesario llevar el rastro de a que tarea se le asigna cual dirección fisica o algo similar
+Ya que no se necesita liberar memoria y las direcciones que ya se mapean no vuelven a tirar PF*/
+char asignarMemoria(unsigned int direccion) {
+    unsigned short tarea = tareaActiva()-10; //Me da el valor del indice de la tarea
+    if((direccion >= 0x003D0000) && (direccion < 0x003F0000) && (cantPaginas[tarea] <= 5)) {
+        cantPaginas[tarea]++;
+        mmu_mappear_pagina(direccion, ultimaDirfisica, (pd_entry*)directorioDeTareas[tarea], 0, 1);
+        ultimaDirfisica += 4096; //Ver si hay que sumarle uno también
+        return 1;
+    }
+    else {
+        return 0;
+    }
+} 
