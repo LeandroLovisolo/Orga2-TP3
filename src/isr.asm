@@ -212,17 +212,17 @@ imprimir_excepcion excepcion_gp_msg, excepcion_gp_msg_len
 jmp $
 
 ;Rutina de atención de Page Fault
-/*
-The contents of the CR2 register. The processor loads the CR2 register with the 32-bit linear address that
-generated the exception. The page-fault handler can use this address to locate the corresponding page
-directory and page-table entries. Another page fault can potentially occur during execution of the page-fault
-handler; the handler should save the contents of the CR2 register before a second page fault can occur.
-*/
+;The contents of the CR2 register. The processor loads the CR2 register with the 32-bit linear address that
+;generated the exception. The page-fault handler can use this address to locate the corresponding page
+;directory and page-table entries. Another page fault can potentially occur during execution of the page-fault
+;handler; the handler should save the contents of the CR2 register before a second page fault can occur.
+
 ISR 14
 pushfd
-push cr2 ;Pusheo cr2 para tenerlo como parámetro
+mov eax, cr2 ;Pusheo cr2 para tenerlo como parámetro
+push eax
 call asignarMemoria
-add rsp, 4 ;Ver si está bien
+add esp, 4 ;Ver si está bien
 cmp ax, 0 ;Veo si el resultado es 0
 jne .fin14
 ;Borro la tarea
@@ -230,7 +230,7 @@ call tareaActiva ;Me deja en ax la tarea
 sub ax, 10d ;Le resto 10 para tener el indice en tareas[]
 push ax ;Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add rsp, 4 ;Restauro la pila
+add esp, 4 ;Restauro la pila
 ;Imprimo el mensaje correspondiente
 ;imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
 ;Tal vez hay que saltar directamente al sched, ver esto (tal vez se puede llamar a la int del reloj)
@@ -301,6 +301,7 @@ ISR 32
 	pushfd 					; guarda del valor de los flags
 	push eax
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
+	xchg bx, bx
 	pushad
 	call sched
 	popad
