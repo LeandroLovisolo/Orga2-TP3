@@ -46,9 +46,9 @@ void sched() {
 					(pausado == 0 && pausarReanudar == 1)) { // hay que reanudar 
 			pausado = 0;
 			unsigned short proxTarea = sched_proximo_indice();
-			if(proxTarea != -1)	{
+			breakpoint();
+			if(proxTarea != 0)	{
 				jmpToTask(proxTarea); // salto a la proxima tarea
-				breakpoint();
 			} else {
 				finalizado = 1;
 				jmpToTask(72); 	// Se terminó todo, salto a idle
@@ -101,11 +101,12 @@ unsigned short sched_proximo_indice() {
 			++cant;
 		}
 		if(cant == 4) {
-			return -1;
+			return 0;
 		}
 		result 	= tareas[posicion];
 		arbitro = FALSE;
-		++posicion;
+		posicion++;
+		if(posicion == 4) posicion = 0;
 	} 
 	return result;
 }
