@@ -298,69 +298,10 @@ jmpToTask:
 ;;
 
 ISR 32
-
 	pushfd 					; guarda del valor de los flags
-	push eax
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
-	pushad
 ;    xchg bx, bx	
-	call sched
-	popad
-
-	;Comentario candidato a ser eliminado!
-	; se fija si se le acabó el cuantum a la tarea actual
-; 	cmp byte [quantum], 0
-; 	jne .finYDec32 			; si no se le acabo salta a la sección donde decrementa el cuantum y sale
-	
-; 	; si llego aca es porque el cuantum de la tarea actual se acabo
-; 	mov byte [quantum], 2 	; Reestablezco quantum
-; 	; se fija si el programa no está actualmente pausado
-; 	cmp byte [pausado], 0 
-; 	jne .noPausar32 		; si no es 0 es porque esta pausado, en ese caso hay que preguntar si se debe despausarlo
-
-; 	; si no salto es porque no esta pausado y en ese caso me fijo si hay que pausarlo
-; 	cmp byte [pausarReanudar], 1
-; 	jne .cambiarTarea32 	; si salta es porque no hay que pausar
-
-; 	; si no salta es porque hay que pausarlo, en ese caso seteamos el bit de pausado a 1 para informar que pasa a ser pausado
-; 	mov byte [pausado], 1
-; 	;Salto a idle
-; 	jmp 72:00
-; 	jmp .fin32 ; Al volver a la tarea quiero que se siga ejecutando
-
-; 	; si entra en esta etiqueta es porque ya esta pausado, en este caso hay que ver si hay que despausarlo
-; .noPausar32:
-; 	cmp byte [pausarReanudar], 0 ; Veo si tengo que despausar
-; 	jne .fin32 					 ; si salta es porque no hay que reanudar
-
-; 	; si no salta es porque hay que reanudar el hilo de las tareas 
-; 	mov byte [pausado], 0 		 ; informamos que ya dejara de estar pausado seteando en 0 pausado
-; 	.cambiarTarea32: 			 ; paso a la proxima tarea
-
-; 	pushad 						; Push EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
-; 	call sched_proximo_indice
-
-; 	xchg bx, bx
-
-; 	; Sacado de http://forum.osdev.org/viewtopic.php?f=1&t=17813
-;     push    eax              	; ax contains your TSS selector
-;     push    0         			; offset is ignored
-;     jmp     far [esp+0]
-;     add     esp, 8              ; remove the dwords pushed onto the stack
-
-; 	popad 						; Pop EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
-; 	jmp .fin32
-
-; .finYDec32:
-
-; 	;Decremento el quantum
-; 	mov al, [quantum]
-; 	dec al
-; 	mov byte [quantum], al
-
-; .fin32:
-; 	call proximo_reloj 	; llama al handler del reloj
-	pop eax 			
+	call sched			
 	popfd 				; restablece el valor de los flags
 	iret 				; retorna de la interrupción
 
