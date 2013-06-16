@@ -11,12 +11,12 @@
 
 void print(const char* str, unsigned int fil, unsigned int col, unsigned short attr);
 
-void imprimir_tablero(unsigned char * tablero);
+void imprimir_tablero();
 void imprimir_puntaje(int * puntajes);
 void imprimir_ganador(int * puntajes);
 int  juego_terminado(unsigned char * tablero);
-void actualizar_pantalla(unsigned char * tablero, int * puntajes);
-void calcular_puntajes(unsigned char * tablero, int * puntajes);
+void actualizar_pantalla(int * puntajes);
+void calcular_puntajes(int * puntajes);
 void imprimir_tablero_inicial();
 void screen_pintar(unsigned char formato, unsigned short desdeFil, 
 	unsigned short hastaFil, unsigned short desdeCol, unsigned short hastaCol);
@@ -30,7 +30,7 @@ void task() {
 	}
 }
 
-void calcular_puntajes(unsigned char * tablero, int * puntajes) {
+void calcular_puntajes(int * puntajes) {
 	int f,c;
 	int espaciosLibres = 0;
 	for(f = 0; f < TABLERO_FILS; f++) {
@@ -45,7 +45,7 @@ void calcular_puntajes(unsigned char * tablero, int * puntajes) {
 	}
 }
 
-void actualizar_pantalla(unsigned char * tablero, int * puntajes) {
+void actualizar_pantalla(int * puntajes) {
 }
 
 int juego_terminado(unsigned char * tablero) {
@@ -58,7 +58,7 @@ void imprimir_ganador(int * puntajes) {
 void imprimir_puntaje(int * puntajes) {
 }
 
-void imprimir_tablero(unsigned char * tablero) {
+void imprimir_tablero() {
 	int f,c;
 	//int espaciosLibres = 0;
 	for(f = 0; f < TABLERO_FILS; f++) {
