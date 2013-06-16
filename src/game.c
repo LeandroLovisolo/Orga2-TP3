@@ -6,8 +6,6 @@
 
 #include "game.h"
 
-unsigned char (*tablero)[TABLERO_COLS] = (unsigned char (*)[TABLERO_COLS]) (TABLERO_ADDR);
-
 unsigned int game_finalizado;
 
 int abs(int n);
@@ -37,7 +35,10 @@ unsigned int game_iniciar() {
 
 	// Inicializar estado del juego
 	game_finalizado = FALSE;
-
+	puntajesJugadores[0] = 0;
+	puntajesJugadores[1] = 0;
+	puntajesJugadores[2] = 0;
+	puntajesJugadores[3] = 0;
 	return TRUE;
 }
 

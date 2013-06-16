@@ -36,12 +36,22 @@ typedef struct str_pt_entry {
     unsigned int  address:20;
 } __attribute__((__packed__, aligned (4))) pt_entry;
 
+pd_entry* directorioDeTareas[5];
+unsigned int ultimaDirfisica;
+unsigned short cantPaginas[5];
 
 // inicializa el directorio de páginas del kernel
 void mmu_inicializar_dir_kernel();
 
 // inicializa el mmu
 void mmu_inicializar();
+char asignarMemoria(unsigned int direccion);
 
+// mapea direcciones de memoria
+void mmu_mappear_pagina(unsigned int virtual,
+                       unsigned int fisica,
+                       pd_entry* page_directory,
+                       unsigned char user_supervisor,
+                       unsigned char read_write);
 
 #endif	/* !__MMU_H__ */

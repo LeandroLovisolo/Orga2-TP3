@@ -35,7 +35,4 @@ void _isr128();
 void _isr144();
 void jmpToTask(unsigned short tarea);
 
-
-
-
 #endif	/* !__ISR_H__ */

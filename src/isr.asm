@@ -30,6 +30,7 @@ extern game_terminar
 extern game_migrar
 extern game_duplicar
 extern sched_proximo_indice
+extern sched_remover_tarea
 
 ;;
 ;;Extern de tareas
@@ -37,7 +38,8 @@ extern sched_proximo_indice
 extern pausado
 extern pausarReanudar
 extern sched
-extern tareaActiva
+extern jugador_actual
+extern asignarMemoria
 
 
 %define TAREA_QUANTUM		2
@@ -210,9 +212,31 @@ imprimir_excepcion excepcion_gp_msg, excepcion_gp_msg_len
 jmp $
 
 ;Rutina de atención de Page Fault
+;The contents of the CR2 register. The processor loads the CR2 register with the 32-bit linear address that
+;generated the exception. The page-fault handler can use this address to locate the corresponding page
+;directory and page-table entries. Another page fault can potentially occur during execution of the page-fault
+;handler; the handler should save the contents of the CR2 register before a second page fault can occur.
+
 ISR 14
-imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
-jmp $
+pushfd
+mov eax, cr2 ;Pusheo cr2 para tenerlo como parámetro
+push eax
+call asignarMemoria
+add esp, 4 ;Ver si está bien
+cmp ax, 0 ;Veo si el resultado es 0
+jne .fin14
+;Borro la tarea
+call jugador_actual 	; Me deja en ax el jugador actual
+sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
+push ax ;Pusheo el parámetro para borrar la tarea
+call sched_remover_tarea
+add esp, 4 ;Restauro la pila
+;Imprimo el mensaje correspondiente
+;imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
+;Tal vez hay que saltar directamente al sched, ver esto (tal vez se puede llamar a la int del reloj)
+.fin14:
+popfd
+iret
 
 ;Rutina de atención de INTERRUPCION 15
 ISR 15
@@ -261,9 +285,9 @@ jmpToTask:
 	push ebp
 	mov ebp, esp
 	pushad
-	xchg bx, bx
 	mov eax, [ebp+8]
 	mov [proximaTarea], ax
+	xchg bx, bx
     jmp far [offset]
     popad
    	pop ebp
@@ -275,66 +299,9 @@ jmpToTask:
 
 ISR 32
 	pushfd 					; guarda del valor de los flags
-	push eax
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
-	pushad
-	call sched
-	popad
-
-	;Comentario candidato a ser eliminado!
-	; se fija si se le acabó el cuantum a la tarea actual
-; 	cmp byte [quantum], 0
-; 	jne .finYDec32 			; si no se le acabo salta a la sección donde decrementa el cuantum y sale
-	
-; 	; si llego aca es porque el cuantum de la tarea actual se acabo
-; 	mov byte [quantum], 2 	; Reestablezco quantum
-; 	; se fija si el programa no está actualmente pausado
-; 	cmp byte [pausado], 0 
-; 	jne .noPausar32 		; si no es 0 es porque esta pausado, en ese caso hay que preguntar si se debe despausarlo
-
-; 	; si no salto es porque no esta pausado y en ese caso me fijo si hay que pausarlo
-; 	cmp byte [pausarReanudar], 1
-; 	jne .cambiarTarea32 	; si salta es porque no hay que pausar
-
-; 	; si no salta es porque hay que pausarlo, en ese caso seteamos el bit de pausado a 1 para informar que pasa a ser pausado
-; 	mov byte [pausado], 1
-; 	;Salto a idle
-; 	jmp 72:00
-; 	jmp .fin32 ; Al volver a la tarea quiero que se siga ejecutando
-
-; 	; si entra en esta etiqueta es porque ya esta pausado, en este caso hay que ver si hay que despausarlo
-; .noPausar32:
-; 	cmp byte [pausarReanudar], 0 ; Veo si tengo que despausar
-; 	jne .fin32 					 ; si salta es porque no hay que reanudar
-
-; 	; si no salta es porque hay que reanudar el hilo de las tareas 
-; 	mov byte [pausado], 0 		 ; informamos que ya dejara de estar pausado seteando en 0 pausado
-; 	.cambiarTarea32: 			 ; paso a la proxima tarea
-
-; 	pushad 						; Push EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
-; 	call sched_proximo_indice
-
-; 	xchg bx, bx
-
-; 	; Sacado de http://forum.osdev.org/viewtopic.php?f=1&t=17813
-;     push    eax              	; ax contains your TSS selector
-;     push    0         			; offset is ignored
-;     jmp     far [esp+0]
-;     add     esp, 8              ; remove the dwords pushed onto the stack
-
-; 	popad 						; Pop EAX, ECX, EDX, EBX, original ESP, EBP, ESI, and EDI
-; 	jmp .fin32
-
-; .finYDec32:
-
-; 	;Decremento el quantum
-; 	mov al, [quantum]
-; 	dec al
-; 	mov byte [quantum], al
-
-; .fin32:
-; 	call proximo_reloj 	; llama al handler del reloj
-	pop eax 			
+;    xchg bx, bx	
+	call sched			
 	popfd 				; restablece el valor de los flags
 	iret 				; retorna de la interrupción
 
@@ -362,73 +329,103 @@ mov byte [pausarReanudar], 0
 pop eax
 popfd
 iret
+
+
+
+
 ;;
 ;; Rutinas de atención de las SYSCALLS
 ;;
 
-;;
-;; Rutina de atencion x80
-;;
+
 ISR 128
-xchg bx,bx
+
 pushfd 				; pushea el estado de los flags
 call fin_intr_pic1 	; comunica al PIC que la interrupción fue atendida
 
-; se fija que acción debe llevar a cabo, esto depende del valor que pasaron en eax
-cmp eax,111
-Je .duplicar_128
-; si no saltó puede asumir que el valor de eax es 222, en otro caso no le importa ya que no dice que hacer
+; Verifico si solicita la operación 'duplicar'
+cmp eax, 111
+je .duplicar_128
 
-; esta función devuelve en eax el número del jugagor al que pertence la tarea HACER
-call obtener_id_jugador 	
+; Verifico si solicita la operación 'migrar'
+cmp eax, 222
+je .migrar_128
 
-; le paso los parámetros a traves de la pila
-push esi
-push edx
-push ecx
-push ebx
-push eax
-call game_migrar
-add esp,20 	 		; pongo el puntero de la pila en la posición correcta		
-
+; La operación solicitada es inválida (eax no es ni 111 ni 222). Devolvemos 0 en eax (error).
+mov eax, 0
 jmp .salir_128
 
 .duplicar_128:
-; si entro aca es porque eax es 1 y tiene que llamar a duplicar
-; esta función devuelve en eax el número del jugagor al que pertence la tarea HACER
-call obtener_id_jugador 	
-							
-; le paso los parámetros a traves de la pila y llama a la función que debe ejecutar
-push ecx
-push ebx
-push eax
+; Obtengo en eax el número de jugador actual
+call jugador_actual 	
+				
+; eax = unsigned int game_duplicar(int nro_jugador, int fila, int col);
+push ecx 			; col
+push ebx 			; fila
+push eax 			; nro_jugador
 call game_duplicar 	; me devuelve en eax el valor de si se pudo llevar a cabo o no
-add esp,8 			; pongo el puntero de la pila en la posición correcta
+add esp, 12
+
+; Terminamos la syscall, con el valor de retorno en eax devuelto por game_duplicar
+jmp .salir_128
+
+.migrar_128:
+; Obtengo en eax el número de jugador actual
+call jugador_actual 	
+
+; eax = unsigned int game_migrar(int nro_jugador, int fil_src, int col_src,
+;                                                 int fil_dst, int col_dst);
+push esi 			; col_dst
+push edx 			; fila_dst
+push ecx 			; col_src
+push ebx 			; fila_src
+push eax 			; nro_jugador
+call game_migrar
+add esp, 20
+
+; Terminamos la syscall, con el valor de retorno en eax devuelto por game_duplicar
 
 .salir_128:
-
-; restablece los registros pusheados
 popfd 				; restablece el estado de los flags
 iret 				; retorna de las interrupciones
 
+
+
+
+
+
+
 ISR 144
+
 pushfd
-cmp eax, 200 ;Veo si hay que terminar el juego
-jne .iniciarJuego
-;Termino el juego
+
+; Verifico si se solicita la operación 'terminar'
+cmp eax, 200
+je .terminar_144
+
+; Verifico si se solicita la operación 'iniciar'
+cmp eax, 300
+je .iniciar_144
+
+; La operación solicitada es inválida
+jmp .salir_144
+
+.terminar_144:
 call game_terminar
-jmp .fin144
-.iniciarJuego:
-cmp eax, 300 ;Veo si hay que iniciar el juego
-jne .fin144
-;Inicializar juego
+jmp .salir_144
+
+.iniciar_144:
 call game_iniciar
-.fin144:
+
+.salir_144:
 popfd
+iret
+
+
+
+
 
 ; --------------------  funciones auxiliares ------------------------------
-obtener_id_jugador:
-ret
 
 proximo_reloj:
 	pushad

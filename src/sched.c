@@ -46,7 +46,6 @@ void sched() {
 					(pausado == 0 && pausarReanudar == 1)) { // hay que reanudar 
 			pausado = 0;
 			unsigned short proxTarea = sched_proximo_indice();
-			breakpoint();
 			if(proxTarea != 0)	{
 				jmpToTask(proxTarea); // salto a la proxima tarea
 			} else {
@@ -115,16 +114,14 @@ void sched_remover_tarea(unsigned int process_id) {
 	tareas[process_id] = 0;
 }
 
-//Tener en cuenta que devuelve la posición en la GDT de la tarea
-//Para tener la posición en tareas[] hay que restarle 10 ya que empieza a contar desde la idle
-//y la idle no está en tareas[]
-unsigned short tareaActiva() {
+// Devuelve un numero entre 1 y 4 representando el jugador actual,
+// o 0 si la tarea actual no corresponde a ningún jugador.
+unsigned short jugador_actual() {
+	unsigned short jugador = 0;
 	int i;
-	unsigned short task = 0;
-	for(i = 9; i < 15; i++) {
-		unsigned short busy = gdt[i].type;
-		busy = busy & 0x0002; //Dejo únicamente el bit de busy
-		if(busy == 2) task = i;
+	for(i = 10; i <= 13; i++) {
+		unsigned short busy = (gdt[i].type & 0x0002);
+		if(busy == 2) jugador = i - 10;
 	}
-	return task;
+	return jugador;
 }
