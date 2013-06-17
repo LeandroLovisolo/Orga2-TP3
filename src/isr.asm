@@ -197,7 +197,7 @@ ISR_GENERICO 20, '#VE Virtualization Exception'
 ; popfd
 ; iret
 
-intr_msg_14 db '#PF Page Fault (14) - CR2: %x - Err. Code: %u', 0
+intr_msg_14 db '#PF Page Fault (14) - CR2: %x ', 0
 intr_malloc_valido db 'Malloc valido!', 0
 
 ISR 14
@@ -205,31 +205,28 @@ ISR 14
 	add esp, 4 ;Chau error code
 	pushfd
 	pushad
-
 	; Obtengo en ax la tarea actual (valor entre 1 y 5, o 0 si no se está ejecutando ninguna.)
 	call tarea_actual 			; ax = tarea actual
 	mov ecx, eax ;Muevo la tarea actual
 	push ecx ;Guardo tarea actual
-	push ebx ;Guardo Error Code
 	mov ebx, cr2				; CR2
 	push ebx
 	call asignarMemoria
 	add esp, 4
-	pop ebx
 	pop ecx
 	cmp eax, 1
-	mov eax, ecx ;Muevo la tarea actual por las dudas
+	mov eax, ecx ;Muevo la tarea actual
 	jne .elminar14
 	;No se elimina
-	pushad
-	push intr_malloc_valido		; Mensaje
-	push 0x6F 					; Atributos
-	push 45 						; Columna
-	push 20					; Fila
-	call aprintf
-	add esp, 16
-	popad
-	xchg bx, bx
+	; pushad
+	; push intr_malloc_valido		; Mensaje
+	; push 0x6F 					; Atributos
+	; push 45 						; Columna
+	; push 20					; Fila
+	; call aprintf
+	; add esp, 16
+	; popad
+	;xchg bx, bx
 	jmp .fin14
 	.elminar14:
 
@@ -244,7 +241,6 @@ ISR 14
 
 	; Imprimo mensaje
 	pushad
-	push ebx 					; Error code
 	mov ebx, cr2				; CR2
 	push ebx
 	push intr_msg_14			; Mensaje
@@ -252,13 +248,13 @@ ISR 14
 	push 4 						; Columna
 	push eax					; Fila
 	call aprintf
-	add esp, 24
+	add esp, 20
 	popad
-	popad
-	popfd
 
-	sti
-	int 32
+	;popad
+	;popfd
+	call pasar_turno
+
 .fin14:
 	popad
 	popfd
@@ -410,8 +406,8 @@ jmp .salir_128
 push ecx 			; col
 push ebx 			; fila
 call tarea_actual 	
-pop ebx
-push ecx
+pop ebx				; recupero col
+pop ecx				; recupero fila
 ; eax = unsigned int game_migrar(int nro_jugador, int fil_src, int col_src,
 ;                                                 int fil_dst, int col_dst);
 push esi 			; col_dst

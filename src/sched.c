@@ -72,7 +72,7 @@ unsigned short sched_proximo_indice() {
 		result 	= posArbitro;
 		arbitro = TRUE;
 	} else {
-		printf(2, 50, "Posicion 1: %d", posicion);
+		//printf(2, 50, "Posicion 1: %d", posicion);
 
 		while (tareas[posicion] == 0 && cant < 4) {
 			++posicion;
@@ -80,7 +80,7 @@ unsigned short sched_proximo_indice() {
 			if(posicion > 3) posicion = 0;
 		}
 
-		printf(3, 50, "posicion = %u, cant = %u", posicion, cant);
+		//printf(3, 50, "posicion = %u, cant = %u", posicion, cant);
 
 		if(cant == 4) {
 			return 0;
@@ -91,13 +91,13 @@ unsigned short sched_proximo_indice() {
 		if(posicion == 4) posicion = 0;
 	} 
 
-	printf(5, 50, "Prox Ind: %d", result);
+	//printf(5, 50, "Prox Ind: %d", result);
 
 	return result;
 }
 
 void sched_remover_tarea(unsigned int process_id) {
-	printf(6, 50, "Borrar: %d", process_id);
+	//printf(6, 50, "Borrar: %d", process_id);
 
 	tareas[process_id] = 0;
 	quantum = 0;
@@ -113,7 +113,7 @@ unsigned short tarea_actual() {
 		if(busy == 2) tarea = i - 9;
 	}
 
-	printf(7, 50, "Tarea actual: %d", tarea);
+	//printf(7, 50, "Tarea actual: %d", tarea);
 
 	return tarea;
 }
