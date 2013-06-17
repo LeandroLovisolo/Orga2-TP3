@@ -50,11 +50,15 @@ void dibujar_interfaz() {
 	rect(C_BG_BLACK,      1,  1, 25, 80);
 	rect(C_BG_LIGHT_GREY, 2,  1, 19, 80);
 	rect(C_BG_BROWN,      20, 1, 24, 80);
+	rect(C_BG_MAGENTA, 8,  49, 14, 65);
+	aprintf(8, 49, C_FG_GREEN | C_BG_BROWN, "Tabla de puntajes");
+	//aprintf(10, 50, COLOR_1, "Jugador 1: %d", puntaje[0]);
 	aprintf(20, 2, COLOR_1, "1");
 	aprintf(21, 2, COLOR_2, "2");
 	aprintf(22, 2, COLOR_3, "3");
 	aprintf(23, 2, COLOR_4, "4");
 	aprintf(24, 2, COLOR_A, "A");
+	aprintf(1, 20, C_FG_GREEN, "El buen kernel de Panceta y Muzzarella");
 }
 
 void calcular_puntajes(int* puntaje) {
