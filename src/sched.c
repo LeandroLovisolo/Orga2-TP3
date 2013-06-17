@@ -87,44 +87,6 @@ return;
 	return;*/ 
 }
 
-
-#define INT_DIGITS 19		/* enough for 64 bit integer */
-
-char *itoa(int i) {
-  /* Room for INT_DIGITS digits, - and '\0' */
-  static char buf[INT_DIGITS + 2];
-  char *p = buf + INT_DIGITS + 1;	/* points to terminating '\0' */
-  if (i >= 0) {
-    do {
-      *--p = '0' + (i % 10);
-      i /= 10;
-    } while (i != 0);
-    return p;
-  }
-  else {			/* i < 0 */
-    do {
-      *--p = '0' - (i % 10);
-      i /= 10;
-    } while (i != 0);
-    *--p = '-';
-  }
-  return p;
-}
-
-
-
-//Imprime una string bien formada
-void print(const char* str, unsigned int fil, unsigned int col, unsigned short attr) {
-	unsigned char* ptr_pantalla = (unsigned char*)VIDEO_ADDR;
-	int i = 0, j = 0;
-	while(str[j] != '\0') {
-		ptr_pantalla[i + col*2     + fil*VIDEO_COLS*2] = str[j];
-		ptr_pantalla[i + 1 + col*2 + fil*VIDEO_COLS*2] = attr;
-		i+=2;
-		j++;
-	}
-}
-
 unsigned short sched_proximo_indice() {
 	unsigned short 	result;
 	unsigned short	cant 	= 0;
@@ -138,13 +100,7 @@ unsigned short sched_proximo_indice() {
 			++cant;
 		}
 
-		print("Posicion: ",   3, 50, C_FG_WHITE);
-		print(itoa(posicion), 3, 60, C_FG_WHITE);
-		print("Cantidad: ",   4, 50, C_FG_WHITE);
-		print(itoa(cant),     4, 60, C_FG_WHITE);
-
-
-		//screen_escribir((unsigned char *) "Hola, mundo!", C_FG_WHITE, 11, 3, 50);
+		printf(3, 50, "posicion = %u, cant = %u", posicion, cant);
 
 		if(cant == 4) {
 			return 0;

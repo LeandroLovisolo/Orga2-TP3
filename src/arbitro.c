@@ -8,33 +8,27 @@
 #include "game.h"
 #include "syscall.h"
 #include "screen.h"
-#define INT_DIGITS 19		/* enough for 64 bit integer */
-
-void print(const char* str, unsigned int fil, unsigned int col, unsigned short attr);
 
 void imprimir_tablero();
-void imprimir_puntaje(int * puntajes);
-void imprimir_ganador(int * puntajes);
+void imprimir_puntaje();
+void imprimir_ganador();
 int  juego_terminado(unsigned char * tablero);
-void actualizar_pantalla(int * puntajes);
-void calcular_puntajes(int * puntajes);
+void actualizar_pantalla();
+void calcular_puntajes();
 void imprimir_tablero_inicial();
-void screen_pintar(unsigned char formato, unsigned short desdeFil, 
-	unsigned short hastaFil, unsigned short desdeCol, unsigned short hastaCol);
-char *itoa(int i);
 
 void task() {
-	//screen_pintar_pantalla(); //Pinto la pantalla por primera vez
-	/* Task 5 : Tarea arbitro */
 	imprimir_tablero_inicial();
 	syscall_iniciar();
+
 	while(1) {
-		//calcular_puntajes(puntajesJugadores);
-		//actualizar_pantalla(puntajesJugadores);
+		calcular_puntajes();
+		actualizar_pantalla();
 	}
 }
 
-void calcular_puntajes(int * puntajes) {
+void calcular_puntajes() {
+	/*
 	int f,c;
 	int espaciosLibres = 0;
 	for(f = 0; f < TABLERO_FILS; f++) {
@@ -47,10 +41,11 @@ void calcular_puntajes(int * puntajes) {
 			}
 		}
 	}
+	*/
 }
 
-void actualizar_pantalla(int * puntajes) {
-	imprimir_puntaje(puntajes);
+void actualizar_pantalla() {
+	imprimir_puntaje();
 	//imprimir_tablero();
 }
 
@@ -58,24 +53,14 @@ int juego_terminado(unsigned char * tablero) {
 	return FALSE;
 }
 
-void imprimir_ganador(int * puntajes) {
+void imprimir_ganador() {
 }
 
-void imprimir_puntaje(int * puntajes) {
-	//char* puntajeJugador1 = itoa(puntajes[0]);
-	//print(puntajeJugador1, 5, 16, C_FG_BLUE);
-	/*
-	char* puntajeJugador2 = itoa(puntajes[1]);
-	//print(puntajeJugador2, 7, 16, C_FG_GREEN);
-	char* puntajeJugador3 = itoa(puntajes[2]);
-	//print(puntajeJugador3, 9, 16, C_FG_CYAN);
-	char* puntajeJugador4 = itoa(puntajes[3]);
-	//print(puntajeJugador4, 12, 16, C_FG_RED);
-	puntajeJugador1++;
-	puntajeJugador2++;
-	puntajeJugador3++;
-	puntajeJugador4++;
-	*/
+void imprimir_puntaje() {
+	aprintf(10, 50, C_FG_LIGHT_BLUE,  "Jugador 1: %d", 0); // puntajesJugadores[0]);
+	aprintf(11, 50, C_FG_LIGHT_GREEN, "Jugador 2: %d", 0); // puntajesJugadores[1]);
+	aprintf(12, 50, C_FG_LIGHT_CYAN,  "Jugador 3: %d", 0); // puntajesJugadores[2]);
+	aprintf(13, 50, C_FG_LIGHT_RED,   "Jugador 4: %d", 0); // puntajesJugadores[3]);
 }
 
 void imprimir_tablero() {
@@ -93,53 +78,18 @@ void imprimir_tablero() {
 	}
 }
 
-//Imprime una string bien formada
-void print(const char* str, unsigned int fil, unsigned int col, unsigned short attr) {
-	unsigned char* ptr_pantalla = (unsigned char*)VIDEO_ADDR;
-	int i = 0;
-	while(str[i] != '\0') {
-		ptr_pantalla[i + col*2+ fil*VIDEO_COLS*2] = str[i];
-		ptr_pantalla[i + 1 + col*2+ fil*VIDEO_COLS*2] = attr;
-		i+=2;
-	}
-}
-
 void imprimir_tablero_inicial() {
 	screen_pintar(C_BG_LIGHT_GREY,0,15,40,VIDEO_COLS);
 	screen_pintar(C_BG_BROWN,15,VIDEO_FILS,0,VIDEO_COLS);
 }
 
-void screen_pintar(unsigned char formato, unsigned short desdeFil, 
-	unsigned short hastaFil, unsigned short desdeCol, unsigned short hastaCol) {
-	unsigned char* ptr_pantalla = (unsigned char*)VIDEO_ADDR;	
-	int i,j;
-	for(j = desdeFil; j < hastaFil; j++) {
-		for(i = desdeCol; i < hastaCol; i++) {
-			ptr_pantalla[(j*VIDEO_COLS*2) + i*2] = 0;
-			ptr_pantalla[(j*VIDEO_COLS*2) + (i*2) + 1] = formato;
-		}
-	}
-}
+// El árbitro se compila como un binario independiente del kernel, linkeado
+// estáticamente. Para poder usar código objeto de otras unidades de
+// compilación, hace falta linkear task5.ctsk con el archivo con el código
+// objeto correspondiente. Esto implica modificar el Makefile provisto por la
+// cátedra.
+//
+// En lugar de modificar el Makefile, optamos por incluir el código necesario
+// dentro de esta misma unidad de compilación.
 
-
-
-char *itoa(int i) {
-  /* Room for INT_DIGITS digits, - and '\0' */
-  static char buf[INT_DIGITS + 2];
-  char *p = buf + INT_DIGITS + 1;	/* points to terminating '\0' */
-  if (i >= 0) {
-    do {
-      *--p = '0' + (i % 10);
-      i /= 10;
-    } while (i != 0);
-    return p;
-  }
-  else {			/* i < 0 */
-    do {
-      *--p = '0' - (i % 10);
-      i /= 10;
-    } while (i != 0);
-    *--p = '-';
-  }
-  return p;
-}
+#include "screen.c"

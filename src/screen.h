@@ -42,13 +42,35 @@
 
 #define C_BLINK				(0x8 << 4)
 
-void screen_escribir(unsigned char* mensaje, unsigned char formato, 
-	unsigned short longitud, unsigned short fil, unsigned short col);
+void screen_print(const char* str, unsigned int fil, unsigned int col, unsigned short attr);
+void screen_pintar(unsigned char formato, unsigned short desdeFil, unsigned short hastaFil,
+                                          unsigned short desdeCol, unsigned short hastaCol);
 
-void screen_pintar(unsigned char formato, unsigned short desdeFil, 
-	unsigned short hastaFil, unsigned short desdeCol, unsigned short hastaCol);
+// Formato de la familia de funciones *printf:
+//
+// %[flag][width][mod][conv]
+// flag:   -      left justify, pad right w/ blanks
+//         0      pad left w/ 0 for numerics
+// width:         (field width)
+// mod:    N      near ptr
+//         h      short (16-bit) int
+//         l      long (32-bit) int
+// conv:   d,i    decimal int
+//         u      decimal unsigned
+//         o      octal
+//         x,X    hex
+//         c      char
+//         s      string
+//         p      ptr
 
-void screen_pintar_pantalla();
+void  printf(unsigned char fila, unsigned char columna, const char *fmt, ...);
+void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, const char *fmt, ...);
+int  sprintf(char *buffer, const char *fmt, ...);
 
+// Ejemplos de uso de sprintf:
+//
+// char buf[64];
+// sprintf(buf, "%u score and %i years ago...\n", 4, -7);
+// sprintf(buf, "-1L == 0x%lX == octal %lo\n", -1L, -1L);
 
 #endif	/* !__SCREEN_H__ */
