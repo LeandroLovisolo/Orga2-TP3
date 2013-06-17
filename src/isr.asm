@@ -146,19 +146,19 @@ reloj:  				db '|/-\'
 ;; Rutina de atención de las EXCEPCIONES
 ;;
 
-;Rutina división por 0
+; Rutina división por 0
 ISR 0
 ;imprimir_excepcion excepcion_division_msg, excepcion_division_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Debug Exception
@@ -166,14 +166,14 @@ ISR 1
 ;imprimir_excepcion excepcion_debug_msg, excepcion_debug_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de NMI
@@ -181,14 +181,14 @@ ISR 2
 ;imprimir_excepcion excepcion_nmi_msg, excepcion_nmi_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Breakpoint
@@ -196,14 +196,14 @@ ISR 3
 ;imprimir_excepcion excepcion_bp_msg, excepcion_bp_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Overflow
@@ -211,14 +211,14 @@ ISR 4
 ;imprimir_excepcion excepcion_of_msg, excepcion_of_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Bound range exceeded
@@ -226,14 +226,14 @@ ISR 5
 ;imprimir_excepcion excepcion_br_msg, excepcion_br_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Invalid Opcode
@@ -241,14 +241,14 @@ ISR 6
 ;imprimir_excepcion excepcion_ud_msg, excepcion_ud_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Device not available
@@ -256,14 +256,14 @@ ISR 7
 ;imprimir_excepcion excepcion_nm_msg, excepcion_nm_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Double Foult
@@ -271,14 +271,14 @@ ISR 8
 ;imprimir_excepcion excepcion_df_msg, excepcion_df_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Coprocessor Segment Overrun
@@ -286,14 +286,14 @@ ISR 9
 ;imprimir_excepcion excepcion_cpso_msg, excepcion_cpso_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Invalid TSS
@@ -301,14 +301,14 @@ ISR 10
 ;imprimir_excepcion excepcion_ts_msg, excepcion_ts_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Segment not present
@@ -316,14 +316,14 @@ ISR 11
 ;imprimir_excepcion excepcion_np_msg, excepcion_np_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Stack Fault
@@ -331,14 +331,14 @@ ISR 12
 ;imprimir_excepcion excepcion_ss_msg, excepcion_ss_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de General protection
@@ -346,22 +346,22 @@ ISR 13
 ;imprimir_excepcion excepcion_gp_msg, excepcion_gp_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
+call jugador_actual 		; Me deja en ax el jugador actual
 
 xchg bx, bx
 xchg eax, eax
 
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
 push ax ;Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
 
 xchg bx, bx
 xchg ebx, ebx
 
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Page Fault
@@ -373,16 +373,16 @@ iret
 ISR 14
 pushfd
 pushad
-mov eax, cr2 ;Pusheo cr2 para tenerlo como parámetro
+mov eax, cr2 				;Pusheo cr2 para tenerlo como parámetro
 push eax
 call asignarMemoria
 add esp, 4 ;Ver si está bien
 cmp ax, 0 ;Veo si el resultado es 0
 jne .fin14
-;Borro la tarea
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+; Borro la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
 add esp, 4 ;Restauro la pila
 ;Imprimo el mensaje correspondiente
@@ -398,14 +398,14 @@ ISR 15
 ;imprimir_excepcion excepcion_mr_msg, excepcion_mr_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de FPU Floating point error
@@ -413,14 +413,14 @@ ISR 16
 ;imprimir_excepcion excepcion_mf_msg, excepcion_mf_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Alignment Check
@@ -428,14 +428,14 @@ ISR 17
 ;imprimir_excepcion excepcion_ac_msg, excepcion_ac_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Machine Check
@@ -443,14 +443,14 @@ ISR 18
 ;imprimir_excepcion excepcion_mc_msg, excepcion_mc_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de SIMD Floating Point
@@ -458,14 +458,14 @@ ISR 19
 ;imprimir_excepcion excepcion_xm_msg, excepcion_xm_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;Rutina de atención de Virtualization
@@ -473,14 +473,14 @@ ISR 20
 ;imprimir_excepcion excepcion_ve_msg, excepcion_ve_msg_len
 pushfd
 pushad
-call jugador_actual 	; Me deja en ax el jugador actual
-sub ax, 1d	 			; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
+call jugador_actual 		; Me deja en ax el jugador actual
+sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-pushad
-pushfd
+popad
+popfd
 iret
 
 ;;
