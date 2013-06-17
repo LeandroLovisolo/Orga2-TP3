@@ -112,6 +112,7 @@ unsigned short sched_proximo_indice() {
 
 void sched_remover_tarea(unsigned int process_id) {
 	tareas[process_id] = 0;
+	quantum = 0;
 }
 
 // Devuelve un numero entre 1 y 4 representando el jugador actual,

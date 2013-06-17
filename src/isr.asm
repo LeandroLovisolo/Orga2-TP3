@@ -128,10 +128,10 @@ _isr%1:
 	; To Infinity And Beyond!!
 	;jmp $
 
-xchg bx, bx
-push eax
-mov eax, %1
-pop eax
+; xchg bx, bx
+; push eax
+; mov eax, %1
+; pop eax
 
 %endmacro
 
@@ -341,6 +341,10 @@ popad
 popfd
 iret
 
+
+
+
+
 ;Rutina de atención de General protection
 ISR 13
 ;imprimir_excepcion excepcion_gp_msg, excepcion_gp_msg_len
@@ -362,7 +366,15 @@ add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
 popad
 popfd
-iret
+
+sti
+int 32
+
+;iret
+
+
+
+
 
 ;Rutina de atención de Page Fault
 ;The contents of the CR2 register. The processor loads the CR2 register with the 32-bit linear address that
@@ -370,28 +382,46 @@ iret
 ;directory and page-table entries. Another page fault can potentially occur during execution of the page-fault
 ;handler; the handler should save the contents of the CR2 register before a second page fault can occur.
 
+; ISR 14
+; pushfd
+; pushad
+; mov eax, cr2 				;Pusheo cr2 para tenerlo como parámetro
+; push eax
+; call asignarMemoria
+; add esp, 4 ;Ver si está bien
+; cmp ax, 0 ;Veo si el resultado es 0
+; jne .fin14
+; ; Borro la tarea
+; call jugador_actual 		; Me deja en ax el jugador actual
+; sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
+; push ax 					; Pusheo el parámetro para borrar la tarea
+; call sched_remover_tarea
+; add esp, 4 ;Restauro la pila
+; ;Imprimo el mensaje correspondiente
+; ;imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
+; ;Tal vez hay que saltar directamente al sched, ver esto (tal vez se puede llamar a la int del reloj)
+; .fin14:
+; popad
+; popfd
+; iret
+
 ISR 14
+;imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
 pushfd
 pushad
-mov eax, cr2 				;Pusheo cr2 para tenerlo como parámetro
-push eax
-call asignarMemoria
-add esp, 4 ;Ver si está bien
-cmp ax, 0 ;Veo si el resultado es 0
-jne .fin14
-; Borro la tarea
 call jugador_actual 		; Me deja en ax el jugador actual
 sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
 push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
-add esp, 4 ;Restauro la pila
+add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
-;imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
-;Tal vez hay que saltar directamente al sched, ver esto (tal vez se puede llamar a la int del reloj)
-.fin14:
 popad
 popfd
-iret
+sti
+int 32
+;iret
+
+
 
 ;Rutina de atención de INTERRUPCION 15
 ISR 15
