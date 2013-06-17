@@ -314,9 +314,9 @@ Tengamos en cuenta como se decodifica la dirección virtual para obtener una dir
  \item Offset = este es el offset que se le suma a la base de la pagina obtenida para obtener el espacio de memoria exacto que queremos
 \end{enumerate}
 
-Como la unica entrada del page directory que utilizaremos es la $0$, el campo directorio deberá ser siempre $0$, lo cual es correcto ya que los últimos $10$ bits de cualquier dirección del kernel son $0$. Luego dentro del page table obtenemos la dirección base de la página, la cual se obtiene de buscar la tabla indicada por el campo table (los bits 12 a 21 de la dirección virtual). Al definirle adress con el mismo número al de la entrada de esa tabla, al momento de sumar el offset de la dirección, obtendremos claramente un $identity$ $mapping$.
+Como la unica entrada del page directory que utilizaremos es la $0$, el campo directorio deberá ser siempre $0$, lo cual es correcto ya que los últimos $10$ bits de cualquier dirección del kernel son $0$. Luego dentro del page table obtenemos la dirección base de la página, la cual se obtiene de buscar la tabla indicada por el campo table (los bits 12 a 21 de la dirección virtual). Al definirle adress con el mismo número al de la entrada de esa tabla, al momento de sumar el offset de la dirección, obtendremos claramente un $identity$ $mapping$. \\
 
-\includegraphics[height=10cm]{privilegios.png} // PONER IMAGEN CORRECTA
+\includegraphics[height=7cm]{iddMap.png}
 
 \subsection{Ejercicio 4: inicializar el directorio y las tablas de paginas}
 
@@ -353,7 +353,32 @@ Esta función llena correctamente la tabla correspondiente siempre que se le pas
 
 \subsection{Ejercicio 5: Tarea del árbitro}
 
+La tarea del árbitro se dedica a mirar constantemente el estado del tablero para ver si debe finalizar el juego o imprimir el tablero.
+Para saber cuando termino el juego, hay que contar cuantos espacios del tablero todabia están libres, en caso que no halla ninguno, entonces el juego termino.
 
+El pseudocodigo para el árbitro es el siguiente:\\
+
+\begin{pseudocodigo}
+  \STATE Dibujar la interfaz
+  \STATE llamar a syscall\_iniciar
+  \STATE inicializar un array de tamaño 5 para los puntajes
+  \STATE
+  \WHILE{True}
+    \STATE
+    \STATE Calcular el puntaje
+    \STATE Actualizar la pantalla dependiendo de esos puntajes
+    \STATE
+    \IF{Termino el juego}
+      \STATE
+      \STATE Imprimir el ganador
+      \STATE llamar a syscall\_terminar
+      \STATE salir del while
+    \ENDIF
+  \ENDWHILE
+  \STATE
+\end{pseudocodigo}
+
+La cantidad de jugadores es 4, pero el array para los puntajes tiene tamaño 5. Esto es porque contamos como quinto  jugador al tablero en si, tomando como su puntaje, la cantidad de casilleros que todabia están vacios, de esta manera, cuando el tablero tenga puntaje $0$ es porque no quedan casilleros vacios y el juego habrá terminado.
 
 \subsection{Ejercicio 6: Scheduler}
 
