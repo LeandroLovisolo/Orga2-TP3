@@ -59,32 +59,6 @@ void sched() {
 	}
 return;
 
-
-	/*
-	if(finalizado == 1) return;
-
-	if(quantum == 0) {
-		quantum = 2;
-		if(pausado == 0 && pausarReanudar == 1) {
-			pausado = 1;
-			jmpToTask(72); //Salto a la tarea idle
-			return;
-		}
-		else if(pausado == 1 && pausarReanudar == 0) {
-			pausado = 0;
-		}
-
-		unsigned short proxTarea = sched_proximo_indice();
-		if(proxTarea != -1) { //Si hay tareas activas
-
-			jmpToTask(proxTarea);
-		} else {
-			finalizado = 1;
-			jmpToTask(72); //Salto a la tarea idle
-		}
-	}
-	quantum--;
-	return;*/ 
 }
 
 unsigned short sched_proximo_indice() {
@@ -139,4 +113,9 @@ unsigned short tarea_actual() {
 	printf(7, 50, "Tarea actual: %d", tarea);
 
 	return tarea;
+}
+
+void pasar_turno() {
+	quantum = 0;
+	sched();
 }
