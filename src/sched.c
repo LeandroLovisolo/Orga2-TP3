@@ -87,44 +87,6 @@ return;
 	return;*/ 
 }
 
-
-#define INT_DIGITS 19		/* enough for 64 bit integer */
-
-char *itoa(int i) {
-  /* Room for INT_DIGITS digits, - and '\0' */
-  static char buf[INT_DIGITS + 2];
-  char *p = buf + INT_DIGITS + 1;	/* points to terminating '\0' */
-  if (i >= 0) {
-    do {
-      *--p = '0' + (i % 10);
-      i /= 10;
-    } while (i != 0);
-    return p;
-  }
-  else {			/* i < 0 */
-    do {
-      *--p = '0' - (i % 10);
-      i /= 10;
-    } while (i != 0);
-    *--p = '-';
-  }
-  return p;
-}
-
-
-
-//Imprime una string bien formada
-void print(const char* str, unsigned int fil, unsigned int col, unsigned short attr) {
-	unsigned char* ptr_pantalla = (unsigned char*)VIDEO_ADDR;
-	int i = 0, j = 0;
-	while(str[j] != '\0') {
-		ptr_pantalla[i + col*2     + fil*VIDEO_COLS*2] = str[j];
-		ptr_pantalla[i + 1 + col*2 + fil*VIDEO_COLS*2] = attr;
-		i+=2;
-		j++;
-	}
-}
-
 unsigned short sched_proximo_indice() {
 	unsigned short 	result;
 	unsigned short	cant 	= 0;
@@ -133,21 +95,15 @@ unsigned short sched_proximo_indice() {
 		result 	= posArbitro;
 		arbitro = TRUE;
 	} else {
-		print("Posicion1: ",   2, 50, C_FG_WHITE);
-		print(itoa(posicion), 2, 60, C_FG_WHITE);
+		printf(2, 50, "Posicion 1: %d", posicion);
+
 		while (tareas[posicion] == 0 && cant < 4) {
 			++posicion;
 			++cant;
 			if(posicion > 3) posicion = 0;
 		}
 
-		print("Posicion2: ",   3, 50, C_FG_WHITE);
-		print(itoa(posicion), 3, 60, C_FG_WHITE);
-		print("Cantidad: ",   4, 50, C_FG_WHITE);
-		print(itoa(cant),     4, 60, C_FG_WHITE);
-
-
-		//screen_escribir((unsigned char *) "Hola, mundo!", C_FG_WHITE, 11, 3, 50);
+		printf(3, 50, "posicion = %u, cant = %u", posicion, cant);
 
 		if(cant == 4) {
 			return 0;
@@ -157,28 +113,30 @@ unsigned short sched_proximo_indice() {
 		posicion++;
 		if(posicion == 4) posicion = 0;
 	} 
-	print("Prox Ind: ",   5, 50, C_FG_WHITE);
-	print(itoa(result), 5, 60, C_FG_WHITE);
+
+	printf(5, 50, "Prox Ind: %d", result);
+
 	return result;
 }
 
 void sched_remover_tarea(unsigned int process_id) {
-	print("Borrar: ",   6, 50, C_FG_WHITE);
-	print(itoa(process_id), 6, 60, C_FG_WHITE);
+	printf(6, 50, "Borrar: %d", process_id);
+
 	tareas[process_id] = 0;
 	quantum = 0;
 }
 
-// Devuelve un numero entre 1 y 4 representando el jugador actual,
-// o 0 si la tarea actual no corresponde a ningún jugador.
-unsigned short jugador_actual() {
-	unsigned short jugador = 0;
+// Devuelve un numero entre 1 y 5 representando la tarea actual,
+// o 0 si no se está ejecutando ninguna tarea.
+unsigned short tarea_actual() {
+	unsigned short tarea = 0;
 	int i;
-	for(i = 10; i <= 13; i++) {
+	for(i = 10; i <= 14; i++) {
 		unsigned short busy = (gdt[i].type & 0x0002);
-		if(busy == 2) jugador = i - 9;
+		if(busy == 2) tarea = i - 9;
 	}
-	print("Jugador: ",   7, 50, C_FG_WHITE);
-	print(itoa(jugador-1), 7, 60, C_FG_WHITE);
-	return jugador;
+
+	printf(7, 50, "Tarea actual: %d", tarea);
+
+	return tarea;
 }

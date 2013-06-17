@@ -183,7 +183,7 @@ le demos una página de memoria fisica. Cada tarea puede tener a lo sumo 5 pági
 No es necesario llevar el rastro de a que tarea se le asigna cual dirección fisica o algo similar
 Ya que no se necesita liberar memoria y las direcciones que ya se mapean no vuelven a tirar PF*/
 char asignarMemoria(unsigned int direccion) {
-    unsigned short tarea = jugador_actual() - 1; //Me da el valor del indice de la tarea
+    unsigned short tarea = tarea_actual() - 1; //Me da el valor del indice de la tarea
     if((direccion >= 0x003D0000) && (direccion < 0x003F0000) && (cantPaginas[tarea] <= 5)) {
         cantPaginas[tarea]++;
         mmu_mappear_pagina(direccion, ultimaDirfisica, (pd_entry*)directorioDeTareas[tarea], 0, 1);

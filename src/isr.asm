@@ -6,374 +6,164 @@
 
 %include "imprimir.mac"
 
-borrar_pantalla:
-	mov ecx, 0x7FFF
-	push ecx
-	.limpiar:
-		mov byte [fs:ecx], 0 ;pongo la pantalla limpa con 0's
-		loop .limpiar
-	pop ecx
-	ret
-
-%macro imprimir_excepcion 2
-	;Primer parámetro, puntero a mensaje
-	;Segundo parámetros, longitud de mensaje
-	call borrar_pantalla
-	imprimir_texto_mp excepcion_msg, excepcion_msg_len ,0x07, 0, 0
-	imprimir_texto_mp %1, %2, 0x06, 1 ,0
-%endmacro
-
 BITS 32
 
+extern fin_intr_pic1
 extern game_iniciar
 extern game_terminar
 extern game_migrar
 extern game_duplicar
 extern sched_proximo_indice
 extern sched_remover_tarea
-
-;;
-;;Extern de tareas
-;;
 extern pausado
 extern pausarReanudar
 extern sched
-extern jugador_actual
+extern tarea_actual
 extern asignarMemoria
-
-
-%define TAREA_QUANTUM		2
-excepcion_msg db		'Ch, ch, que andas haciendo? Toma una excepcion pebete!'
-excepcion_msg_len equ	$ - excepcion_msg
-
-excepcion_division_msg db		'Exepcion, division por 0'
-excepcion_division_msg_len equ	$ - excepcion_division_msg
-
-excepcion_debug_msg db		'Exepcion de debug'
-excepcion_debug_msg_len equ	$ - excepcion_debug_msg
-
-excepcion_nmi_msg db		'Exepcion NMI'
-excepcion_nmi_msg_len equ	$ - excepcion_nmi_msg
-
-excepcion_bp_msg db			'Breakpoint Exception'
-excepcion_bp_msg_len equ	$ - excepcion_bp_msg
-
-excepcion_of_msg db		'Overflow Exception'
-excepcion_of_msg_len equ	$ - excepcion_of_msg
-
-excepcion_br_msg db		'BOUND Range Exceeded Exception'
-excepcion_br_msg_len equ	$ - excepcion_br_msg
-
-excepcion_ud_msg db		'Invalid Opcode Exception'
-excepcion_ud_msg_len equ	$ - excepcion_ud_msg
-
-excepcion_nm_msg db		'Device Not Available Exception'
-excepcion_nm_msg_len equ	$ - excepcion_nm_msg
-
-excepcion_df_msg db		'Double Fault Exception'
-excepcion_df_msg_len equ	$ - excepcion_df_msg
-
-excepcion_cpso_msg db		'Coprocesor Segment Overrun'
-excepcion_cpso_msg_len equ	$ - excepcion_cpso_msg
-
-excepcion_ts_msg db		'Invalid TSS Exception'
-excepcion_ts_msg_len equ	$ - excepcion_ts_msg
-
-excepcion_np_msg db		'Segment Not Present'
-excepcion_np_msg_len equ	$ - excepcion_np_msg
-
-excepcion_ss_msg db		'Stack Fault Exception'
-excepcion_ss_msg_len equ	$ - excepcion_ss_msg
-
-excepcion_gp_msg db		'General Protection Exception'
-excepcion_gp_msg_len equ	$ - excepcion_gp_msg
-
-excepcion_pf_msg db		'Page Fault Exception'
-excepcion_pf_msg_len equ	$ - excepcion_pf_msg
-
-excepcion_mf_msg db		'FPU Floating point Error'
-excepcion_mf_msg_len equ	$ - excepcion_mf_msg
-
-excepcion_ac_msg db		'Alignment Check Exception'
-excepcion_ac_msg_len equ	$ - excepcion_ac_msg
-
-excepcion_mc_msg db		'Maching Check Exception'
-excepcion_mc_msg_len equ	$ - excepcion_mc_msg
-
-excepcion_xm_msg db		'SIMD Floating point Exception'
-excepcion_xm_msg_len equ	$ - excepcion_xm_msg
-
-excepcion_ve_msg db		'Virtualization Exception'
-excepcion_ve_msg_len equ	$ - excepcion_ve_msg
-
-soltarR_ve_msg db		'Tecla R'
-soltarR_ve_msg_len equ	$ - soltarR_ve_msg
-
-soltarP_ve_msg db		'Tecla P'
-soltarP_ve_msg_len equ	$ - soltarP_ve_msg
-
-;; PIC
-extern fin_intr_pic1
-
+extern printf
+extern aprintf
 
 ;;
 ;; Definición de MACROS
 ;;
 
-%macro ISR 1
 
-global _isr%1
+mensaje_vacio db '                                                                      ', 0
 
-_isr%1:
-	; To Infinity And Beyond!!
-	;jmp $
+%macro limpiar_mensaje_tarea 1 	; limpiar_mensaje_tarea num_tarea
+	push eax
 
-; xchg bx, bx
-; push eax
-; mov eax, %1
-; pop eax
+	; Calculo fila
+	mov eax, %1
+	and eax, 0x000000FF
+	add eax, 19
 
+	; Limpio línea
+	pushad
+	push mensaje_vacio			; Mensaje
+	push 0x6F 					; Atributos
+	push 4 						; Columna
+	push eax					; Fila
+	call aprintf
+	add esp, 16
+	popad
+
+	pop eax
 %endmacro
 
-;;
-;; Datos
-;;
-; Scheduler
-reloj_numero:		 	dd 0x00000000
-reloj:  				db '|/-\'
+
+%macro mensaje_tarea 2 			; mensaje_tarea num_tarea, mensaje
+	push eax
+
+	; Calculo fila
+	mov eax, %1
+	and eax, 0x000000FF
+	add eax, 19
+
+	limpiar_mensaje_tarea %1
+
+	; Imprimo mensaje
+	pushad
+	push %2						; Mensaje
+	push 0x6F 					; Atributos
+	push 4 						; Columna
+	push eax					; Fila
+	call aprintf
+	add esp, 16
+	popad
+
+	pop eax
+%endmacro
+
+
+%macro eliminar_tarea_actual 1
+	push eax
+	mov eax, %1
+
+	; Verifico que no se trate del árbitro
+	cmp ax, 5
+	je %%no_eliminar_tarea_actual
+
+	; Quito el jugador actual del scheduler
+	dec ax		 				; Le resto 1 para tener el indice en tareas[]
+	push eax 					; Pusheo el parámetro para borrar la tarea
+	call sched_remover_tarea
+	add esp, 4 					; Restauro la pila
+
+	%%no_eliminar_tarea_actual:
+
+	pop eax
+%endmacro
+
+
+%macro ISR 1
+	global _isr%1
+
+	_isr%1:
+	; xchg bx, bx
+	; push eax
+	; mov eax, %1
+	; pop eax
+%endmacro
+
+
+%macro ISR_GENERICO 2
+	global _isr%1
+
+	%defstr intr_num_%1 %1
+	intr_msg_%1     db  %2, ' (', intr_num_%1, ')', 0
+	intr_msg_len_%1 equ $ - intr_msg_%1
+
+	_isr%1:
+
+	; xchg bx, bx
+	; push eax
+	; mov eax, %1
+	; pop eax
+
+	pushfd
+	pushad
+
+	call tarea_actual 			; ax = tarea actual
+
+	eliminar_tarea_actual eax
+
+	; Muestro excepción en pantalla
+ 	mensaje_tarea eax, intr_msg_%1
+
+	popad
+	popfd
+
+	sti
+	int 32
+%endmacro
+
 
 ;;
 ;; Rutina de atención de las EXCEPCIONES
 ;;
 
-; Rutina división por 0
-ISR 0
-;imprimir_excepcion excepcion_division_msg, excepcion_division_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Debug Exception
-ISR 1
-;imprimir_excepcion excepcion_debug_msg, excepcion_debug_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de NMI
-ISR 2
-;imprimir_excepcion excepcion_nmi_msg, excepcion_nmi_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Breakpoint
-ISR 3
-;imprimir_excepcion excepcion_bp_msg, excepcion_bp_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Overflow
-ISR 4
-;imprimir_excepcion excepcion_of_msg, excepcion_of_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Bound range exceeded
-ISR 5
-;imprimir_excepcion excepcion_br_msg, excepcion_br_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Invalid Opcode
-ISR 6
-;imprimir_excepcion excepcion_ud_msg, excepcion_ud_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Device not available
-ISR 7
-;imprimir_excepcion excepcion_nm_msg, excepcion_nm_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Double Foult
-ISR 8
-;imprimir_excepcion excepcion_df_msg, excepcion_df_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Coprocessor Segment Overrun
-ISR 9
-;imprimir_excepcion excepcion_cpso_msg, excepcion_cpso_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Invalid TSS
-ISR 10
-;imprimir_excepcion excepcion_ts_msg, excepcion_ts_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Segment not present
-ISR 11
-;imprimir_excepcion excepcion_np_msg, excepcion_np_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Stack Fault
-ISR 12
-;imprimir_excepcion excepcion_ss_msg, excepcion_ss_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-
-
-
-
-;Rutina de atención de General protection
-ISR 13
-;imprimir_excepcion excepcion_gp_msg, excepcion_gp_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-
-xchg bx, bx
-xchg eax, eax
-
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax ;Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-
-xchg bx, bx
-xchg ebx, ebx
-
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-
-sti
-int 32
-
-;iret
-
-
-
+ISR_GENERICO  0, '#DE Divide Error'
+ISR_GENERICO  1, '#DB RESERVED'
+ISR_GENERICO  2, 'NMI Interrupt'
+ISR_GENERICO  3, '#BP Breakpoint'
+ISR_GENERICO  4, '#OF Overflow'
+ISR_GENERICO  5, '#BR BOUND Range Exceeded'
+ISR_GENERICO  6, '#UD Invalid Opcode (Undefined Opcode)'
+ISR_GENERICO  7, '#NM Device Not Available (No Math Coprocessor)'
+ISR_GENERICO  8, '#DF Double Fault'
+ISR_GENERICO  9, 'Coprocessor Segment Overrun (reserved)'
+ISR_GENERICO 10, '#TS Invalid TSS'
+ISR_GENERICO 11, '#NP Segment Not Present'
+ISR_GENERICO 12, '#SS Stack-Segment Fault'
+ISR_GENERICO 13, '#GP General Protection'
+; ISR_GENERICO 14, '#PF Page Fault'
+ISR_GENERICO 15, '(Intel reserved. Do not use.)'
+ISR_GENERICO 16, '#MF x87 FPU Floating-Point Error (Math Fault)'
+ISR_GENERICO 17, '#AC Alignment Check'
+ISR_GENERICO 18, '#MC Machine Check'
+ISR_GENERICO 19, '#XM SIMD Floating-Point Exception'
+ISR_GENERICO 20, '#VE Virtualization Exception'
 
 
 ;Rutina de atención de Page Fault
@@ -405,138 +195,53 @@ int 32
 ; popfd
 ; iret
 
+intr_msg_14 db '#PF Page Fault (14) - CR2: %x - Err. Code: %u', 0
+
 ISR 14
+	mov ebx, [esp] 			; Cargo el error code
 
-xchg bx, bx
-push eax
-mov eax, 14
-pop eax
+	pushfd
+	pushad
 
-;imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
+	; Obtengo en ax la tarea actual (valor entre 1 y 5, o 0 si no se está ejecutando ninguna.)
+	call tarea_actual 			; ax = tarea actual
 
-xchg bx, bx
-xchg ecx, ecx
+	eliminar_tarea_actual eax
 
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
+	limpiar_mensaje_tarea eax
 
-xchg bx, bx
-xchg edx, edx
+	; Calculo fila
+	and eax, 0x000000FF
+	add eax, 19
 
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-sti
-int 32
-;iret
+	; Imprimo mensaje
+	pushad
+	push ebx 					; Error code
+	mov ebx, cr2				; CR2
+	push ebx
+	push intr_msg_14			; Mensaje
+	push 0x6F 					; Atributos
+	push 4 						; Columna
+	push eax					; Fila
+	call aprintf
+	add esp, 24
+	popad
+
+	popad
+	popfd
+
+	sti
+	int 32
 
 
 
-;Rutina de atención de INTERRUPCION 15
-ISR 15
-;imprimir_excepcion excepcion_mr_msg, excepcion_mr_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de FPU Floating point error
-ISR 16
-;imprimir_excepcion excepcion_mf_msg, excepcion_mf_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Alignment Check
-ISR 17
-;imprimir_excepcion excepcion_ac_msg, excepcion_ac_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Machine Check
-ISR 18
-;imprimir_excepcion excepcion_mc_msg, excepcion_mc_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de SIMD Floating Point
-ISR 19
-;imprimir_excepcion excepcion_xm_msg, excepcion_xm_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
-
-;Rutina de atención de Virtualization
-ISR 20
-;imprimir_excepcion excepcion_ve_msg, excepcion_ve_msg_len
-pushfd
-pushad
-call jugador_actual 		; Me deja en ax el jugador actual
-sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-push ax 					; Pusheo el parámetro para borrar la tarea
-call sched_remover_tarea
-add esp, 4 					; Restauro la pila
-;Imprimo el mensaje correspondiente
-popad
-popfd
-iret
 
 ;;
 ;; variables del handler del RELOJ
 ;;
 
-offset:      dd 0
-proximaTarea:   dw 0 
-
-;;
-;;	Función jmpToTask para saltar de tareas
-;;
+offset:      			dd 0
+proximaTarea:			dw 0 
 
 global jmpToTask
 
@@ -546,7 +251,7 @@ jmpToTask:
 	pushad
 	mov eax, [ebp+8]
 	mov [proximaTarea], ax
-	xchg bx, bx
+	; xchg bx, bx
     jmp far [offset]
     popad
    	pop ebp
@@ -555,6 +260,9 @@ jmpToTask:
 ;;
 ;; Rutina de atención del RELOJ
 ;;
+
+reloj_numero:		 	dd 0x00000000
+reloj:  				db '|/-\'
 
 ISR 32
 	pushfd 					; guarda del valor de los flags
@@ -566,9 +274,32 @@ ISR 32
 	popfd 				; restablece el valor de los flags
 	iret 				; retorna de la interrupción
 
+proximo_reloj:
+	pushad
+	inc DWORD [reloj_numero]
+	mov ebx, [reloj_numero]
+	cmp ebx, 0x4
+	jl .ok
+		mov DWORD [reloj_numero], 0x0
+		mov ebx, 0
+	.ok:
+		add ebx, reloj
+		imprimir_texto_mp ebx, 1, 0x0f, 24, 79
+
+	popad
+	ret
+
+
 ;;
 ;; Rutina de atención del TECLADO
 ;;
+
+soltarR_ve_msg db		'Tecla R'
+soltarR_ve_msg_len equ	$ - soltarR_ve_msg
+
+soltarP_ve_msg db		'Tecla P'
+soltarP_ve_msg_len equ	$ - soltarP_ve_msg
+
 ISR 33
 pushfd
 call fin_intr_pic1
@@ -590,8 +321,6 @@ mov byte [pausarReanudar], 0
 pop eax
 popfd
 iret
-
-
 
 
 ;;
@@ -630,7 +359,7 @@ jmp .salir_128
 
 push ecx 			; col
 push ebx 			; fila
-call jugador_actual 
+call tarea_actual 
 pop ebx
 pop ecx
 
@@ -649,7 +378,7 @@ jmp .salir_128
 ; Obtengo en eax el número de jugador actual
 push ecx 			; col
 push ebx 			; fila
-call jugador_actual 	
+call tarea_actual 	
 pop ebx
 push ecx
 ; eax = unsigned int game_migrar(int nro_jugador, int fil_src, int col_src,
@@ -720,24 +449,3 @@ pop esi
 pop edi
 popfd
 iret
-
-
-
-
-
-; --------------------  funciones auxiliares ------------------------------
-
-proximo_reloj:
-	pushad
-	inc DWORD [reloj_numero]
-	mov ebx, [reloj_numero]
-	cmp ebx, 0x4
-	jl .ok
-		mov DWORD [reloj_numero], 0x0
-		mov ebx, 0
-	.ok:
-		add ebx, reloj
-		imprimir_texto_mp ebx, 1, 0x0f, 24, 79
-
-	popad
-	ret
