@@ -22,6 +22,7 @@ extern tarea_actual
 extern asignarMemoria
 extern printf
 extern aprintf
+extern pasar_turno
 
 ;;
 ;; Definición de MACROS
@@ -134,8 +135,9 @@ mensaje_vacio db '                                                              
 	popad
 	popfd
 
-	sti
-	int 32
+	;sti
+	;int 32
+	call pasar_turno
 %endmacro
 
 
@@ -195,16 +197,38 @@ ISR_GENERICO 20, '#VE Virtualization Exception'
 ; popfd
 ; iret
 
-intr_msg_14 db '#PF Page Fault (14) - CR2: %x - Err. Code: %u', 0
+intr_msg_14 db '#PF Page Fault (14) - CR2: %x ', 0
+intr_malloc_valido db 'Malloc valido!', 0
 
 ISR 14
-	mov ebx, [esp] 			; Cargo el error code
-
+	;mov ebx, [esp] 			; Cargo el error code
+	add esp, 4 ;Chau error code
 	pushfd
 	pushad
-
 	; Obtengo en ax la tarea actual (valor entre 1 y 5, o 0 si no se está ejecutando ninguna.)
 	call tarea_actual 			; ax = tarea actual
+	mov ecx, eax ;Muevo la tarea actual
+	push ecx ;Guardo tarea actual
+	mov ebx, cr2				; CR2
+	push ebx
+	call asignarMemoria
+	add esp, 4
+	pop ecx
+	cmp eax, 1
+	mov eax, ecx ;Muevo la tarea actual
+	jne .elminar14
+	;No se elimina
+	; pushad
+	; push intr_malloc_valido		; Mensaje
+	; push 0x6F 					; Atributos
+	; push 45 						; Columna
+	; push 20					; Fila
+	; call aprintf
+	; add esp, 16
+	; popad
+	;xchg bx, bx
+	jmp .fin14
+	.elminar14:
 
 	eliminar_tarea_actual eax
 
@@ -214,9 +238,9 @@ ISR 14
 	and eax, 0x000000FF
 	add eax, 19
 
+
 	; Imprimo mensaje
 	pushad
-	push ebx 					; Error code
 	mov ebx, cr2				; CR2
 	push ebx
 	push intr_msg_14			; Mensaje
@@ -224,14 +248,17 @@ ISR 14
 	push 4 						; Columna
 	push eax					; Fila
 	call aprintf
-	add esp, 24
+	add esp, 20
 	popad
 
+	;popad
+	;popfd
+	call pasar_turno
+
+.fin14:
 	popad
 	popfd
-
-	sti
-	int 32
+	iret
 
 
 
@@ -379,8 +406,8 @@ jmp .salir_128
 push ecx 			; col
 push ebx 			; fila
 call tarea_actual 	
-pop ebx
-push ecx
+pop ebx				; recupero col
+pop ecx				; recupero fila
 ; eax = unsigned int game_migrar(int nro_jugador, int fil_src, int col_src,
 ;                                                 int fil_dst, int col_dst);
 push esi 			; col_dst
@@ -394,6 +421,12 @@ add esp, 20
 ; Terminamos la syscall, con el valor de retorno en eax devuelto por game_duplicar
 
 .salir_128:
+cmp eax, 0
+je .fin_128
+pushad
+call pasar_turno
+popad
+.fin_128:
 pop ecx
 pop edx
 pop ebx

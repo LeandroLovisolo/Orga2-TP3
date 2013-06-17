@@ -8,6 +8,7 @@
 #include "mmu.h"
 #include "i386.h"
 #include "sched.h"
+#include "screen.h"
 
 void inicializar_kernel_page_directory();
 void inicializar_kernel_table_directory();
@@ -184,10 +185,17 @@ No es necesario llevar el rastro de a que tarea se le asigna cual dirección fis
 Ya que no se necesita liberar memoria y las direcciones que ya se mapean no vuelven a tirar PF*/
 char asignarMemoria(unsigned int direccion) {
     unsigned short tarea = tarea_actual() - 1; //Me da el valor del indice de la tarea
+    //breakpoint();
+    //printf(15, 45, "Tarea %u -> dir %x veces %u", tarea, direccion, cantPaginas[tarea]);
     if((direccion >= 0x003D0000) && (direccion < 0x003F0000) && (cantPaginas[tarea] <= 5)) {
+        //printf(16, 45, "Pasa el if");
         cantPaginas[tarea]++;
-        mmu_mappear_pagina(direccion, ultimaDirfisica, (pd_entry*)directorioDeTareas[tarea], 0, 1);
+        //printf(17, 45, "Incremento contador");
+        mmu_mappear_pagina(direccion, ultimaDirfisica, (pd_entry*)directorioDeTareas[tarea], 1, 1);
+        //printf(18, 45, "Hago el mapeo");
         ultimaDirfisica += 4096; //Ver si hay que sumarle uno también
+        //printf(19, 45, "Incremento dir");
+        //breakpoint();
         return 1;
     }
     else {
