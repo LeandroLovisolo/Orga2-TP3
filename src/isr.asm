@@ -55,12 +55,12 @@ mensaje_vacio db '                                                              
 %macro mensaje_tarea 2 			; mensaje_tarea num_tarea, mensaje
 	push eax
 
+	limpiar_mensaje_tarea %1
+
 	; Calculo fila
 	mov eax, %1
 	and eax, 0x000000FF
 	add eax, 19
-
-	limpiar_mensaje_tarea %1
 
 	; Imprimo mensaje
 	pushad
