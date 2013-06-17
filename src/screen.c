@@ -10,28 +10,32 @@
 
 void puts(const char* str, unsigned char fil, unsigned char col, unsigned char attr) {
 	unsigned char* ptr_pantalla = (unsigned char*) VIDEO_ADDR;
-	int i = 0, j = 0;
-	while(str[j] != '\0') {
-		ptr_pantalla[i + col * 2     + fil * VIDEO_COLS * 2] = str[j];
-		ptr_pantalla[i + col * 2 + 1 + fil * VIDEO_COLS * 2] = attr;
-		i += 2;
-		j++;
-	}
+	int i = 0;
+	int j = 2 * VIDEO_COLS * (fil - 1) + 2 * (col - 1);
+	while(str[i] != 0 && j < VIDEO_FILS * VIDEO_COLS * 2) {
+		ptr_pantalla[j]     = str[i];
+		ptr_pantalla[j + 1] = attr;
+		i++;
+		j += 2;
+	}	
 }
 
 void rect(unsigned char attr, unsigned char fil_src, unsigned char col_src,
                               unsigned char fil_dst, unsigned char col_dst) {
 	unsigned char* ptr_pantalla = (unsigned char*) VIDEO_ADDR;	
-	int i, j;
-	for(j = fil_src; j < fil_dst; j++) {
-		for(i = col_src; i < col_dst; i++) {
-			ptr_pantalla[j * VIDEO_COLS * 2 + i * 2] = 0;
-			ptr_pantalla[j * VIDEO_COLS * 2 + i * 2 + 1] = attr;
+	int fil, col;
+	for(fil = fil_src; fil <= fil_dst; fil++) {
+		for(col = col_src; col <= col_dst; col++) {
+			int i = 2 * VIDEO_COLS * (fil - 1) + 2 * (col - 1);
+			ptr_pantalla[i]     = 0;
+			ptr_pantalla[i + 1] = attr;
 		}
 	}
 }
 
-// Código para printf extraído de acá: http://geezer.osdevbrasil.net/osd/
+///////////////////////////////////////////////////////////////////////////////
+// Código para printf extraído de http://geezer.osdevbrasil.net/osd/         //
+///////////////////////////////////////////////////////////////////////////////
 
 #define	NULL	0
 

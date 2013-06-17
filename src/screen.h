@@ -42,7 +42,13 @@
 
 #define C_BLINK				(0x8 << 4)
 
+// Imprime str en (fil, col). Los parámetros fil y col
+// tienen rangos 1...25, y 1...80, respectivamente.
 void puts(const char* str, unsigned char fil, unsigned char col, unsigned char attr);
+
+// Dibuja el rectángulo de vértices (fil_src, col_src) y (fil_dst, col_dst).
+// Los parámetros fil_src/dst y col_src/dst tienen rangos 1...25, y 1...80,
+// respectivamente.
 void rect(unsigned char attr, unsigned char fil_src, unsigned char col_src,
                               unsigned char fil_dst, unsigned char col_dst);
 
