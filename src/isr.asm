@@ -30,7 +30,7 @@ extern aprintf
 
 mensaje_vacio db '                                                                      ', 0
 
-%macro mensaje_tarea 2 			; mensaje_tarea num_tarea, mensaje
+%macro limpiar_mensaje_tarea 1 	; limpiar_mensaje_tarea num_tarea
 	push eax
 
 	; Calculo fila
@@ -48,6 +48,20 @@ mensaje_vacio db '                                                              
 	add esp, 16
 	popad
 
+	pop eax
+%endmacro
+
+
+%macro mensaje_tarea 2 			; mensaje_tarea num_tarea, mensaje
+	push eax
+
+	; Calculo fila
+	mov eax, %1
+	and eax, 0x000000FF
+	add eax, 19
+
+	limpiar_mensaje_tarea %1
+
 	; Imprimo mensaje
 	pushad
 	push %2						; Mensaje
@@ -57,6 +71,26 @@ mensaje_vacio db '                                                              
 	call aprintf
 	add esp, 16
 	popad
+
+	pop eax
+%endmacro
+
+
+%macro eliminar_tarea_actual 1
+	push eax
+	mov eax, %1
+
+	; Verifico que no se trate del árbitro
+	cmp ax, 5
+	je %%no_eliminar_tarea_actual
+
+	; Quito el jugador actual del scheduler
+	dec ax		 				; Le resto 1 para tener el indice en tareas[]
+	push eax 					; Pusheo el parámetro para borrar la tarea
+	call sched_remover_tarea
+	add esp, 4 					; Restauro la pila
+
+	%%no_eliminar_tarea_actual:
 
 	pop eax
 %endmacro
@@ -90,42 +124,20 @@ mensaje_vacio db '                                                              
 	pushfd
 	pushad
 
-	; Obtengo en ax la tarea actual (valor entre 1 y 5, o 0 si no se está ejecutando ninguna.)
 	call tarea_actual 			; ax = tarea actual
 
-	; Verifico que no se trate del árbitro
-	cmp ax, 5
-	je no_eliminar_tarea_%1
-
-	; Quito el jugador actual del scheduler
-	dec ax		 				; Le resto 1 para tener el indice en tareas[]
-	push ax 					; Pusheo el parámetro para borrar la tarea
-	call sched_remover_tarea
-	add esp, 4 					; Restauro la pila
-	inc ax
-
-	no_eliminar_tarea_%1:
+	eliminar_tarea_actual eax
 
 	; Muestro excepción en pantalla
  	mensaje_tarea eax, intr_msg_%1
-
-	; push intr_msg_%1			; Mensaje
-	; push 0x6F 					; Atributos
-	; push 4 						; Columna
-	; add eax, 19
-	; and eax, 0x000000FF
-	; push eax					; Fila
-	; call aprintf
-	; add esp, 16
 
 	popad
 	popfd
 
 	sti
 	int 32
-
-	;iret
 %endmacro
+
 
 ;;
 ;; Rutina de atención de las EXCEPCIONES
@@ -145,7 +157,7 @@ ISR_GENERICO 10, '#TS Invalid TSS'
 ISR_GENERICO 11, '#NP Segment Not Present'
 ISR_GENERICO 12, '#SS Stack-Segment Fault'
 ISR_GENERICO 13, '#GP General Protection'
-ISR_GENERICO 14, '#PF Page Fault'
+; ISR_GENERICO 14, '#PF Page Fault'
 ISR_GENERICO 15, '(Intel reserved. Do not use.)'
 ISR_GENERICO 16, '#MF x87 FPU Floating-Point Error (Math Fault)'
 ISR_GENERICO 17, '#AC Alignment Check'
@@ -183,6 +195,43 @@ ISR_GENERICO 20, '#VE Virtualization Exception'
 ; popfd
 ; iret
 
+intr_msg_14 db '#PF Page Fault (14) - CR2: %x - Err. Code: %u', 0
+
+ISR 14
+	mov ebx, [esp] 			; Cargo el error code
+
+	pushfd
+	pushad
+
+	; Obtengo en ax la tarea actual (valor entre 1 y 5, o 0 si no se está ejecutando ninguna.)
+	call tarea_actual 			; ax = tarea actual
+
+	eliminar_tarea_actual eax
+
+	limpiar_mensaje_tarea eax
+
+	; Calculo fila
+	and eax, 0x000000FF
+	add eax, 19
+
+	; Imprimo mensaje
+	pushad
+	push ebx 					; Error code
+	mov ebx, cr2				; CR2
+	push ebx
+	push intr_msg_14			; Mensaje
+	push 0x6F 					; Atributos
+	push 4 						; Columna
+	push eax					; Fila
+	call aprintf
+	add esp, 24
+	popad
+
+	popad
+	popfd
+
+	sti
+	int 32
 
 
 
