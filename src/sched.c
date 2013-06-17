@@ -133,12 +133,15 @@ unsigned short sched_proximo_indice() {
 		result 	= posArbitro;
 		arbitro = TRUE;
 	} else {
+		print("Posicion1: ",   2, 50, C_FG_WHITE);
+		print(itoa(posicion), 2, 60, C_FG_WHITE);
 		while (tareas[posicion] == 0 && cant < 4) {
 			++posicion;
 			++cant;
+			if(posicion > 3) posicion = 0;
 		}
 
-		print("Posicion: ",   3, 50, C_FG_WHITE);
+		print("Posicion2: ",   3, 50, C_FG_WHITE);
 		print(itoa(posicion), 3, 60, C_FG_WHITE);
 		print("Cantidad: ",   4, 50, C_FG_WHITE);
 		print(itoa(cant),     4, 60, C_FG_WHITE);
@@ -154,10 +157,14 @@ unsigned short sched_proximo_indice() {
 		posicion++;
 		if(posicion == 4) posicion = 0;
 	} 
+	print("Prox Ind: ",   5, 50, C_FG_WHITE);
+	print(itoa(result), 5, 60, C_FG_WHITE);
 	return result;
 }
 
 void sched_remover_tarea(unsigned int process_id) {
+	print("Borrar: ",   6, 50, C_FG_WHITE);
+	print(itoa(process_id), 6, 60, C_FG_WHITE);
 	tareas[process_id] = 0;
 	quantum = 0;
 }
@@ -171,5 +178,7 @@ unsigned short jugador_actual() {
 		unsigned short busy = (gdt[i].type & 0x0002);
 		if(busy == 2) jugador = i - 9;
 	}
+	print("Jugador: ",   7, 50, C_FG_WHITE);
+	print(itoa(jugador-1), 7, 60, C_FG_WHITE);
 	return jugador;
 }
