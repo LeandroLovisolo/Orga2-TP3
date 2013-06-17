@@ -126,17 +126,17 @@ void sched_remover_tarea(unsigned int process_id) {
 	quantum = 0;
 }
 
-// Devuelve un numero entre 1 y 4 representando el jugador actual,
-// o 0 si la tarea actual no corresponde a ningún jugador.
-unsigned short jugador_actual() {
-	unsigned short jugador = 0;
+// Devuelve un numero entre 1 y 5 representando la tarea actual,
+// o 0 si no se está ejecutando ninguna tarea.
+unsigned short tarea_actual() {
+	unsigned short tarea = 0;
 	int i;
-	for(i = 10; i <= 13; i++) {
+	for(i = 10; i <= 14; i++) {
 		unsigned short busy = (gdt[i].type & 0x0002);
-		if(busy == 2) jugador = i - 9;
+		if(busy == 2) tarea = i - 9;
 	}
 
-	printf(7, 50, "Jugador: %d", jugador - 1);
+	printf(7, 50, "Tarea actual: %d", tarea);
 
-	return jugador;
+	return tarea;
 }
