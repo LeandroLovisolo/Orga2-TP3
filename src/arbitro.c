@@ -8,6 +8,15 @@
 #include "game.h"
 #include "syscall.h"
 #include "screen.h"
+#include "i386.h"
+
+#define COLOR_1 C_FG_WHITE + C_BG_RED
+#define COLOR_2 C_FG_WHITE + C_BG_CYAN
+#define COLOR_3 C_FG_WHITE + C_BG_GREEN
+#define COLOR_4 C_FG_WHITE + C_BG_BLUE
+
+#define TABLERO_POS_FIL 3
+#define TABLERO_POS_COL 3
 
 void dibujar_interfaz();
 void imprimir_tablero();
@@ -28,8 +37,8 @@ void task() {
 }
 
 void dibujar_interfaz() {
-	rect(C_BG_LIGHT_GREY, 0, 40, 15, VIDEO_COLS);
-	rect(C_BG_BROWN,      15, 0, VIDEO_FILS, VIDEO_COLS);
+	rect(C_BG_LIGHT_GREY, 2,  1, 19, 80);
+	rect(C_BG_BROWN,      20, 1, 24, 80);
 }
 
 void calcular_puntajes() {
@@ -51,7 +60,7 @@ void calcular_puntajes() {
 
 void actualizar_pantalla() {
 	imprimir_puntaje();
-	//imprimir_tablero();
+	imprimir_tablero();
 }
 
 int juego_terminado(unsigned char * tablero) {
@@ -62,22 +71,42 @@ void imprimir_ganador() {
 }
 
 void imprimir_puntaje() {
-	aprintf(10, 50, C_FG_LIGHT_BLUE,  "Jugador 1: %d", 0); // puntajesJugadores[0]);
-	aprintf(11, 50, C_FG_LIGHT_GREEN, "Jugador 2: %d", 0); // puntajesJugadores[1]);
-	aprintf(12, 50, C_FG_LIGHT_CYAN,  "Jugador 3: %d", 0); // puntajesJugadores[2]);
-	aprintf(13, 50, C_FG_LIGHT_RED,   "Jugador 4: %d", 0); // puntajesJugadores[3]);
+	aprintf(10, 50, COLOR_1, "Jugador 1: %d", 0); // puntajesJugadores[0]);
+	aprintf(11, 50, COLOR_2, "Jugador 2: %d", 0); // puntajesJugadores[1]);
+	aprintf(12, 50, COLOR_3, "Jugador 3: %d", 0); // puntajesJugadores[2]);
+	aprintf(13, 50, COLOR_4, "Jugador 4: %d", 0); // puntajesJugadores[3]);
 }
 
 void imprimir_tablero() {
-	int f,c;
-	//int espaciosLibres = 0;
-	for(f = 0; f < TABLERO_FILS; f++) {
-		for(c = 0; c < TABLERO_COLS; c++) {
-			if(tablero[f][c] == TABLERO_CELDA_VACIA) {
-				rect(C_BG_BLACK, f, c, f + 1, c + 1);
-			}
-			else {
-				rect(tablero[f][c] << 4, f, c, f + 1, c + 1);
+	int fil, col;
+
+	unsigned char (*tablero)[TABLERO_COLS] = (unsigned char (*)[TABLERO_COLS]) (TABLERO_ADDR);
+
+	rect(C_BG_BLACK, TABLERO_POS_FIL, TABLERO_POS_COL, 
+	                 TABLERO_POS_FIL + TABLERO_FILS - 1,
+	                 TABLERO_POS_COL + TABLERO_COLS - 1);
+
+	for(fil = 0; fil < TABLERO_FILS; fil++) {
+		for(col = 0; col < TABLERO_COLS; col++) {
+			switch(tablero[fil][col]) {
+				case JUG_1:
+					rect(COLOR_1, TABLERO_POS_FIL + fil, TABLERO_POS_COL + col,
+								  TABLERO_POS_FIL + fil, TABLERO_POS_COL + col);
+					break;
+				case JUG_2:
+					rect(COLOR_2, TABLERO_POS_FIL + fil, TABLERO_POS_COL + col,
+								  TABLERO_POS_FIL + fil, TABLERO_POS_COL + col);
+					break;
+				case JUG_3:
+					rect(COLOR_3, TABLERO_POS_FIL + fil, TABLERO_POS_COL + col,
+								  TABLERO_POS_FIL + fil, TABLERO_POS_COL + col);
+					break;
+				case JUG_4:
+					rect(COLOR_4, TABLERO_POS_FIL + fil, TABLERO_POS_COL + col,
+								  TABLERO_POS_FIL + fil, TABLERO_POS_COL + col);
+					break;
+				default:
+					break;					
 			}
 		}
 	}
