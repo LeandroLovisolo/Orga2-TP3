@@ -202,33 +202,33 @@ intr_malloc_valido db 'Malloc valido!', 0
 
 ISR 14
 	;mov ebx, [esp] 			; Cargo el error code
-	xchg bx, bx
+	add esp, 4 ;Chau error code
 	pushfd
 	pushad
 
 	; Obtengo en ax la tarea actual (valor entre 1 y 5, o 0 si no se está ejecutando ninguna.)
-	;call tarea_actual 			; ax = tarea actual
-	;mov ecx, eax ;Muevo la tarea actual
-	;pop ecx ;Guardo tarea actual
-	;pop ebx ;Guardo Error Code
-	;mov ebx, cr2				; CR2
-	;push ebx
-	;call asignarMemoria
-	;add esp, 4
-	;pop ebx
-	;pop ecx
-	;cmp eax, 1
-	;mov eax, ecx ;Muevo la tarea actual por las dudas
-	;jne .elminar14
+	call tarea_actual 			; ax = tarea actual
+	mov ecx, eax ;Muevo la tarea actual
+	push ecx ;Guardo tarea actual
+	push ebx ;Guardo Error Code
+	mov ebx, cr2				; CR2
+	push ebx
+	call asignarMemoria
+	add esp, 4
+	pop ebx
+	pop ecx
+	cmp eax, 1
+	mov eax, ecx ;Muevo la tarea actual por las dudas
+	jne .elminar14
 	;No se elimina
-	;pushad
-	;push intr_malloc_valido		; Mensaje
-	;push 0x6F 					; Atributos
-	;push 45 						; Columna
-	;push 20					; Fila
-	;call aprintf
-	;add esp, 16
-	;popad
+	pushad
+	push intr_malloc_valido		; Mensaje
+	push 0x6F 					; Atributos
+	push 45 						; Columna
+	push 20					; Fila
+	call aprintf
+	add esp, 16
+	popad
 	xchg bx, bx
 	jmp .fin14
 	.elminar14:

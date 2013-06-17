@@ -186,16 +186,13 @@ Ya que no se necesita liberar memoria y las direcciones que ya se mapean no vuel
 char asignarMemoria(unsigned int direccion) {
     unsigned short tarea = tarea_actual() - 1; //Me da el valor del indice de la tarea
     breakpoint();
-    printf(15, 45, "Tarea %u -> dir %x", tarea, direccion);
+    printf(15, 45, "Tarea %u -> dir %x veces %u", tarea, direccion, cantPaginas[tarea]);
     if((direccion >= 0x003D0000) && (direccion < 0x003F0000) && (cantPaginas[tarea] <= 5)) {
         printf(16, 45, "Pasa el if");
-        breakpoint();
         cantPaginas[tarea]++;
         printf(17, 45, "Incremento contador");
-        breakpoint();
-        mmu_mappear_pagina(direccion, ultimaDirfisica, (pd_entry*)directorioDeTareas[tarea], 0, 1);
+        mmu_mappear_pagina(direccion, ultimaDirfisica, (pd_entry*)directorioDeTareas[tarea], 1, 1);
         printf(18, 45, "Hago el mapeo");
-        breakpoint();
         ultimaDirfisica += 4096; //Ver si hay que sumarle uno también
         printf(19, 45, "Incremento dir");
         breakpoint();
