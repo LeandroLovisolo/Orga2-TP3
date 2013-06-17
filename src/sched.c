@@ -122,7 +122,7 @@ unsigned short jugador_actual() {
 	int i;
 	for(i = 10; i <= 13; i++) {
 		unsigned short busy = (gdt[i].type & 0x0002);
-		if(busy == 2) jugador = i - 10;
+		if(busy == 2) jugador = i - 9;
 	}
 	return jugador;
 }

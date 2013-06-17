@@ -406,13 +406,27 @@ int 32
 ; iret
 
 ISR 14
+
+xchg bx, bx
+push eax
+mov eax, 14
+pop eax
+
 ;imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
 pushfd
 pushad
 call jugador_actual 		; Me deja en ax el jugador actual
+
+xchg bx, bx
+xchg ecx, ecx
+
 sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
 push ax 					; Pusheo el parámetro para borrar la tarea
 call sched_remover_tarea
+
+xchg bx, bx
+xchg edx, edx
+
 add esp, 4 					; Restauro la pila
 ;Imprimo el mensaje correspondiente
 popad
