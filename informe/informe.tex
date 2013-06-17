@@ -204,9 +204,38 @@ A continuación veremos el codigo que pasa de modo real a modo protegido.
   \STATE (pasa a modo protegido)
   \STATE jmp 0x8:modo\_protegido
   \STATE BITS 32
+  \STATE cli
+  \STATE 
+  \STATE ( setear los segmentos )
+  \STATE mov ax, 32
+  \STATE mov ss, ax
+  \STATE mov ds, ax
+  \STATE mov es, ax
+  \STATE mov gs, ax
+  \STATE mov ax, 56
+  \STATE mov fs, ax
+  \STATE 
+  \STATE ( setea la pila )
+  \STATE mov EBP, 0x00020000	
+  \STATE mov ESP, 0x00020000
 \end{pseudocodigo}
 
 la función $habilitar\_A20$ creada por la catedra sirve para poder trabajar con espacios de memoria por ensima del primer Mbyte de memoria, la misma debe ser llamada antes de pasar al modo protegido, ya que si no se genera un general protection $\#GP$.
+
+También se debe cargar la GDT, ya que una vez que pasemos a modo protegido se empezará a utilizar la misma para gestionar la memoria. Es por esto que las primeras acciones que se llevan a cabo luego de pasar a modo protegido es setear los selectores de segmento correctamente y pasarle la dirección de la pila a los registros \textbf{EBP} y \textbf{ESP}. Si esto no se llevara a cabo rapidamente, se corre el riezgo de tener errores, ya que si se necesitace usar estos recursos, los mismos estarían con basura.
+
+\subsection{Ejercicio 2: Completar la IDT}
+La IDT (Interrupt Descriptor Table) es la encargada de almacenar los descriptores de interrupciones, la misma tiene un total de 256 entradas, las cuales se corresponden con todos los distintos tipos de interruptores que maneja el microprocesador. Las entradas 2, 15 y de la 20 a la 31 estan reservadas por intel, por lo que no hay que utilizarlas, para el resto de las entradas, tuvimos que ponerle los descriptores correctos para que apunten a la rutina correspondiente.
+Para llenar correctamente esta tabla utilizamos el archivo $idt.c$, el cual contiene la siguiente macro creada por la cátedra que facilita el trabajo del mismo.\\
+
+\#define IDT\_ENTRY(numero, seg, atrr) \\                                                                      
+\ \ \ \ idt[numero].offset\_0\_15 = (unsigned short) ((unsigned int)(\&\_isr \#\# numero) \& (unsigned int) 0xFFFF); \\
+\ \ \ \ idt[numero].segsel = (unsigned short) seg; \\
+\ \ \ \ idt[numero].attr = (unsigned short) atrr; \\
+\ \ \ \ idt[numero].offset\_16\_31 = (unsigned short) ((unsigned int)(\&\_isr \#\# numero) $>>$ 16 \& (unsigned int) 0xFFFF); \\
+
+En $numero$ va la posición de la IDT correspondiente, en $seg$ el segmento que utilizara y en $atrr$ los atributos correctos.
+Utilizando esta macro definimos los descriptores de interrupciones
 
 \section{Preguntas y respuestas}
 \subsection{¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por
@@ -246,7 +275,7 @@ Para poder volver al codigo de la tarea actual sin tener problemas, antes de pas
  \item Código de Error (este campo no es obligatorio pero en caso de que la interrupción tenga código de error entonces se almacena aquí.
 \end{itemize}
 
-Los demas registros deben ser resguardados por la interrupción en caso que los utilize.\\
+Los demás registros deben ser resguardados por la interrupción en caso que los utilize.\\
 
 Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de  los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
 
