@@ -225,7 +225,7 @@ la función $habilitar\_A20$ creada por la catedra sirve para poder trabajar con
 También se debe cargar la GDT, ya que una vez que pasemos a modo protegido se empezará a utilizar la misma para gestionar la memoria. Es por esto que las primeras acciones que se llevan a cabo luego de pasar a modo protegido es setear los selectores de segmento correctamente y pasarle la dirección de la pila a los registros \textbf{EBP} y \textbf{ESP}. Si esto no se llevara a cabo rapidamente, se corre el riezgo de tener errores, ya que si se necesitace usar estos recursos, los mismos estarían con basura.
 
 \subsection{Ejercicio 2: Completar la IDT}
-La IDT (Interrupt Descriptor Table) es la encargada de almacenar los descriptores de interrupciones, la misma tiene un total de 256 entradas, las cuales se corresponden con todos los distintos tipos de interruptores que maneja el microprocesador. Las entradas 2, 15 y de la 20 a la 31 estan reservadas por intel, por lo que no hay que utilizarlas, para el resto de las entradas, tuvimos que ponerle los descriptores correctos para que apunten a la rutina correspondiente.
+La IDT (Interrupt Descriptor Table) es la encargada de almacenar los descriptores de interrupciones, la misma tiene un total de 256 entradas, las cuales se corresponden con todos los distintos tipos de interrupciones que maneja el microprocesador. Las entradas 2, 15 y de la 20 a la 31 están reservadas por intel, por lo que no hay que utilizarlas. Para el resto de las entradas, tuvimos que ponerle los descriptores correctos para que apunten a la rutina correspondiente.
 Para llenar correctamente esta tabla utilizamos el archivo $idt.c$, el cual contiene la siguiente macro creada por la cátedra que facilita el trabajo del mismo.\\
 
 \#define IDT\_ENTRY(numero, seg, atrr) \\                                                                      
@@ -234,8 +234,87 @@ Para llenar correctamente esta tabla utilizamos el archivo $idt.c$, el cual cont
 \ \ \ \ idt[numero].attr = (unsigned short) atrr; \\
 \ \ \ \ idt[numero].offset\_16\_31 = (unsigned short) ((unsigned int)(\&\_isr \#\# numero) $>>$ 16 \& (unsigned int) 0xFFFF); \\
 
-En $numero$ va la posición de la IDT correspondiente, en $seg$ el segmento que utilizara y en $atrr$ los atributos correctos.
-Utilizando esta macro definimos los descriptores de interrupciones
+En $numero$ va la posición de la IDT correspondiente a la entrada, en $seg$ el segmento que utilizara y en $atrr$ los atributos correctos.
+
+Estos atributos deben ser seteados teniendo en cuenta los atributos correctos.
+
+\subsubsection{atributos}
+
+A continuación mostramos la lista de atributos que explicaremos.
+\begin{itemize}
+ \item $p$
+ \item $dpl$
+ \item $s$
+ \item $d$
+ \item $tipo$ $de$ $descriptor$ $de$ $3$ $bits$
+ \item $3$ $bits$ $en$ $0$
+\end{itemize}
+
+El primer bit $p$ es el que indica que la interrupcion está presente en memoria.
+
+$dpl$ hace referencia a los privilegios que necesita el proceso para poder llamar a la rutina. Un proceso que tiene privilegio de usuario no puede llamar a una rutina que tiene $dpl = 0$ ya que el mismo indica que solo un proceso con privilegio de kernel puede llamarlo.
+
+Además como lo que queremos definir son puertas de interrupcion, hay que definir como $1 1 0$ los 3 bits de $tipo$ $de$ $descriptor$.
+
+Los siguientes 3 bit deben ser seteados en $0$ ya que asi lo indica el manual de intel.\\
+
+Teniendo estas cosas en cuenta, los tres números en hexadecimal que se le pasa al campo $atrr$ para definir las entradas correctamente son:
+
+\begin{enumerate}
+ \item $0x8E00 = | 1 | 0 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de kernel.
+ \item $0xCE00 = | 1 | 1 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios $2$.
+ \item $0xEE00 = | 1 | 1 1 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de usuario.
+\end{enumerate}
+
+Luego utilizando esto, llenamos todos los campos necesarios en la IDT correctamente. Todas las interrupciones utilizarán el segmento de código del kernel salvo las interrupciones $0x80$ y $0x90$ las cuales tienen nivel de privilegio $usuario$ y $2$ correspondientemente.
+
+
+\subsection{Ejercicio 3: inicializar el directorio y las tablas de paginas del kernel}
+\subsubsection{inicializando page\_directory}
+Para poder activar paginación primero debemos inicializar el page directory y los page table tanto del kernel como de las tareas. Teniendo en cuenta que la cantida de espacio que necesita el kernel es de $1.39$ MB alcanza con definir un solo page table para mapear todo este espacio.
+
+Es por esto que utilizando la siguiente rutina inicializamos primero todas las entradas del page directory del kernel en $0$.
+
+\begin{pseudocodigo}
+  \STATE pd\_entry\* page\_directory = (pd\_entry\*) KERNEL\_PAGE\_DIR
+  \STATE int i;
+  \FOR {$i = 0; i < 1024; i++$} 
+    \STATE \*((unsigned int\*) \&(page\_directory[i])) = 0;
+  \ENDFOR
+\end{pseudocodigo}
+
+El siguiente paso es definir correctamente la primer entrada, la cual está ubicada en page\_directory[0]. Para hacer esto hay que tener en cuenta como asignar los atributos. 
+
+\begin{itemize}
+ \item $user\_supervisor = 0$;
+ \item $address = KERNEL\_PAGE\_TABLE[12 \ldots 32]$; // ver si esta bién
+ \item $read_write = 1$;
+ \item $present = 1$;
+\end{itemize}
+
+De esta manera indicamos que esa página puede ser accedida solo teniendo privilegios de kernel, además dice en que parte de la memoria fisica esta alojada la page table, que la misma es de lectura y escritura y que está presente en la memoria.
+Como mensionamos antes vasta cargar estos datos en la primer entrada del page directory para mapear todo el espacio necesario para el kernel del TP.
+
+\subsubsection{inicializando page\_table}
+Una vez que esta definido el page directory, debemos inicializar correctamente las entradas del page\_table[0] que definimos anteriormente.
+
+Hay que direccionar un espacio de $1.39$ MB =  $1424$ Kb lo cual entra en $356 = 0x164$ paginas de $4$ Kb. Teniendo en cuenta que la cantidad de entradas de un page table es de $1024$ setearemos las todas las entradas en $0$ con una rutina idéntica a la utilizada en el page directory y luego las primeras $356$ las reseteamos corréctamente.
+
+Las entradas del page Table tienen la misma estructura que el page directory, y como lo que tenemos que hacer es $identity$ $mapping$, lo que necesitamos es que dada una dirección virtual $A$ al finalizar el mapeo nos devuelva $A$. Para esto en el campo $adress$ le ponemos el mismo número de la entrada.
+
+$page\_table[i].adress = i$
+
+Tengamos en cuenta como se decodifica la dirección virtual para obtener una dirección fisica. La misma se puede dividir en $3$ segmentos.
+
+\begin{enumerate}
+ \item directorio = contiene el offset dentro del page directory donde se encuentra la page table correspondiente.
+ \item tabla = este es el offset dentro del page table donde se encuentra el descriptor de la página correspondiente.
+ \item Offset = este es el offset que se le suma a la base de la pagina obtenida para obtener el espacio de memoria exacto que queremos
+\end{enumerate}
+
+Como la unica entrada del page directory que utilizaremos es la $0$, el campo directorio deberá ser siempre $0$, lo cual es correcto ya que los últimos $10$ bits de cualquier dirección del kernel son $0$. Luego dentro del page table obtenemos la dirección base de la página, la cual se obtiene de buscar la tabla indicada por el campo table (los bits 12 a 21 de la dirección virtual). Al definirle adress con el mismo número a esa tabla, al sumarle el offset de la dirección, obtendremos claramente un $identity$ $mapping$. 
+
+\subsection{Ejercicio 4: inicializar el directorio y las tablas de paginas}
 
 \section{Preguntas y respuestas}
 \subsection{¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por
