@@ -314,7 +314,9 @@ Tengamos en cuenta como se decodifica la dirección virtual para obtener una dir
  \item Offset = este es el offset que se le suma a la base de la pagina obtenida para obtener el espacio de memoria exacto que queremos
 \end{enumerate}
 
-Como la unica entrada del page directory que utilizaremos es la $0$, el campo directorio deberá ser siempre $0$, lo cual es correcto ya que los últimos $10$ bits de cualquier dirección del kernel son $0$. Luego dentro del page table obtenemos la dirección base de la página, la cual se obtiene de buscar la tabla indicada por el campo table (los bits 12 a 21 de la dirección virtual). Al definirle adress con el mismo número a de la entrada de esa tabla, al momento de sumar el offset de la dirección, obtendremos claramente un $identity$ $mapping$. 
+Como la unica entrada del page directory que utilizaremos es la $0$, el campo directorio deberá ser siempre $0$, lo cual es correcto ya que los últimos $10$ bits de cualquier dirección del kernel son $0$. Luego dentro del page table obtenemos la dirección base de la página, la cual se obtiene de buscar la tabla indicada por el campo table (los bits 12 a 21 de la dirección virtual). Al definirle adress con el mismo número al de la entrada de esa tabla, al momento de sumar el offset de la dirección, obtendremos claramente un $identity$ $mapping$.
+
+\includegraphics[height=10cm]{privilegios.png} // PONER IMAGEN CORRECTA
 
 \subsection{Ejercicio 4: inicializar el directorio y las tablas de paginas}
 
@@ -325,8 +327,8 @@ los pasos a seguir entonces para mapear la memoria de una tarea es:
 
 \begin{enumerate}
  \item inicializar el directorio con con todas entradas vacias.
- \item inicializar correctamente la primer entrada de la page directory.
- \item inicializar esta tabla toda con entradas vacias.
+ \item inicializar correctamente la primer entrada del directorio.
+ \item inicializar la tabla correspondiente a la primer entrada con entradas vacias.
  \item mapear la memoria del kernel.
  \item mapear la memoria de la pila, del codigo y del tablero.
 \end{enumerate}
@@ -347,7 +349,15 @@ mmu\_mappear\_pagina(unsigned int virtual, unsigned int fisica, pd\_entry\* page
   \STATE page\_table[table].present = 1;
 \end{pseudocodigo}
 
-Esta función llena correctamente la tabla correspondiente siempre que se le pasen bién los parámetros. Luego vasta llamar a esta función 3 veces como indicamos a continuación para tener mapeada correctamente la tarea de un jugador.\\
+Esta función llena correctamente la tabla correspondiente siempre que se le pasen bién los parámetros.\\
+
+\subsection{Ejercicio 5: Tarea del árbitro}
+
+
+
+\subsection{Ejercicio 6: Scheduler}
+
+
 
 
 \section{Preguntas y respuestas}
