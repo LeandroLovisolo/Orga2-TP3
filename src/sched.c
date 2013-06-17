@@ -9,7 +9,7 @@
 #include "sched.h"
 #include "isr.h"
 #include "gdt.h"
-
+#include "game.h"
 //extern jmpToTask
 
 unsigned short tareas[CANT_TAREAS];
@@ -20,7 +20,7 @@ unsigned short posicion 		= 0;
 char		   pausarReanudar	= 1;
 char		   pausado			= 0;
 char		   quantum			= 2;
-char		   finalizado		= 0;
+//char		   finalizado		= 0;
 char 		   contador			= 0;
 
 void sched_inicializar() {
@@ -36,7 +36,10 @@ void sched_inicializar() {
 //pausado FALSE & pausarReanudar FALSE -> pausado TRUE
 
 void sched() {
-	if(finalizado == 1) return;
+	if(game_terminado() == TRUE) { //Veo si se terminó el juego
+		if(tarea_actual() == 0) return; //Si ya estaba antes en idle salgo
+		jmpToTask(72); //Terminó juego, salto a idle
+	}
 	if(quantum == 0) {
 		quantum = 2;
 		if(pausado == 0 && pausarReanudar == 0) { // hay que pausar 
@@ -48,8 +51,8 @@ void sched() {
 			unsigned short proxTarea = sched_proximo_indice();
 			if(proxTarea != 0)	{
 				jmpToTask(proxTarea); // salto a la proxima tarea
-			} else {
-				finalizado = 1;
+			} else { //Si no quedan tareas por ejecutar porque todas murieron
+				game_terminar();
 				jmpToTask(72); 	// Se terminó todo, salto a idle
 			} 
 		}
