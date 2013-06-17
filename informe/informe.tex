@@ -382,6 +382,10 @@ La cantidad de jugadores es 4, pero el array para los puntajes tiene tamaño 5. 
 
 \subsection{Ejercicio 6: Scheduler}
 
+El scheduler es el encargado de ir pasandole el control del procesador de una tarea a la otra. Para hacer esto utiliza la interrupcion de reloj como control del tiempo que una tarea lleva en ejecución. De esta manera cuando pasa una cierta cantidad de tiempo acumulado en un quantum le quitamos el control a una tarea y se lo pasamos a la siguiente. También se le quita el control a una tara si las mismas hacen una jugada correcta.
+Por otro lado si se precionan las teclas P se le debe pasar el control a la tarea idle. Si actualmente se esta ejecutando la tarea idle y se preciona la tecla R se le debe pasar el control a la proxima tarea.
+
+Para lograr 
 
 
 
