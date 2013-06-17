@@ -6,10 +6,10 @@
 
 #include "game.h"
 
-unsigned int game_finalizado;
+unsigned int game_finalizado = FALSE;
 
 int abs(int n);
-
+unsigned char (*tablero)[TABLERO_COLS] = (unsigned char (*)[TABLERO_COLS]) (TABLERO_ADDR);
 unsigned int game_salto_en_rango(int nro_jugador, int fil_src, int col_src, int fil_dst, int col_dst);
 unsigned int game_es_adyacente(int nro_jugador, int fil, int col);
 unsigned int game_posicion_en_rango(int fil, int col);
@@ -34,11 +34,7 @@ unsigned int game_iniciar() {
 	tablero[JUG4_FIL_INIT][JUG4_COL_INIT] = JUG_4;
 
 	// Inicializar estado del juego
-	game_finalizado = FALSE;
-	puntajesJugadores[0] = 0;
-	puntajesJugadores[1] = 0;
-	puntajesJugadores[2] = 0;
-	puntajesJugadores[3] = 0;
+	//game_finalizado = FALSE;
 	return TRUE;
 }
 
@@ -46,6 +42,10 @@ unsigned int game_terminar() {
 	game_finalizado = TRUE;
 
 	return TRUE;
+}
+
+unsigned int game_terminado() {
+	return game_finalizado;
 }
 
 unsigned int game_duplicar(int nro_jugador, int fil, int col) {

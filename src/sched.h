@@ -21,5 +21,6 @@ unsigned short sched_proximo_indice();
 void sched_remover_tarea(unsigned int process_id);
 void sched();
 unsigned short tarea_actual();
+void pasar_turno();
 
 #endif	/* !__SCHED_H__ */
