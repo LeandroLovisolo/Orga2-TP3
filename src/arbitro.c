@@ -98,8 +98,8 @@ void print(const char* str, unsigned int fil, unsigned int col, unsigned short a
 	unsigned char* ptr_pantalla = (unsigned char*)VIDEO_ADDR;
 	int i = 0;
 	while(str[i] != '\0') {
-		ptr_pantalla[i + col*2+ fil*VIDEO_COL*2] = str[i];
-		ptr_pantalla[i + 1 + col*2+ fil*VIDEO_COL*2] = attr;
+		ptr_pantalla[i + col*2+ fil*VIDEO_COLS*2] = str[i];
+		ptr_pantalla[i + 1 + col*2+ fil*VIDEO_COLS*2] = attr;
 		i+=2;
 	}
 }
