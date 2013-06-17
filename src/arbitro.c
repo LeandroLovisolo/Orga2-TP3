@@ -9,22 +9,27 @@
 #include "syscall.h"
 #include "screen.h"
 
+void dibujar_interfaz();
 void imprimir_tablero();
 void imprimir_puntaje();
 void imprimir_ganador();
 int  juego_terminado(unsigned char * tablero);
 void actualizar_pantalla();
 void calcular_puntajes();
-void imprimir_tablero_inicial();
 
 void task() {
-	imprimir_tablero_inicial();
+	dibujar_interfaz();
 	syscall_iniciar();
 
 	while(1) {
 		calcular_puntajes();
 		actualizar_pantalla();
 	}
+}
+
+void dibujar_interfaz() {
+	rect(C_BG_LIGHT_GREY, 0, 40, 15, VIDEO_COLS);
+	rect(C_BG_BROWN,      15, 0, VIDEO_FILS, VIDEO_COLS);
 }
 
 void calcular_puntajes() {
@@ -69,18 +74,13 @@ void imprimir_tablero() {
 	for(f = 0; f < TABLERO_FILS; f++) {
 		for(c = 0; c < TABLERO_COLS; c++) {
 			if(tablero[f][c] == TABLERO_CELDA_VACIA) {
-				screen_pintar(C_BG_BLACK,f,f+1,c,c+1);
+				rect(C_BG_BLACK, f, c, f + 1, c + 1);
 			}
 			else {
-				screen_pintar(tablero[f][c] << 4,f,f+1,c,c+1);
+				rect(tablero[f][c] << 4, f, c, f + 1, c + 1);
 			}
 		}
 	}
-}
-
-void imprimir_tablero_inicial() {
-	screen_pintar(C_BG_LIGHT_GREY,0,15,40,VIDEO_COLS);
-	screen_pintar(C_BG_BROWN,15,VIDEO_FILS,0,VIDEO_COLS);
 }
 
 // El árbitro se compila como un binario independiente del kernel, linkeado

@@ -8,25 +8,25 @@
 #include "i386.h"
 #include "screen.h"
 
-void screen_print(const char* str, unsigned int fil, unsigned int col, unsigned short attr) {
-	unsigned char* ptr_pantalla = (unsigned char*)VIDEO_ADDR;
+void puts(const char* str, unsigned char fil, unsigned char col, unsigned char attr) {
+	unsigned char* ptr_pantalla = (unsigned char*) VIDEO_ADDR;
 	int i = 0, j = 0;
 	while(str[j] != '\0') {
-		ptr_pantalla[i + col*2     + fil*VIDEO_COLS*2] = str[j];
-		ptr_pantalla[i + 1 + col*2 + fil*VIDEO_COLS*2] = attr;
-		i+=2;
+		ptr_pantalla[i + col * 2     + fil * VIDEO_COLS * 2] = str[j];
+		ptr_pantalla[i + col * 2 + 1 + fil * VIDEO_COLS * 2] = attr;
+		i += 2;
 		j++;
 	}
 }
 
-void screen_pintar(unsigned char formato, unsigned short desdeFil, unsigned short hastaFil,
-	                                      unsigned short desdeCol, unsigned short hastaCol) {
-	unsigned char* ptr_pantalla = (unsigned char*)VIDEO_ADDR;	
-	int i,j;
-	for(j = desdeFil; j < hastaFil; j++) {
-		for(i = desdeCol; i < hastaCol; i++) {
-			ptr_pantalla[(j*VIDEO_COLS*2) + i*2] = 0;
-			ptr_pantalla[(j*VIDEO_COLS*2) + (i*2) + 1] = formato;
+void rect(unsigned char attr, unsigned char fil_src, unsigned char col_src,
+                              unsigned char fil_dst, unsigned char col_dst) {
+	unsigned char* ptr_pantalla = (unsigned char*) VIDEO_ADDR;	
+	int i, j;
+	for(j = fil_src; j < fil_dst; j++) {
+		for(i = col_src; i < col_dst; i++) {
+			ptr_pantalla[j * VIDEO_COLS * 2 + i * 2] = 0;
+			ptr_pantalla[j * VIDEO_COLS * 2 + i * 2 + 1] = attr;
 		}
 	}
 }
@@ -404,7 +404,7 @@ void printf(unsigned char fila, unsigned char columna, const char *fmt, ...)
 	vsprintf(buf, fmt, args);
 	va_end(args);
 	
-	screen_print(buf, fila, columna, C_FG_LIGHT_GREY);
+	puts(buf, fila, columna, C_FG_LIGHT_GREY);
 }
 
 void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, const char *fmt, ...)
@@ -416,5 +416,5 @@ void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, cons
 	vsprintf(buf, fmt, args);
 	va_end(args);
 	
-	screen_print(buf, fila, columna, attr);
+	puts(buf, fila, columna, attr);
 }

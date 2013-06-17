@@ -42,9 +42,9 @@
 
 #define C_BLINK				(0x8 << 4)
 
-void screen_print(const char* str, unsigned int fil, unsigned int col, unsigned short attr);
-void screen_pintar(unsigned char formato, unsigned short desdeFil, unsigned short hastaFil,
-                                          unsigned short desdeCol, unsigned short hastaCol);
+void puts(const char* str, unsigned char fil, unsigned char col, unsigned char attr);
+void rect(unsigned char attr, unsigned char fil_src, unsigned char col_src,
+                              unsigned char fil_dst, unsigned char col_dst);
 
 // Formato de la familia de funciones *printf:
 //
