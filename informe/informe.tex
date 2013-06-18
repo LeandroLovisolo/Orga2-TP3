@@ -264,20 +264,6 @@ Teniendo estas cosas en cuenta, los tres números en hexadecimal que se le pasa 
 
 Luego utilizando esto, llenamos todos los campos necesarios en la IDT correctamente. Todas las excepciones utilizarán el segmento de código del kernel salvo las interrupciones $0x80$ y $0x90$, las cuales tienen nivel de privilegio $3$ y $2$ respectivamente que servirán para permitir a los usuarios y al árbitro utilizar los servicios del kernel.
 
-\subsubsection{Rutinas de atención de interrupciones}
-Para las excepciones del procesador, excepto la interrupción 14, utilizamos el macro $ISR\_GENERICO$ definido en $isr.asm$ el cuál hace lo siguiente:
-\begin{itemize}
-\item \textbf{Ejecuta tarea\_actual():} utiliza esta función para conseguir el número de tarea actual (1 a 5).
-\item \textbf{Elimina la tarea actual:} remueve la tarea actual del scheduler utilizando $sched\_remover\_tarea()$ ubicada en $sched.c$ la cuál se encarga de setear en 0 el valor del selector de la tarea en el arreglo de tareas marcándola como eliminada.
-\item \textbf{Mostrar el mensaje de la interrupción correspondiente:} se utiliza la función $aprintf()$ localizada en $screen.c$ para imprimir el tipo de interrupción encontrada en la sección determinada para cáda tarea (recuadro inferior).
-\item \textbf{Conmutar tarea:} debido a que se produjo una interrupción por un problema en la ejecución de la tarea, se llama a $pasar\_turno()$ ubicada en $sched.c$ la cuál se encarga de setear el quantum en 0 y llamar al scheduler para que realize la conmutación de tareas adecuada.
-\end{itemize}
-
-\textbf{Rutina de atención de la interrupción 14 (Page Fault)}
-La rutina de atención de Page Fault's se encarga de atender el problema utilizando la función $asignarMemoria()$ definida en $mmu.c$ la cuál mapea la memoria correspondiente al espacio de memoria reservado para el uso de las tareas. $AsignarMemoria()$ utiliza una dirección base física que incrementa en 4k en cada interrupción realizada por las tareas, asignando una página de memoria correspondiente a la dirección virtual pedida. $AsignarMemoria()$ devuelve 0 en caso fallido (memoria virtual fuera del rángo o máximo de páginas alcanzado) o 1 en caso de finalizar correctamente.
-
-Una vez ocurrido el llamado a $asignarMemoria()$, según el resultado de la operación se procede a eliminar la tarea y mostrar el mensaje correspondiente en caso de haber fallado o a continuar con la tarea.
-
 \subsection{Ejercicio 3: inicializar el directorio y las tablas de paginas del kernel}
 \subsubsection{Inicializando page\_directory}
 Para poder activar paginación primero debemos inicializar el page directory y los page table tanto del kernel como de las tareas. Teniendo en cuenta que la cantida de espacio que necesita el kernel es de $1.39$ MB alcanza con definir un solo page table para mapear todo este espacio.
@@ -424,13 +410,20 @@ Nuevamente presentaremos un pseudocódigo del handler para que sea más facil de
 \subsubsection{Handler de la interrupción 0x90 (iniciar terminar) }
 la misma tiene un funcionamiento parecido a la int $0x80$ ya que compara el valor de $eax$ con $200$ y $300$ para saber asi, si debe iniciar o finalizar el juego. Dependiendo del resultado de las comparaciones, si el valor de $eax$ es valido, llama a las funcionas creadas por la catedra $game\_iniciar$ y $game\_terminar$, si el valor de $eax$ no es valido, entonces simplemente sale del handler sin producir ninguna acción.
 
-\subsubsection{Handler de la excepciones}
 
-En este TP cuando se genera un error, se deduce que la tarea producente del mismo, lo genero intentando romper la seguridad del SO. Es por esto que se pasa directamente a elimiar la tarea del scheduler. Hay que tener en cuenta que una tarea tiene permitido pedir memoria, por lo que la unica excepción que no elimina a las tareas del scheduler es la $14$ ($Page$ $Fault$).
+\subsubsection{Handler de las excepciones}
+Para las excepciones del procesador, excepto la interrupción 14, utilizamos el macro $ISR\_GENERICO$ definido en $isr.asm$ el cuál hace lo siguiente:
+\begin{itemize}
+\item \textbf{Ejecuta tarea\_actual():} utiliza esta función para conseguir el número de tarea actual (1 a 5).
+\item \textbf{Elimina la tarea actual:} remueve la tarea actual del scheduler utilizando $sched\_remover\_tarea()$ ubicada en $sched.c$ la cuál se encarga de setear en 0 el valor del selector de la tarea en el arreglo de tareas marcándola como eliminada.
+\item \textbf{Mostrar el mensaje de la interrupción correspondiente:} se utiliza la función $aprintf()$ localizada en $screen.c$ para imprimir el tipo de interrupción encontrada en la sección determinada para cáda tarea (recuadro inferior).
+\item \textbf{Conmutar tarea:} debido a que se produjo una interrupción por un problema en la ejecución de la tarea, se llama a $pasar\_turno()$ ubicada en $sched.c$ la cuál se encarga de setear el quantum en 0 y llamar al scheduler para que realize la conmutación de tareas adecuada.
+\end{itemize}
 
-Veremos entonces, por un lado, la estrucutra creada para las excepciones que se encargan de eliminar la tarea actual del scheduler, y por otro el handler del $Page$ $Fault$.\\
+\textbf{Rutina de atención de la interrupción 14 (Page Fault)}
+La rutina de atención de Page Fault's se encarga de atender el problema utilizando la función $asignarMemoria()$ definida en $mmu.c$ la cuál mapea la memoria correspondiente al espacio de memoria reservado para el uso de las tareas. $AsignarMemoria()$ utiliza una dirección base física que incrementa en 4k en cada interrupción realizada por las tareas, asignando una página de memoria correspondiente a la dirección virtual pedida. $AsignarMemoria()$ devuelve 0 en caso fallido (memoria virtual fuera del rángo o máximo de páginas alcanzado) o 1 en caso de finalizar correctamente.
 
-\textbf{Estructura general para eliminar la tarea actual del scheduler.}\\
+Una vez ocurrido el llamado a $asignarMemoria()$, según el resultado de la operación se procede a eliminar la tarea y mostrar el mensaje correspondiente en caso de haber fallado o a continuar con la tarea.
 
 
 
