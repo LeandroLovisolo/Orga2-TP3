@@ -8,7 +8,7 @@
 global start
 
 %macro borrar_pantalla 0
-	mov ecx, 0x7FFF
+	mov ecx, 0xFA0
 	limpar:
 		mov byte [fs:ecx], 0 ;pongo la pantalla limpa con 0's
 		loop limpar
