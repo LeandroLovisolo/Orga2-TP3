@@ -500,13 +500,11 @@ Tanto las tablas como los directorios de paginas pueden tener privilegios de use
 
 \includegraphics[height=10cm]{privilegios.png} 
 
+\subsection{¿Es posible desde dos directorios de página, referenciar a una misma tabla de páginas?}
+Si, esto es posible ya que no hay restricciones al respecto. Cuando la unidad de paginación va al directorio de páginas lo que recupera es una dirección fisica alineada a $4Kb$ que le indica en que lugar de la memoria se encuentra el page table que buscamos, por lo que para lograr esto simplemente hay que asignarles la direccion de la tabla que se desea compartir en ambos directorios y listo.
 
-\subsection{Pregunta 9: ¿Es posible desde dos directorios de página, referenciar a una misma tabla de páginas?}
+\subsection{¿Que es el TLB (Translation Lookaside Buffer) y para qué sirve?}
 
-Si, esto es posible ya que no hay restricciones al respecto. Cuando la unidad de paginación va al directorio de páginas lo que recupera es una dirección fisica alineada a $4Kb$ que le indica en que lugar de la memoria se encuentra el page table que buscamos, por lo que para lograr esto simplemente hay que asignarles la direccion de la tabla que se decea compartir en ambos directorios y listo.
-
-
-\subsection{Pregunta 10: ¿Que es el TLB (Translation Lookaside Buffer) y para qué sirve?}cache de traducciones
 La TLB es una cache de traducciones, en el mismo se guarda la dirección base de una pagina para obtener una direccion fisica más algunos bit de atributos necesarios, entre los cuales se encuentra LRU para saber cual es el próximo elemento de la TLB que debe ser desalojado en caso necesario.
 
 Esto tiene su utilidad ya que se cuenta con el criterio de vecindad, el cual dice que si por ejemplo la dirección almacenada pertenece a una página de código, seguramente la proximas instrucciones estén en la misma página ahorrandose asi la traducción de las mismas que ya se pueden calcular a traves de la TLB. 
