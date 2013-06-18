@@ -467,6 +467,9 @@ Esto tiene su utilidad ya que se cuenta con el criterio de vecindad, el cual dic
 \subsection{¿Qué pasa si en la interrupción de teclado no se lee la tecla presionada?}
 
 \subsection{¿Qué pasa si no se resetea el PIC?}
+Al utilizar el PIC como la manera de recibir interrupciones por hardware, es necesario remapear estas interrupciones ya que su mapeo original ubica las interrupciones dentro de las excepciones e interrupciones reservadas por Intel, provocando una interrupción errónea.
+
+Al resetear el PIC, las interrupciones de hardware quedan mapeadas en el área de interrupciones disponibles provistas por Intel, pudiendose luego ser utilizadas correctamente.
 
 \subsection{Colocando un breakpoint luego de la cargar una tarea, ¿cómo se puede
 verificar, utilizando el debugger de Bochs, que la tarea se cargó correctamente? ¿Cómo se
