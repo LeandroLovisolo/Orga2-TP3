@@ -338,11 +338,11 @@ Esta función llena correctamente la entrada de la page table en el directorio c
 La rutina de atención de la \textbf{interrupción $32$} (reloj) tiene 2 funciones:
 
 \begin{enumerate}
- \item imprimir el proximo estado del reloj.
- \item ir pasandole el comando del procesador a las distintas tareas.
+ \item Imprimir el proximo estado del reloj.
+ \item Conmutar a la siguiente tarea habiendo acabado el tiempo de la tarea que se estuviera ejecutando.
 \end{enumerate}
 
-La primer funcionalidad se ejecuta utilizando una función creada por la cátedra ``$proximo\_reloj$'' la cual se encarga de actualizar correctamente el estado de reloj. \\
+Imprimir el próximo estado del reloj se realiza ejecutando la función creada por la cátedra $proximo\_reloj()$ la cual se encarga de actualizar correctamente el estado de reloj.
 
 Cómo segunda función, la interrupción del reloj se encarga de llamar a $sched$, ubicada en el archivo $sched.c$ la cuál se encarga de administrar los quantums de las tareas y hacer el cambio de estas. La función $sched()$ será detallada en el siguiente punto.
 
