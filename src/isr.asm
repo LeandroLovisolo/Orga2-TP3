@@ -23,6 +23,7 @@ extern asignarMemoria
 extern printf
 extern aprintf
 extern pasar_turno
+extern reloj_tarea
 
 ;;
 ;; Definición de MACROS
@@ -135,8 +136,6 @@ mensaje_vacio db '                                                              
 	popad
 	popfd
 
-	;sti
-	;int 32
 	call pasar_turno
 %endmacro
 
@@ -174,29 +173,6 @@ ISR_GENERICO 20, '#VE Virtualization Exception'
 ;directory and page-table entries. Another page fault can potentially occur during execution of the page-fault
 ;handler; the handler should save the contents of the CR2 register before a second page fault can occur.
 
-; ISR 14
-; pushfd
-; pushad
-; mov eax, cr2 				;Pusheo cr2 para tenerlo como parámetro
-; push eax
-; call asignarMemoria
-; add esp, 4 ;Ver si está bien
-; cmp ax, 0 ;Veo si el resultado es 0
-; jne .fin14
-; ; Borro la tarea
-; call jugador_actual 		; Me deja en ax el jugador actual
-; sub ax, 1d	 				; Le resto 1 para tener el indice en tareas[]
-; push ax 					; Pusheo el parámetro para borrar la tarea
-; call sched_remover_tarea
-; add esp, 4 ;Restauro la pila
-; ;Imprimo el mensaje correspondiente
-; ;imprimir_excepcion excepcion_pf_msg, excepcion_pf_msg_len
-; ;Tal vez hay que saltar directamente al sched, ver esto (tal vez se puede llamar a la int del reloj)
-; .fin14:
-; popad
-; popfd
-; iret
-
 intr_msg_14 db '#PF Page Fault (14) - CR2: %x ', 0
 intr_malloc_valido db 'Malloc valido!', 0
 
@@ -218,15 +194,6 @@ ISR 14
 	mov eax, ecx ;Muevo la tarea actual
 	jne .elminar14
 	;No se elimina
-	; pushad
-	; push intr_malloc_valido		; Mensaje
-	; push 0x6F 					; Atributos
-	; push 45 						; Columna
-	; push 20					; Fila
-	; call aprintf
-	; add esp, 16
-	; popad
-	;xchg bx, bx
 	jmp .fin14
 	.elminar14:
 
@@ -251,8 +218,6 @@ ISR 14
 	add esp, 20
 	popad
 
-	;popad
-	;popfd
 	call pasar_turno
 
 .fin14:
@@ -278,7 +243,6 @@ jmpToTask:
 	pushad
 	mov eax, [ebp+8]
 	mov [proximaTarea], ax
-	; xchg bx, bx
     jmp far [offset]
     popad
    	pop ebp
@@ -289,6 +253,7 @@ jmpToTask:
 ;;
 
 reloj_numero:		 	dd 0x00000000
+
 reloj:  				db '|/-\'
 
 ISR 32
@@ -296,6 +261,7 @@ ISR 32
 	pushad
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
 	call proximo_reloj
+	call reloj_tarea
 	call sched			
 	popad
 	popfd 				; restablece el valor de los flags
@@ -316,7 +282,6 @@ proximo_reloj:
 	popad
 	ret
 
-
 ;;
 ;; Rutina de atención del TECLADO
 ;;
@@ -334,14 +299,12 @@ push eax
 in al, 0x60 ;Lectura del teclado
 cmp al, 0x93 ;Veo si soltó R
 jne .verTeclaP
-;imprimir_excepcion soltarR_ve_msg, soltarR_ve_msg_len
 ;Reanudo tarea
 mov byte [pausarReanudar], 1
 jmp .fin33
 .verTeclaP:
 cmp al, 0x99 ;Veo si soltó P
 jne .fin33
-;imprimir_excepcion soltarP_ve_msg, soltarP_ve_msg_len
 ;Pauso tarea
 mov byte [pausarReanudar], 0
 .fin33:

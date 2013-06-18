@@ -11,6 +11,12 @@
 #include "gdt.h"
 #include "game.h"
 //extern jmpToTask
+#define COLOR_V C_BG_BLACK
+#define COLOR_1 C_FG_WHITE + C_BG_RED
+#define COLOR_2 C_FG_WHITE + C_BG_CYAN
+#define COLOR_3 C_FG_WHITE + C_BG_GREEN
+#define COLOR_4 C_FG_WHITE + C_BG_BLUE
+#define COLOR_A C_FG_WHITE + C_BG_MAGENTA
 
 unsigned short tareas[CANT_TAREAS];
 char 		   arbitro			= FALSE;
@@ -20,14 +26,19 @@ unsigned short posicion 		= 0;
 char		   pausarReanudar	= 1;
 char		   pausado			= 0;
 char		   quantum			= 2;
-//char		   finalizado		= 0;
 char 		   contador			= 0;
-
+char		   reloj[]			= "|/-\\";
+int			   posRelojTarea[5];
 void sched_inicializar() {
 	tareas[0] = 80;
 	tareas[1] = 88;
 	tareas[2] = 96;
 	tareas[3] = 104;
+	posRelojTarea[0] = 0;
+	posRelojTarea[1] = 0;
+	posRelojTarea[2] = 0;
+	posRelojTarea[3] = 0;
+	posRelojTarea[4] = 0;
 }
 
 //pausado TRUE & pausarReanudar TRUE -> pausado FALSE
@@ -121,4 +132,31 @@ unsigned short tarea_actual() {
 void pasar_turno() {
 	quantum = 0;
 	sched();
+}
+
+void reloj_tarea() {
+	char buf[2];
+	buf[1] = '\0';
+	unsigned short tarea = tarea_actual();
+	if(tarea == 0) return;
+	posRelojTarea[tarea-1]++;
+	if(posRelojTarea[tarea-1] == 4) posRelojTarea[tarea-1] = 0;
+	buf[0] = reloj[posRelojTarea[tarea-1]];
+	switch(tarea) {
+		case 1:
+			aprintf(20, 1, COLOR_1, buf);
+			break;
+		case 2:
+			aprintf(21, 1, COLOR_2, buf);
+			break;
+		case 3:
+			aprintf(22, 1, COLOR_3, buf);
+			break;
+		case 4:
+			aprintf(23, 1, COLOR_4, buf);
+			break;
+		case 5:
+			aprintf(24, 1, COLOR_A, buf);
+			break;
+	}
 }
