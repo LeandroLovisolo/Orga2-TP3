@@ -363,15 +363,15 @@ Pseudocódigo de la rutina:
   \ENDIF
 \end{pseudocodigo}
 
-Una vez seteado $pausarReanudar$, cuando se llame a la función sched, la misma se encargara de leer el valor del mismo y efectuar la acción necesaria.\\
+Una vez seteado $pausarReanudar$, cuando se llame a la función sched, la misma se encargara de leer el valor del mismo y efectuar la acción necesaria.
 
-\subsubsection{Handler de la interrupción 0x80 (migrar, duplicar) }
+\subsubsection{Handler de la interrupción 0x80 (migrar, duplicar)}
 
 Esta interrupción podra ser accedida por un proceso de nivel usuario y debera pasarle parametros para que funcione correctamente. La tabla de los parámetros de entrada correctos esta establecida en el enunciado del TP.
 
 Contamos para la implementación de este handler con dos funciones pasadas por la cátedra $game\_duplicar$ y $game\_migrar$. Luego lo que debemos haces es comparar el valor de $eax$ con $111$ y $222$ para saber cual de las dos funcionalidades llamar.
 
-Teniendo en cuenta que no se pasa por parametro cual es la tarea que llamo a la interrupción, la misma debe obtenerse a traves de la función tarea\_actual.
+Teniendo en cuenta que no se pasa por parametro cual es la tarea que llamo a la interrupción, la misma debe obtenerse a traves de la función $tarea\_actual()$ definida en $sched.c$.
 
 Además si el valor de $eax$ no es valido se pasa directamente a la tarea siguiente haciendo que la actual pierda su turno.
 
@@ -379,12 +379,15 @@ Nuevamente presentaremos un pseudocódigo del handler para que sea más facil de
 
 \begin{pseudocodigo}
   \STATE
-  \STATE $eax \leftarrow$ $obtener$ $la$ $tarea$ $actual$
   \IF {$eax = 111$}
-    \STATE llamar a la función $game\_duplicar(nro\_jugador,fila,columna)$
+  \STATE $eax \leftarrow$ $obtener$ $la$ $tarea$ $actual$
+    \STATE Pusheo los parámetros de la función
+    \STATE $call$ $game\_duplicar(nro\_jugador,fila,columna)$
   \ELSE
     \IF{$eax = 222$}
-      \STATE llamar a la función $game\_migrar(col\_dst,fila\_dst,col\_src,fila\_src,nro\_jugador)$
+    \STATE $eax \leftarrow$ $obtener$ $la$ $tarea$ $actual$
+    \STATE Pusheo los parámetros de la función
+      \STATE $call$ $ game\_migrar(col\_dst,fila\_dst,col\_src,fila\_src,nro\_jugador)$
     \ELSE
       \STATE pasar el control del procesador a la próxima tarea del scheduler.
     \ENDIF
