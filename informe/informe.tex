@@ -379,17 +379,26 @@ Pseudocódigo de la rutina:
   \ENDIF
 \end{pseudocodigo}
 
-Una vez seteado $pausarReanudar$ 
+Una vez seteado $pausarReanudar$, el scheduler se encargará más tarde de pausar o reanudar el juego.
 
 
-\subsection{Ejercicio 6: Scheduler}
+\subsection{Ejercicio 7: Scheduler}
 
-El scheduler es el encargado de ir pasandole el control del procesador de una tarea a la otra. Para hacer esto utiliza la interrupcion de reloj como control del tiempo que una tarea lleva en ejecución. De esta manera cuando pasa una cierta cantidad de tiempo acumulado en un quantum le quitamos el control a una tarea y se lo pasamos a la siguiente. También se le quita el control a una tara si las mismas hacen una jugada correcta.
-Por otro lado si se precionan las teclas P se le debe pasar el control a la tarea idle. Si actualmente se esta ejecutando la tarea idle y se preciona la tecla R se le debe pasar el control a la proxima tarea.
+El scheduler es el encargado de realizar la conmutación de tareas. Para hacer esto utiliza la interrupcion de reloj como control del tiempo que una tarea lleva en ejecución. También realiza conmutación de tareas cuando estas han realizado un movimiento válido en el juego.
 
-Para lograr 
+El scheduler toma como $quantum$ máximo 2 y lo decrementa en cada interrupción de reloj. De esta manera cuando el $quantum$ es 0, procede a conmutar la tarea que se está ejecutando con la siguiente.
 
-\subsection{Apéndice}
+El scheduler también se encarga de verificar el estado de $pausarReanudar$, estableciendo como próxima tarea a ejecutarse a la tarea idle o la siguiente tarea en la lista de ejecución antes de pausarse.
+
+El scheduler cuenta con las siguientes funciones:
+\begin{itemize}
+	\item \textbf{jmpToTask():} se encarga de realizar el $jmp far$ destinado a la conmutación de tareas. Esta se encuentra definida en $isr.asm$ y es exportada a C.
+	\item \textbf{sched\_proximo\_indice():} se encarga de seleccionar la próxima tarea a ejecutarse y devolver el selector adecuado para realizar el $jmp far$. Para esto cuenta con un arreglo en el cuál guarda los selectores correspondientes a cada tarea y a la hora de elegir el próximo se fija si su valor correspondiente es $0$, es decir, ha sido eliminada y pasa a la siguiente, o si es tiempo de ejecutar la tarea árbitro la cuál se alterna entre tareas.
+	\item \textbf{reloj\_tarea():} es la encargada de imprimir la posición correspondiente del reloj en cada llamada a sched, mostrando la actividad de las tareas.
+	\item \textbf{game\_terminado():} se utiliza para saber si el juego terminó y realizar la conmutación a la tarea idle. La rutina se encuentra en $game.c$
+\end{itemize}
+
+\subsection{Detalles de implementación}
 \subsubsection{Tarea árbitro}
 La tarea del árbitro se dedica a mirar constantemente el estado del tablero, graficar los cambios que hayan provocado los jugadores y ver si el juego ha llegado a su fin para poder dar como finalizado el juego y mostrar el ganador.
 Para saber cuando termino el juego, hay que contar cuantos espacios del tablero todavía están libres, en caso que no haya ninguno, entonces el juego termino.
