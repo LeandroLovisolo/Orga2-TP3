@@ -410,7 +410,7 @@ Para las excepciones del procesador, excepto la interrupción 14, utilizamos el 
 \end{itemize}
 
 \textbf{Rutina de atención de la interrupción 14 (Page Fault)}
-La rutina de atención de Page Fault's se encarga de atender el problema utilizando la función $asignarMemoria()$ definida en $mmu.c$ la cuál mapea la memoria correspondiente al espacio de memoria reservado para el uso de las tareas. $AsignarMemoria()$ utiliza una dirección base física que incrementa en 4k en cada interrupción realizada por las tareas, asignando una página de memoria correspondiente a la dirección virtual pedida. $AsignarMemoria()$ devuelve 0 en caso fallido (memoria virtual fuera del rángo o máximo de páginas alcanzado) o 1 en caso de finalizar correctamente.
+La rutina de atención de Page Fault's se encarga de atender el problema utilizando la función $asignarMemoria()$ definida en $mmu.c$ la cuál mapea la memoria correspondiente al espacio de memoria reservado para el uso de las tareas. $AsignarMemoria()$ utiliza una dirección base física que incrementa en 4k en cada interrupción realizada por las tareas, asignando una página de memoria correspondiente a la dirección virtual pedida y luego llamando a $flushtlb()$ para limpiar la TLB. $AsignarMemoria()$ devuelve 0 en caso fallido (memoria virtual fuera del rángo o máximo de páginas alcanzado) o 1 en caso de finalizar correctamente.
 
 Una vez ocurrido el llamado a $asignarMemoria()$, según el resultado de la operación se procede a eliminar la tarea y mostrar el mensaje correspondiente en caso de haber fallado o a continuar con la tarea.
 
