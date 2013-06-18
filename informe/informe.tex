@@ -207,6 +207,7 @@ También se debe cargar la GDT, ya que una vez que pasemos a modo protegido se e
 
 \subsection{Ejercicio 2: Completar la IDT}
 La IDT (Interrupt Descriptor Table) es la encargada de almacenar los descriptores de interrupciones, la misma tiene un total de 256 entradas, las cuales se corresponden con todos los distintos tipos de interrupciones que maneja el microprocesador, estas pueden ser excepciones o interrupciones provocadas por el usuario. Las entradas 2, 15 y de la 20 a la 31 están reservadas por intel, por lo que no hay que utilizarlas. Para el resto de las entradas, se creó en $isr.asm$ la rutina de atención correspondiente y se llenó con los descriptores correctos para que apunten a la rutina creada.
+
 Para llenar la IDT con sus descriptores utilizamos el archivo $idt.c$, el cual contiene la siguiente macro creada por la cátedra que facilita el trabajo del mismo.\\
 
 \#define IDT\_ENTRY(numero, seg, atrr) \\                                                                      
