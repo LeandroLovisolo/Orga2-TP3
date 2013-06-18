@@ -260,7 +260,6 @@ Los siguientes 3 bit deben ser seteados en $0$ ya que asi lo indica el manual de
 
 Teniendo estas cosas en cuenta, los tres números en hexadecimal que se le pasa al campo $atrr$ para definir las entradas correctamente son:
 
-
 \begin{enumerate}
  \item $0x8E00 = | 1 | 0 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de kernel.
  \item $0xCE00 = | 1 | 1 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios $2$.
@@ -272,7 +271,7 @@ Luego utilizando esto, llenamos todos los campos necesarios en la IDT correctame
 
 \subsection{Ejercicio 3: inicializar el directorio y las tablas de paginas del kernel}
 \subsubsection{Inicializando page\_directory}
-Para poder activar paginación primero debemos inicializar los page directory y page table tanto del kernel como de las tareas. Teniendo en cuenta que la cantida de espacio que necesita el kernel es de $1.39$ MB alcanza con definir un solo page table para mapear todo este espacio.
+Para poder activar paginación primero debemos inicializar el page directory y los page table tanto del kernel como de las tareas. Teniendo en cuenta que la cantida de espacio que necesita el kernel es de $1.39$ MB alcanza con definir un solo page table para mapear todo este espacio.
 
 Es por esto que utilizando la siguiente rutina inicializamos primero todas las entradas del page directory del kernel en $0$.
 
@@ -291,14 +290,12 @@ Para hacer esto hay que tener en cuenta como asignar los atributos.
 \begin{itemize}
  \item $user\_supervisor = 0$;
  \item $address = KERNEL\_PAGE\_TABLE >> 12$;
- \item $read\_write = 1$;
+ \item $read_write = 1$;
  \item $present = 1$;
 \end{itemize}
 
 De esta manera indicamos que esa página tiene privilegios de supervisor ($user\_supervisor$ en 0), además dice en que parte de la memoria fisica esta alojada la page table, que la misma es de lectura y escritura y que está presente en la memoria.
-Como mencionamos antes, basta cargar estos datos en la primer entrada del page directory para mapear todo el espacio necesario para el kernel del TP.\\
-
-Si miramos el campo adress tiene los $20$ bits más significativos de la dirección real del KERNEL\_PAGE\_TABLE, por lo que se pueden direccionar $2^{20}$ lugares. Pero luego a esta dirección se le suma el offset de la dirección virtual el cual tiene $10$ bits y como se asume que los $2$ bits menos significativos son $0$ entonces tenemos $12$ bits más y nos da un total de $20+10+2=32$ bits puediendo asi direccionar un espacio de $4$ GB de descriptores de paginas.
+Como mencionamos antes, basta cargar estos datos en la primer entrada del page directory para mapear todo el espacio necesario para el kernel del TP.
 
 \subsubsection{inicializando page\_table}
 Una vez que esta definido el page directory, debemos inicializar correctamente las entradas del page\_table[0] que definimos anteriormente.
@@ -309,9 +306,7 @@ Las entradas del page table tienen la misma estructura que el page directory, y 
 
 $page\_table[i].adress = i$
 
-Tengamos en cuenta como se decodifica la dirección virtual para obtener una dirección fisica:\\
-
-La misma se puede dividir en $3$ segmentos.
+Tengamos en cuenta como se decodifica la dirección virtual para obtener una dirección fisica. La misma se puede dividir en $3$ segmentos.
 
 \begin{enumerate}
  \item directorio = contiene el offset dentro del page directory donde se encuentra la page table correspondiente.
@@ -356,19 +351,10 @@ mmu\_mappear\_pagina(unsigned int virtual, unsigned int fisica, pd\_entry\* page
 
 Esta función llena correctamente la entrada de la page table en el directorio correspondiente a la dirección virtual, mapeando la dirección física provista como parámetro a esta.\\
 
-\subsection{Ejercicio 5: Handler de las tareas del reloj, int 0x80 e int 0x90}
+\subsection{Ejercicio 5: Tarea del árbitro}
 
-La tarea Del reloj tiene 3 funcionalidades:
-
-\begin{enumerate}
- \item imprimir el proximo estado del reloj.
- \item imprimir el proximo estado del reloj de las tareas.
- \item ir pasandole el comando del procesador a las distintas tareas.
-\end{enumerate}
-
-
-La tarea del árbitro se dedica a mirar constantemente el estado del tablero para ver si debe finalizar el juego o imprimir el tablero.
-Para saber cuando termino el juego, hay que contar cuantos espacios del tablero todabia están libres, en caso que no halla ninguno, entonces el juego termino.
+La tarea del árbitro se dedica a mirar constantemente el estado del tablero, graficar los cambios que hayan provocado los jugadores y ver si el juego ha llegado a su fin para poder dar como finalizado el juego y mostrar el ganador.
+Para saber cuando termino el juego, hay que contar cuantos espacios del tablero todavía están libres, en caso que no haya ninguno, entonces el juego termino.
 
 El pseudocodigo para el árbitro es el siguiente:\\
 
@@ -392,7 +378,9 @@ El pseudocodigo para el árbitro es el siguiente:\\
   \STATE
 \end{pseudocodigo}
 
-La cantidad de jugadores es 4, pero el array para los puntajes tiene tamaño 5. Esto es porque contamos como quinto  jugador al tablero en si, tomando como su puntaje, la cantidad de casilleros que todabia están vacios, de esta manera, cuando el tablero tenga puntaje $0$ es porque no quedan casilleros vacios y el juego habrá terminado.
+La cantidad de jugadores es 4, pero el array para los puntajes tiene tamaño 5. Esto es porque la última posicion de puntaje es utilizada para contar los espacios libres en tablero, de esta manera, cuando $puntaje[4]= 0$ es porque no quedan casilleros vacios y el juego habrá terminado.
+
+Esto se implementó de esta manera para poder contar las celulass vacías al mismo tiempo que se cuentan las celulas infectadas para ver el puntaje de los jugadores.
 
 \subsection{Ejercicio 6: Scheduler}
 
