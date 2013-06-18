@@ -356,15 +356,35 @@ mmu\_mappear\_pagina(unsigned int virtual, unsigned int fisica, pd\_entry\* page
 
 Esta función llena correctamente la entrada de la page table en el directorio correspondiente a la dirección virtual, mapeando la dirección física provista como parámetro a esta.\\
 
-\subsection{Ejercicio 5: Handler de las tareas del reloj, int 0x80 e int 0x90}
+\subsection{Ejercicio 5: Handler de las interrupciones}
 
-La tarea Del reloj tiene 3 funcionalidades:
+La tarea de la interrupción $32$ ( reloj ) tiene 2 funcionalidades:
 
 \begin{enumerate}
  \item imprimir el proximo estado del reloj.
- \item imprimir el proximo estado del reloj de las tareas.
  \item ir pasandole el comando del procesador a las distintas tareas.
 \end{enumerate}
+
+La primer funcionalidad se ejecuta utilizando una función creada por la cátedra $proximo\_reloj$ la cual se encarga de actualizar correctamente el estado de reloj. \\
+
+Para la segunda funcionalidad se llama la función $sched$ creada en el archivo $sched.c$ que detallaremos en el ejercicio 6. \\
+
+la interrupción $33$ es la encargada de ver si hay que pausar o reanudar el juego, La misma realiza una lectura del estado del teclado y dependiendo el resultado, setea el espacio de memoria definido por la etiqueta $pausarReanudar$ en $1$ o en $0$.
+Para esto utiliza la instrucción assembler ``in $al$, $0x60$'' y luego compara el valor de $al$ con $0x93$ (soltar tecla R) y $0x99$ (soltar tecla P).
+
+un pseudocodigo que ayude a comprender mejor esta rutina es enunciado a continuación:
+
+\begin{pseudocodigo}
+  \STATE $al \leftarrow [0x60]$
+  \IF {$al = 0x93$}
+    \STATE [$pausarReanudar$] $\leftarrow$ $1$
+  \ENDIF
+  \IF {$al = 0x99$}
+    \STATE [$pausarReanudar$] $\leftarrow$ $0$
+  \ENDIF
+\end{pseudocodigo}
+
+Una vez seteado $pausarReanudar$ 
 
 
 La tarea del árbitro se dedica a mirar constantemente el estado del tablero para ver si debe finalizar el juego o imprimir el tablero.
