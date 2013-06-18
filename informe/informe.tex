@@ -246,7 +246,7 @@ A continuación mostramos la lista de atributos que explicaremos.
  \item $dpl$
  \item $s$
  \item $d$
- \item $tipo$ $de$ $descriptor$ $de$ $3$ $bits$
+ \item $tipo$ $de$ $descriptor$ $(3$ $bits)$
  \item $3$ $bits$ $en$ $0$
 \end{itemize}
 
@@ -294,15 +294,15 @@ Para hacer esto hay que tener en cuenta como asignar los atributos.
  \item $present = 1$;
 \end{itemize}
 
-De esta manera indicamos que esa página puede ser accedida solo teniendo privilegios de kernel, además dice en que parte de la memoria fisica esta alojada la page table, que la misma es de lectura y escritura y que está presente en la memoria.
+De esta manera indicamos que esa página tiene privilegios de supervisor ($user\_supervisor$ en 0), además dice en que parte de la memoria fisica esta alojada la page table, que la misma es de lectura y escritura y que está presente en la memoria.
 Como mencionamos antes, basta cargar estos datos en la primer entrada del page directory para mapear todo el espacio necesario para el kernel del TP.
 
 \subsubsection{inicializando page\_table}
 Una vez que esta definido el page directory, debemos inicializar correctamente las entradas del page\_table[0] que definimos anteriormente.
 
-Hay que direccionar un espacio de $1.39$ MB =  $1424$ Kb lo cual entra en $356 = 0x164$ paginas de $4$ Kb. Teniendo en cuenta que la cantidad de entradas de un page table es de $1024$ setearemos las todas las entradas en $0$ con una rutina idéntica a la utilizada en el page directory y luego las primeras $356$ las reseteamos corréctamente.
+Hay que direccionar un espacio de $1.39$ MB =  $1424$ Kb lo cual entra en $356 = 0x164$ paginas de $4$ Kb. Teniendo en cuenta que la cantidad de entradas de un page table es de $1024$ setearemos las todas las entradas en $0$ con una rutina idéntica a la utilizada en el page directory y luego las primeras $356$ las re-seteamos corréctamente.
 
-Las entradas del page Table tienen la misma estructura que el page directory, y como lo que tenemos que hacer es $identity$ $mapping$, lo que necesitamos es que dada una dirección virtual $A$ al finalizar el mapeo nos devuelva $A$. Para esto en el campo $adress$ le ponemos el mismo número de la entrada.
+Las entradas del page table tienen la misma estructura que el page directory, y como lo que tenemos que hacer es $identity$ $mapping$, lo que necesitamos es que dada una dirección virtual $A$, esta corresponda a la misma dirección física. Para esto en el campo $adress$ le ponemos el mismo número de la page entry que estamos seteando para determinar que la misma página virtual se corresponde con la misma física.
 
 $page\_table[i].adress = i$
 
@@ -334,7 +334,7 @@ los pasos a seguir entonces para mapear la memoria de una tarea es:
 \end{enumerate}
 
 Para los item $1$, $2$, $3$ y $4$ se utiliza la misma técnica implementada en el ejercicio $3$ del TP.
-Luego lo que resta es implementar el paso 5. Par esto se utiliza la función mmu\_mappear\_pagina de la cual presentaremos el codigo a continuación.\\
+Luego lo que resta es implementar el paso 5. Para esto se utiliza la función mmu\_mappear\_pagina de la cual presentaremos el codigo a continuación.\\
 
 mmu\_mappear\_pagina(unsigned int virtual, unsigned int fisica, pd\_entry\* page\_directory, unsigned char user\_supervisor, unsigned char read\_write)
 \begin{pseudocodigo}
@@ -349,7 +349,7 @@ mmu\_mappear\_pagina(unsigned int virtual, unsigned int fisica, pd\_entry\* page
   \STATE page\_table[table].present = 1;
 \end{pseudocodigo}
 
-Esta función llena correctamente la tabla correspondiente siempre que se le pasen bién los parámetros.\\
+Esta función llena correctamente la entrada de la page table en el directorio correspondiente a la dirección virtual, mapeando la dirección física provista como parámetro a esta.\\
 
 \subsection{Ejercicio 5: Tarea del árbitro}
 
