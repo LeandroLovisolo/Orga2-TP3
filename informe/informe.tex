@@ -445,19 +445,17 @@ El pseudocodigo para el árbitro es el siguiente:
 
 \begin{pseudocodigo}
   \STATE Dibujar la interfaz
-  \STATE llamar a syscall\_iniciar
-  \STATE inicializar un array de tamaño 5 para los puntajes
+  \STATE Llamar a syscall\_iniciar
+  \STATE Inicializar un array de tamaño 5 para los puntajes
   \STATE
   \WHILE{True}
-    \STATE
     \STATE Calcular el puntaje
     \STATE Actualizar la pantalla dependiendo de esos puntajes
     \STATE
     \IF{Termino el juego}
-      \STATE
       \STATE Imprimir el ganador
-      \STATE llamar a syscall\_terminar
-      \STATE salir del while
+      \STATE Llamar a syscall\_terminar
+      \STATE Salir del while
     \ENDIF
   \ENDWHILE
   \STATE
