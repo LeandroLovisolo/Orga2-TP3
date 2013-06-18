@@ -474,7 +474,8 @@ Las funciones definidas son las siguientes:
 
 \begin{verbatim}
 void  printf(unsigned char fila, unsigned char columna, const char *fmt, ...);
-void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, const char *fmt, ...);
+void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, 
+const char *fmt, ...);
 int  sprintf(char *buffer, const char *fmt, ...);
 \end{verbatim}
 
@@ -493,6 +494,7 @@ La función \texttt{sprintf} es análoga a la función de mismo nombre en la lib
 
 \subsection{Pregunta 1: ¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por qué?}
 
+Se produce una excepción de protección general. El segmento de video comienza en $B8000$ y termina en $B8FA0$. La excepción se produce porque al escribir en la fila 26, columna 1, estamos modificando el byte $25 * 80 * 2 + 1 = 4001 = FA1$ de la memoria de video, es decir, la dirección $B8FA1$, que no pertenece al segmento de video.
 
 \subsection{Pregunta 2: ¿Qué ocurre si no se setean todos los registros de segmento al entrar en
 modo protegido? ¿Es necesario setearlos todos? ¿Por qué?}
