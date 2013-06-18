@@ -131,7 +131,7 @@ Como estamos definiendo nuestro SO con un sistema Flat, todas las bases de los $
 
 A continuación se enuncia detalladamente como fueron cargados los descriptores. \\
 
-Segmento 1: ( segmento de código )
+\textbf{Segmento 1: ( segmento de código )}
 \begin{itemize}
  \item $limit\_0\_15 = 0xFFFF$ (Se encuentran los primeros $16$ bits que indican el limite del segmento, poniendo este valor, como la base es $0$ obtenemos segmentos de $2GB$ como fue pedido en el enunciado del TP).
  \item $base\_0\_15 = 0$ 
@@ -148,22 +148,22 @@ Segmento 1: ( segmento de código )
  \item $base\_31\_24  = 0$
 \end{itemize}
 
-Segmento $2$: ( segmento de código ) \\
+\textbf{Segmento $2$: ( segmento de código )} \\
 Es muy similar al segmento $1$ solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $1$. \\
 
-Segmento $3$: ( segmento de código ) \\
+\textbf{Segmento $3$: ( segmento de código )} \\
 Es muy similar al segmento $1$ solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\
 
-Segmento $4$: ( segmento de datos ) \\
+\textbf{Segmento $4$: ( segmento de datos )} \\
 Es muy similar al segmento $1$ cambiando el atributo $type$ por $2$ = $0010$. \\
 
-Segmento $3$: ( segmento de código ) \\
-Es muy similar al segmento $4$, solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $1$. \\
+\textbf{Segmento $5$: ( segmento de datos )} \\
+Es muy similar al segmento anterior solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $1$. \\
 
-Segmento $3$: ( segmento de código ) \\
-Es muy similar al segmento $4$, solo que cambia es el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\ 
+\textbf{Segmento $6$: ( segmento de datos )} \\
+Es muy similar al segmento anterior solo que cambia es el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\ 
 
-Además de esto hay que declarar un segmento más para describir el área de la pantalla en memoria, el mismo esta definido de la siguiente manera: 
+Además de esto hay que declarar un segmento de datos más para describir el área de la pantalla en memoria, el mismo esta definido de la siguiente manera: 
 \begin{itemize}
  \item $limit\_0\_15 = 0x7FFF$
  \item $base\_0\_15 = 0x8000$ 
@@ -176,11 +176,11 @@ Además de esto hay que declarar un segmento más para describir el área de la 
  \item $avl = 0$
  \item $l = 0$
  \item $db = 1$
- \item $g = 1$
+ \item $g = 0$
  \item $base\_31\_24  = 0$
 \end{itemize}
 
-Si observamos veremos que la base es $0xB8000$ y el limite es $0x07FFF$ lo cual es correcto.
+Si observamos veremos que la base es $0xB8000$ (dirección de memoria donde empieza la memoria de video), el limite es $0x07FFF$ (el límite de la memoria de video es $0xC0000$ por lo tanto $0xC0000-1 = 0x07FFF$) y su granularidad es 0 ya que su límite puede determinar la memoria necesaria sin usar granularidad. (VER TP TIENE GRANULARIDAD 1 ERROR CREO)
 
 \subsubsection{Pasando a modo protegido}
 
@@ -188,25 +188,25 @@ A continuación veremos el codigo que pasa de modo real a modo protegido.
 
 \begin{pseudocodigo}
   \STATE
-  \STATE (Desabilitando las interrupciones)
+  \STATE \textbf{(Desabilitando las interrupciones)}
   \STATE cli
   \STATE
   \STATE call habilitar\_A20
   \STATE
-  \STATE (carga la GDT definida anteriormente)
+  \STATE \textbf{(carga la GDT definida anteriormente)}
   \STATE lgdt [GDT\_DESC]
   \STATE
-  \STATE (setea el bit PE del registro CR0)
+  \STATE \textbf{(setea el bit PE del registro CR0)}
   \STATE mov eax, cr0
   \STATE or eax, 1
   \STATE mov cr0, eax
   \STATE
-  \STATE (pasa a modo protegido)
+  \STATE \textbf{(pasa a modo protegido, segmento 8 es código nivel 0)}
   \STATE jmp 0x8:modo\_protegido
   \STATE BITS 32
   \STATE cli
   \STATE 
-  \STATE ( setear los segmentos )
+  \STATE \textbf{( setear los segmentos )}
   \STATE mov ax, 32
   \STATE mov ss, ax
   \STATE mov ds, ax
@@ -215,18 +215,19 @@ A continuación veremos el codigo que pasa de modo real a modo protegido.
   \STATE mov ax, 56
   \STATE mov fs, ax
   \STATE 
-  \STATE ( setea la pila )
+  \STATE \textbf{( setea la pila )}
   \STATE mov EBP, 0x00020000	
   \STATE mov ESP, 0x00020000
 \end{pseudocodigo}
 
-la función $habilitar\_A20$ creada por la catedra sirve para poder trabajar con espacios de memoria por ensima del primer Mbyte de memoria, la misma debe ser llamada antes de pasar al modo protegido, ya que si no se genera un general protection $\#GP$.
+(ESTO NO ES DE 20 A 32 bits?)
+la función $habilitar\_A20$ creada por la catedra sirve para poder trabajar con espacios de memoria por encima del primer Mbyte de memoria, la misma debe ser llamada antes de pasar al modo protegido, ya que si no se genera un general protection $\#GP$.
 
 También se debe cargar la GDT, ya que una vez que pasemos a modo protegido se empezará a utilizar la misma para gestionar la memoria. Es por esto que las primeras acciones que se llevan a cabo luego de pasar a modo protegido es setear los selectores de segmento correctamente y pasarle la dirección de la pila a los registros \textbf{EBP} y \textbf{ESP}. Si esto no se llevara a cabo rapidamente, se corre el riezgo de tener errores, ya que si se necesitace usar estos recursos, los mismos estarían con basura.
 
 \subsection{Ejercicio 2: Completar la IDT}
-La IDT (Interrupt Descriptor Table) es la encargada de almacenar los descriptores de interrupciones, la misma tiene un total de 256 entradas, las cuales se corresponden con todos los distintos tipos de interrupciones que maneja el microprocesador. Las entradas 2, 15 y de la 20 a la 31 están reservadas por intel, por lo que no hay que utilizarlas. Para el resto de las entradas, tuvimos que ponerle los descriptores correctos para que apunten a la rutina correspondiente.
-Para llenar correctamente esta tabla utilizamos el archivo $idt.c$, el cual contiene la siguiente macro creada por la cátedra que facilita el trabajo del mismo.\\
+La IDT (Interrupt Descriptor Table) es la encargada de almacenar los descriptores de interrupciones, la misma tiene un total de 256 entradas, las cuales se corresponden con todos los distintos tipos de interrupciones que maneja el microprocesador, estas pueden ser excepciones o interrupciones provocadas por el usuario. Las entradas 2, 15 y de la 20 a la 31 están reservadas por intel, por lo que no hay que utilizarlas. Para el resto de las entradas, se creó en $isr.asm$ la rutina de atención correspondiente y se llenó con los descriptores correctos para que apunten a la rutina creada.
+Para llenar la IDT con sus descriptores utilizamos el archivo $idt.c$, el cual contiene la siguiente macro creada por la cátedra que facilita el trabajo del mismo.\\
 
 \#define IDT\_ENTRY(numero, seg, atrr) \\                                                                      
 \ \ \ \ idt[numero].offset\_0\_15 = (unsigned short) ((unsigned int)(\&\_isr \#\# numero) \& (unsigned int) 0xFFFF); \\
@@ -252,7 +253,7 @@ A continuación mostramos la lista de atributos que explicaremos.
 
 El primer bit $p$ es el que indica que la interrupcion está presente en memoria.
 
-$dpl$ hace referencia a los privilegios que necesita el proceso para poder llamar a la rutina. Un proceso que tiene privilegio de usuario no puede llamar a una rutina que tiene $dpl = 0$ ya que el mismo indica que solo un proceso con privilegio de kernel puede llamarlo.
+$dpl$ hace referencia a los privilegios que necesita el proceso para poder llamar a la rutina. Un proceso que tiene privilegio de usuario ($3$) no puede llamar a una rutina que tiene $dpl = 0$ ya que el mismo indica que solo un proceso con privilegio de kernel puede llamarlo.
 
 Además como lo que queremos definir son puertas de interrupcion, hay que definir como $1 1 0$ los 3 bits de $tipo$ $de$ $descriptor$.
 
@@ -266,11 +267,11 @@ Teniendo estas cosas en cuenta, los tres números en hexadecimal que se le pasa 
  \item $0xEE00 = | 1 | 1 1 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de usuario.
 \end{enumerate}
 
-Luego utilizando esto, llenamos todos los campos necesarios en la IDT correctamente. Todas las interrupciones utilizarán el segmento de código del kernel salvo las interrupciones $0x80$ y $0x90$ las cuales tienen nivel de privilegio $usuario$ y $2$ correspondientemente.
+Luego utilizando esto, llenamos todos los campos necesarios en la IDT correctamente. Todas las excepciones utilizarán el segmento de código del kernel salvo las interrupciones $0x80$ y $0x90$, las cuales tienen nivel de privilegio $3$ y $2$ respectivamente que servirán para permitir a los usuarios y al árbitro utilizar los servicios del kernel.
 
 
 \subsection{Ejercicio 3: inicializar el directorio y las tablas de paginas del kernel}
-\subsubsection{inicializando page\_directory}
+\subsubsection{Inicializando page\_directory}
 Para poder activar paginación primero debemos inicializar el page directory y los page table tanto del kernel como de las tareas. Teniendo en cuenta que la cantida de espacio que necesita el kernel es de $1.39$ MB alcanza con definir un solo page table para mapear todo este espacio.
 
 Es por esto que utilizando la siguiente rutina inicializamos primero todas las entradas del page directory del kernel en $0$.
@@ -283,19 +284,19 @@ Es por esto que utilizando la siguiente rutina inicializamos primero todas las e
   \ENDFOR
 \end{pseudocodigo}
 
-El siguiente paso es definir correctamente la primer entrada, la cual está ubicada en page\_directory[0]. Para hacer esto hay que tener en cuenta como asignar los atributos. 
+El siguiente paso es definir correctamente la primer entrada, la cual está ubicada en page\_directory[0].
+
+Para hacer esto hay que tener en cuenta como asignar los atributos. 
 
 \begin{itemize}
  \item $user\_supervisor = 0$;
- \item $address = KERNEL\_PAGE\_TABLE[12 \ldots 31]$;
+ \item $address = KERNEL\_PAGE\_TABLE >> 12$;
  \item $read_write = 1$;
  \item $present = 1$;
 \end{itemize}
 
 De esta manera indicamos que esa página puede ser accedida solo teniendo privilegios de kernel, además dice en que parte de la memoria fisica esta alojada la page table, que la misma es de lectura y escritura y que está presente en la memoria.
-Como mensionamos antes vasta cargar estos datos en la primer entrada del page directory para mapear todo el espacio necesario para el kernel del TP.
-
-Si miramos el campo $adress$ el mismo es de $20$ Bytes con lo que se pueden direccionar $2^{20} = 1GB$ de direcciones. por lo que hay que tener esto en cuenta a la hora de assignar la direccion de la page table, en nuestro caso, la catedra ya nos dio en el archivo define.h todas las direcciones.
+Como mencionamos antes, basta cargar estos datos en la primer entrada del page directory para mapear todo el espacio necesario para el kernel del TP.
 
 \subsubsection{inicializando page\_table}
 Una vez que esta definido el page directory, debemos inicializar correctamente las entradas del page\_table[0] que definimos anteriormente.
