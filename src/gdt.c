@@ -154,9 +154,8 @@ gdt_entry gdt[GDT_COUNT] = {
 
 	// Memoria en pantalla, privilegio 0
 	[7] = {
-		//Memoria de pantalla de 0xB8000 a 0xC0000
-		//0xB8000 - 0xC0000 = 32 768 -1 = 32 767 = 0x7FFF
-		.limit_0_15  = 0x7FFF,
+		//Memoria de pantalla de 0xB8000 a 0xB8FA0
+		.limit_0_15  = 0xFA0,
 		.base_0_15   = 0x8000,
 		.base_23_16  = 0xB,
 		.type        = 2,
@@ -167,7 +166,7 @@ gdt_entry gdt[GDT_COUNT] = {
 		.avl         = 0,
 		.l           = 0,
 		.db          = 1,
-		.g           = 1,
+		.g           = 0,
 		.base_31_24  = 0,
 	},
 

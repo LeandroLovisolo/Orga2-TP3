@@ -250,11 +250,11 @@ A continuación mostramos la lista de atributos que explicaremos.
  \item $3$ $bits$ $en$ $0$
 \end{itemize}
 
-El primer bit $p$ es el que indica que la interrupción está presente en memoria.
+El primer bit $p$ es el que indica que la interrupcion está presente en memoria.
 
 $dpl$ hace referencia a los privilegios que necesita el proceso para poder llamar a la rutina. Un proceso que tiene privilegio de usuario ($3$) no puede llamar a una rutina que tiene $dpl = 0$ ya que el mismo indica que solo un proceso con privilegio de kernel puede llamarlo.
 
-Además como lo que queremos definir son puertas de interrupción, hay que definir como $1 1 0$ los 3 bits de $tipo$ $de$ $descriptor$.
+Además como lo que queremos definir son puertas de interrupcion, hay que definir como $1 1 0$ los 3 bits de $tipo$ $de$ $descriptor$.
 
 Los siguientes 3 bit deben ser seteados en $0$ ya que asi lo indica el manual de intel.\\
 
@@ -352,7 +352,7 @@ mmu\_mappear\_pagina(unsigned int virtual, unsigned int fisica, pd\_entry\* page
 Esta función llena correctamente la entrada de la page table en el directorio correspondiente a la dirección virtual, mapeando la dirección física provista como parámetro a esta.\\
 
 \subsection{Ejercicio 5: Handler de las interrupciones}
-\subsubsection{Handler de la interrupción 32 (reloj)}
+\subsubsection{Handler de la interrupción 32 (Reloj)}
 La tarea de la interrupción $32$ ( reloj ) tiene 2 funcionalidades:
 
 \begin{enumerate}
@@ -411,7 +411,6 @@ Nuevamente presentaremos un pseudocódigo del handler para que sea más facil de
 
 
 \subsubsection{Handler de la interrupción 0x90 (iniciar terminar) }
-
 la misma tiene un funcionamiento parecido a la int $0x80$ ya que compara el valor de $eax$ con $200$ y $300$ para saber asi, si debe iniciar o finalizar el juego. Dependiendo del resultado de las comparaciones, si el valor de $eax$ es valido, llama a las funcionas creadas por la catedra $game\_iniciar$ y $game\_terminar$, si el valor de $eax$ no es valido, entonces simplemente sale del handler sin producir ninguna acción.
 
 \subsubsection{Handler de la excepciones}
@@ -424,10 +423,28 @@ Veremos entonces, por un lado, la estrucutra creada para las excepciones que se 
 
 
 
+\subsection{Ejercicio 7: Scheduler}
+
+El scheduler es el encargado de realizar la conmutación de tareas. Para hacer esto utiliza la interrupcion de reloj como control del tiempo que una tarea lleva en ejecución. También realiza conmutación de tareas cuando estas han realizado un movimiento válido en el juego.
+
+El scheduler toma como $quantum$ máximo 2 y lo decrementa en cada interrupción de reloj. De esta manera cuando el $quantum$ es 0, procede a conmutar la tarea que se está ejecutando con la siguiente.
+
+El scheduler también se encarga de verificar el estado de $pausarReanudar$, estableciendo como próxima tarea a ejecutarse a la tarea idle o la siguiente tarea en la lista de ejecución antes de pausarse.
+
+El scheduler cuenta con las siguientes funciones:
+\begin{itemize}
+	\item \textbf{jmpToTask():} se encarga de realizar el $jmp far$ destinado a la conmutación de tareas. Esta se encuentra definida en $isr.asm$ y es exportada a C.
+	\item \textbf{sched\_proximo\_indice():} se encarga de seleccionar la próxima tarea a ejecutarse y devolver el selector adecuado para realizar el $jmp far$. Para esto cuenta con un arreglo en el cuál guarda los selectores correspondientes a cada tarea y a la hora de elegir el próximo se fija si su valor correspondiente es $0$, es decir, ha sido eliminada y pasa a la siguiente, o si es tiempo de ejecutar la tarea árbitro la cuál se alterna entre tareas.
+	\item \textbf{reloj\_tarea():} es la encargada de imprimir la posición correspondiente del reloj en cada llamada a sched, mostrando la actividad de las tareas.
+	\item \textbf{game\_terminado():} se utiliza para saber si el juego terminó y realizar la conmutación a la tarea idle. La rutina se encuentra en $game.c$
+\end{itemize}
+
+\subsection{Detalles de implementación}
+\subsubsection{Tarea árbitro}
 La tarea del árbitro se dedica a mirar constantemente el estado del tablero, graficar los cambios que hayan provocado los jugadores y ver si el juego ha llegado a su fin para poder dar como finalizado el juego y mostrar el ganador.
 Para saber cuando termino el juego, hay que contar cuantos espacios del tablero todavía están libres, en caso que no haya ninguno, entonces el juego termino.
 
-El pseudocodigo para el árbitro es el siguiente:\\
+El pseudocodigo para el árbitro es el siguiente:
 
 \begin{pseudocodigo}
   \STATE Dibujar la interfaz
@@ -451,21 +468,15 @@ El pseudocodigo para el árbitro es el siguiente:\\
 
 La cantidad de jugadores es 4, pero el array para los puntajes tiene tamaño 5. Esto es porque la última posicion de puntaje es utilizada para contar los espacios libres en tablero, de esta manera, cuando $puntaje[4]= 0$ es porque no quedan casilleros vacios y el juego habrá terminado.
 
-Esto se implementó de esta manera para poder contar las celulass vacías al mismo tiempo que se cuentan las celulas infectadas para ver el puntaje de los jugadores.
-
-\subsection{Ejercicio 6: Scheduler}
-
-El scheduler es el encargado de ir pasandole el control del procesador de una tarea a la otra. Para hacer esto utiliza la interrupción de reloj como control del tiempo que una tarea lleva en ejecución. De esta manera cuando pasa una cierta cantidad de tiempo acumulado en un quantum le quitamos el control a una tarea y se lo pasamos a la siguiente. También se le quita el control a una tara si las mismas hacen una jugada correcta.
-Por otro lado si se precionan las teclas P se le debe pasar el control a la tarea idle. Si actualmente se esta ejecutando la tarea idle y se preciona la tecla R se le debe pasar el control a la proxima tarea.
-
-Para lograr 
-
+Esto se implementó de esta manera para poder contar las celulas vacías al mismo tiempo que se cuentan las celulas infectadas para ver el puntaje de los jugadores.
 
 
 \section{Preguntas y respuestas}
 
 
 \subsection{Pregunta 1: ¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por qué?}
+
+Se produce una excepción de protección general. El segmento de video comienza en $B8000$ y termina en $B8FA0$. La excepción se produce porque al escribir en la fila 26, columna 1, estamos modificando el byte $25 * 80 * 2 + 1 = 4001 = FA1$ de la memoria de video, es decir, la dirección $B8FA1$, que no pertenece al segmento de video.
 
 
 \subsection{Pregunta 2: ¿Qué ocurre si no se setean todos los registros de segmento al entrar en
@@ -572,7 +583,7 @@ Si la conmutación de la tarea fue exitosa, esta comenzará a ejecutarse, pudien
 
 \subsection{Pregunta 15: Se sabe que las tareas llaman a la interrupción 0x80 y por 0x90. ¿Qué ocurre si esta no está implementada? ¿Por qué?}
 
-Si estas interrupciónes están definidas en la IDT pero no están implementadas, lo que ocurre es que el procesador empieza a ejecutar el código en la dirección especificada en la IDT entry correspondiente a la interrupción recibida. El resultado de esto es indeterminado, de acuerdo a lo que hayamos puesto en nuestro kernel en esa dirección de memoria.
+Si estas interrupciones están definidas en la IDT pero no están implementadas, lo que ocurre es que el procesador empieza a ejecutar el código en la dirección especificada en la IDT entry correspondiente a la interrupción recibida. El resultado de esto es indeterminado, de acuerdo a lo que hayamos puesto en nuestro kernel en esa dirección de memoria.
 
 Si en cambio las interrupciones no están definidas en la IDT, o la IDT entry correspondiente está mal definida (por ejemplo, si los campos segmento:offset apuntan a una dirección de memoria no definida) el procesador produce una excepción de protección general.
 
