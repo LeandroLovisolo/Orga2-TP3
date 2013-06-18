@@ -378,20 +378,17 @@ Además si el valor de $eax$ no es valido se pasa directamente a la tarea siguie
 Nuevamente presentaremos un pseudocódigo del handler para que sea más facil de comprender.
 
 \begin{pseudocodigo}
-  \STATE
-  \IF {$eax = 111$}
-  \STATE $eax \leftarrow$ $obtener$ $la$ $tarea$ $actual$
-    \STATE Pusheo los parámetros de la función
-    \STATE $call$ $game\_duplicar(nro\_jugador,fila,columna)$
+  \IF{$eax = 111$}
+    \STATE $retval$ $\leftarrow$ game\_duplicar(nro\_jugador, fila, columna)
   \ELSE
     \IF{$eax = 222$}
-    \STATE $eax \leftarrow$ $obtener$ $la$ $tarea$ $actual$
-    \STATE Pusheo los parámetros de la función
-      \STATE $call$ $ game\_migrar(col\_dst,fila\_dst,col\_src,fila\_src,nro\_jugador)$
+      \STATE $retval$ $\leftarrow$ game\_migrar(col\_dst, fila\_dst, col\_src, fila\_src, nro\_jugador)
     \ELSE
-      \STATE pasar el control del procesador a la próxima tarea del scheduler.
+      \STATE $retval$ $\leftarrow$ $0$
     \ENDIF
   \ENDIF
+  \STATE pasar a la siguiente tarea
+  \STATE $eax$ $\leftarrow$ $retval$
 \end{pseudocodigo}
 
 
@@ -414,6 +411,22 @@ La rutina de atención de Page Fault's se encarga de atender el problema utiliza
 
 Una vez ocurrido el llamado a $asignarMemoria()$, según el resultado de la operación se procede a eliminar la tarea y mostrar el mensaje correspondiente en caso de haber fallado o a continuar con la tarea.
 
+\subsection{Ejercicio 6: TSS}
+Dado que el SO va permutando las tareas, se necesita definir un método para guardar el contexto de las tareas que estén paradas.
+Para llevar esto a cabo se necesita poner en la GDT los descriptores de TSS para cada una de las tareas y luego definir correctamente cada una de las TSS a las que apuntan cada uno de los descriptores.\\
+También hay que tener en cuenta que cuando saltamos a la primer tarea el procesador va a intentar guardar el contexto de la misma en la TSS que le debemos indicar, es por esto que hay que definir un TSS inicial por mas que no nos importe que tenga basura adentro.
+
+\subsubsection{Descriptores de TSS}
+Los descriptores de las TSS son iguales que los descriptores de segmento, con la direrencia que en el campo $type$ hay que ponerle el valor de $9$ el cual le indica que es un descriptor de TSS, también tienen seteado en $0$ el bit $s$ para indicar que es un descriptor de sistema, esto es correcto ya que las TSS se consideran parte del sistema y no deben ser de acceso por codigo de privilegio usuario.
+
+Por otro lado la base de los mismos se las define en la posición de memoria fisica donde arranca la TSS, ya que ahi es donde se asumirá que están los datos correctos de la tarea a la cual se quiere pasar. como limite hay que poner un valor mayor a  $103$ bytes (tamaño de la estructura de datos de una TSS).
+\subsubsection{Estructura de datos TSS}
+Para facilitar la tarea de cargar las distintas TSS utilizamos una estructura de datos definida en el archivo $tss.h$
+Si una tarea tiene privilegios de Kernel, entonces no hace falta cargar nada en el campo $ss0$ ya que no cambia el segmento donde estará hubicada la pila, en cambio para las tareas de los jugadores y del árbitro hay que definirles correctamente el $ss0$. Para esto se hace uso de la siguiente macro. \\
+
+$\#define\ SEGMENT\_SELECTOR(index,\ rpl)\ ((index << 3)\ |\ rpl)$
+
+Mirando como deben estar definidos los selectores de segmento, los primeros $3$ bit son del RPL (Requested Privilege level) y los restantes $13$ pertenecen al indice en la GDT esta PARTE SE LAS DEJO A TERMINAR
 
 
 \subsection{Ejercicio 7: Scheduler}
@@ -474,8 +487,8 @@ Las funciones definidas son las siguientes:
 
 \begin{verbatim}
 void  printf(unsigned char fila, unsigned char columna, const char *fmt, ...);
-void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, 
-const char *fmt, ...);
+void aprintf(unsigned char fila, unsigned char columna, unsigned char attr,
+                                                        const char *fmt, ...);
 int  sprintf(char *buffer, const char *fmt, ...);
 \end{verbatim}
 
