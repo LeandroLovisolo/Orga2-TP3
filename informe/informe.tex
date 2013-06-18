@@ -127,7 +127,7 @@ Como estamos definiendo nuestro SO con un sistema Flat, todas las bases de los $
 
 A continuación se enuncia detalladamente como fueron cargados los descriptores. \\
 
-\textbf{Segmento 1: ( segmento de código )}
+\textbf{Segmento 1: (segmento de código)}
 \begin{itemize}
  \item $limit\_0\_15 = 0xFFFF$ (Se encuentran los primeros $16$ bits que indican el limite del segmento, poniendo este valor, como la base es $0$ obtenemos segmentos de $2GB$ como fue pedido en el enunciado del TP).
  \item $base\_0\_15 = 0$ 
@@ -144,39 +144,24 @@ A continuación se enuncia detalladamente como fueron cargados los descriptores.
  \item $base\_31\_24  = 0$
 \end{itemize}
 
-\textbf{Segmento $2$: ( segmento de código )} \\
-Es muy similar al segmento $1$ solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $1$. \\
+\textbf{Segmento $2$: (segmento de código)} \\
+Igual al segmento $1$, con $dpl = 1$. \\
 
-\textbf{Segmento $3$: ( segmento de código )} \\
-Es muy similar al segmento $1$ solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\
+\textbf{Segmento $3$: (segmento de código)} \\
+Igual al segmento $1$, con $dpl = 2$. \\
 
-\textbf{Segmento $4$: ( segmento de datos )} \\
-Es muy similar al segmento $1$ cambiando el atributo $type$ por $2$ = $0010$. \\
+\textbf{Segmento $4$: (segmento de datos)} \\
+Igual al segmento $1$, con $type = 2$. \\
 
-\textbf{Segmento $5$: ( segmento de datos )} \\
-Es muy similar al segmento anterior solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $1$. \\
+\textbf{Segmento $5$: (segmento de datos)} \\
+Igual al segmento $1$, con $type = 2$ y $dpl = 1$. \\
 
-\textbf{Segmento $6$: ( segmento de datos )} \\
-Es muy similar al segmento anterior solo que cambia es el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\ 
+\textbf{Segmento $6$: (segmento de datos)} \\
+Igual al segmento $1$, con $type = 2$ y $dpl = 1$. \\
 
-Además de esto hay que declarar un segmento de datos más para describir el área de la pantalla en memoria, el mismo esta definido de la siguiente manera: 
-\begin{itemize}
- \item $limit\_0\_15 = 0x7FFF$
- \item $base\_0\_15 = 0x8000$ 
- \item $base\_23\_16 = 0xB$
- \item $type = 2$
- \item $s = 1$
- \item $dpl = 3$
- \item $p = 1$
- \item $limit_16_19 = 0$
- \item $avl = 0$
- \item $l = 0$
- \item $db = 1$
- \item $g = 0$
- \item $base\_31\_24  = 0$
-\end{itemize}
+\textbf{Segmento $7$: (segmento de video)} \\
+Igual al segmento $1$, con $base = 0xB8000$, $limit = 0xFA0$, $dpl = 3$ y $g = 0$. \\
 
-Si observamos veremos que la base es $0xB8000$ (dirección de memoria donde empieza la memoria de video), el limite es $0x07FFF$ (el límite de la memoria de video es $0xC0000$ por lo tanto $0xC0000-1 = 0x07FFF$) y su granularidad es 0 ya que su límite puede determinar la memoria necesaria sin usar granularidad. (VER TP TIENE GRANULARIDAD 1 ERROR CREO)
 
 \subsubsection{Pasando a modo protegido}
 
