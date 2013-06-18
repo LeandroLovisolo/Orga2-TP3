@@ -378,20 +378,17 @@ Además si el valor de $eax$ no es valido se pasa directamente a la tarea siguie
 Nuevamente presentaremos un pseudocódigo del handler para que sea más facil de comprender.
 
 \begin{pseudocodigo}
-  \STATE
-  \IF {$eax = 111$}
-  \STATE $eax \leftarrow$ $obtener$ $la$ $tarea$ $actual$
-    \STATE Pusheo los parámetros de la función
-    \STATE $call$ $game\_duplicar(nro\_jugador,fila,columna)$
+  \IF{$eax = 111$}
+    \STATE $retval$ $\leftarrow$ game\_duplicar(nro\_jugador, fila, columna)
   \ELSE
     \IF{$eax = 222$}
-    \STATE $eax \leftarrow$ $obtener$ $la$ $tarea$ $actual$
-    \STATE Pusheo los parámetros de la función
-      \STATE $call$ $ game\_migrar(col\_dst,fila\_dst,col\_src,fila\_src,nro\_jugador)$
+      \STATE $retval$ $\leftarrow$ game\_migrar(col\_dst, fila\_dst, col\_src, fila\_src, nro\_jugador)
     \ELSE
-      \STATE pasar el control del procesador a la próxima tarea del scheduler.
+      \STATE $retval$ $\leftarrow$ $0$
     \ENDIF
   \ENDIF
+  \STATE pasar a la siguiente tarea
+  \STATE $eax$ $\leftarrow$ $retval$
 \end{pseudocodigo}
 
 
