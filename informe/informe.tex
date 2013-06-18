@@ -351,7 +351,35 @@ mmu\_mappear\_pagina(unsigned int virtual, unsigned int fisica, pd\_entry\* page
 
 Esta función llena correctamente la entrada de la page table en el directorio correspondiente a la dirección virtual, mapeando la dirección física provista como parámetro a esta.\\
 
-\subsection{Ejercicio 5: Tarea del árbitro}
+\subsection{Ejercicio 5: Handler de las interrupciones}
+
+La tarea de la interrupción $32$ ( reloj ) tiene 2 funcionalidades:
+
+\begin{enumerate}
+ \item imprimir el proximo estado del reloj.
+ \item ir pasandole el comando del procesador a las distintas tareas.
+\end{enumerate}
+
+La primer funcionalidad se ejecuta utilizando una función creada por la cátedra $proximo\_reloj$ la cual se encarga de actualizar correctamente el estado de reloj. \\
+
+Para la segunda funcionalidad se llama la función $sched$ creada en el archivo $sched.c$ que detallaremos en el ejercicio 6. \\
+
+la interrupción $33$ es la encargada de ver si hay que pausar o reanudar el juego, La misma realiza una lectura del estado del teclado y dependiendo el resultado, setea el espacio de memoria definido por la etiqueta $pausarReanudar$ en $1$ o en $0$.
+Para esto utiliza la instrucción assembler ``in $al$, $0x60$'' y luego compara el valor de $al$ con $0x93$ (soltar tecla R) y $0x99$ (soltar tecla P).
+
+un pseudocodigo que ayude a comprender mejor esta rutina es enunciado a continuación:
+
+\begin{pseudocodigo}
+  \STATE $al \leftarrow [0x60]$
+  \IF {$al = 0x93$}
+    \STATE [$pausarReanudar$] $\leftarrow$ $1$
+  \ENDIF
+  \IF {$al = 0x99$}
+    \STATE [$pausarReanudar$] $\leftarrow$ $0$
+  \ENDIF
+\end{pseudocodigo}
+
+Una vez seteado $pausarReanudar$ 
 
 La tarea del árbitro se dedica a mirar constantemente el estado del tablero, graficar los cambios que hayan provocado los jugadores y ver si el juego ha llegado a su fin para poder dar como finalizado el juego y mostrar el ganador.
 Para saber cuando termino el juego, hay que contar cuantos espacios del tablero todavía están libres, en caso que no haya ninguno, entonces el juego termino.
@@ -482,6 +510,6 @@ Si la conmutación de la tarea fue exitosa, esta comenzará a ejecutarse, pudien
 
 Si estas interrupciones están definidas en la IDT pero no están implementadas, lo que ocurre es que el procesador empieza a ejecutar el código en la dirección especificada en la IDT entry correspondiente a la interrupción recibida. El resultado de esto es indeterminado, de acuerdo a lo que hayamos puesto en nuestro kernel en esa dirección de memoria.
 
-Si en cambio las interrupciones no están definidas en la IDT, el procesador produce una excepción de protección general.
+Si en cambio las interrupciones no están definidas en la IDT, o la IDT entry correspondiente está mal definida (por ejemplo, si los campos segmento:offset apuntan a una dirección de memoria no definida) el procesador produce una excepción de protección general.
 
 \end{document}
