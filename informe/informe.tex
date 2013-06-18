@@ -417,17 +417,50 @@ Para llevar esto a cabo se necesita poner en la GDT los descriptores de TSS para
 También hay que tener en cuenta que cuando saltamos a la primer tarea el procesador va a intentar guardar el contexto de la misma en la TSS que le debemos indicar, es por esto que hay que definir un TSS inicial por mas que no nos importe que tenga basura adentro.
 
 \subsubsection{Descriptores de TSS}
-Los descriptores de las TSS son iguales que los descriptores de segmento, con la direrencia que en el campo $type$ hay que ponerle el valor de $9$ el cual le indica que es un descriptor de TSS, también tienen seteado en $0$ el bit $s$ para indicar que es un descriptor de sistema, esto es correcto ya que las TSS se consideran parte del sistema y no deben ser de acceso por codigo de privilegio usuario.
+Los descriptores de las TSS son iguales que los descriptores de segmento, con la direrencia que en el campo $type$ hay que ponerle el valor de $9$ el cual le indica que es un descriptor de TSS, también tienen seteado en $0$ el bit $s$ para indicar que es un descriptor de sistema, esto es correcto ya que las TSS se consideran parte del sistema.
 
-Por otro lado la base de los mismos se las define en la posición de memoria fisica donde arranca la TSS, ya que ahi es donde se asumirá que están los datos correctos de la tarea a la cual se quiere pasar. como limite hay que poner un valor mayor a  $103$ bytes (tamaño de la estructura de datos de una TSS).
+Por otro lado la base de los mismos se las define en la posición de memoria donde comienza la TSS de cada tarea, ya que ahi es donde se asumirá que están los datos correctos de la tarea a la cual se quiere pasar. Como límite se colocó $0x67$, el tamaño de la estructura de datos de una TSS.
+
+Estas entradas de la GDT fueron definidas en la función $gdt_tareas_ii()$ que se puede encontrar en $gdt.c$ y son inicializadas desde $kernel.asm$.
+
 \subsubsection{Estructura de datos TSS}
 Para facilitar la tarea de cargar las distintas TSS utilizamos una estructura de datos definida en el archivo $tss.h$
-Si una tarea tiene privilegios de Kernel, entonces no hace falta cargar nada en el campo $ss0$ ya que no cambia el segmento donde estará hubicada la pila, en cambio para las tareas de los jugadores y del árbitro hay que definirles correctamente el $ss0$. Para esto se hace uso de la siguiente macro. \\
 
-$\#define\ SEGMENT\_SELECTOR(index,\ rpl)\ ((index << 3)\ |\ rpl)$
+Definimos las TSS de la taréa idle y tareas 1, 2, 3, 4 y 5 en el archivo $tss.c$.
 
-Mirando como deben estar definidos los selectores de segmento, los primeros $3$ bit son del RPL (Requested Privilege level) y los restantes $13$ pertenecen al indice en la GDT esta PARTE SE LAS DEJO A TERMINAR
+\textbf{Rellenamos las TSS para cáda tarea de la manera siguiente:}
+\begin{itemize}
+ \item Definimos para cada tarea su ESP y EBP inicial para conformar su pila utilizando la dirección virtual previamente mapeada TASK\_STAK y sumándole $0x1000$ debido a que la pila trabaja decrementándose
+ \item Asignamos a CR3 el valor correspondiente a la page directory asociada a la tarea.
+ \item Definimos iomap con 0xFFFF para setear correctamente los usos de los puertos de entrada/salida y definimos los EFLAGS con 0x00000202 los cuales nos permitieron tener habilitadas las intrucciones.
+ \item Definimos los registros segmentos de datos y códigos con el siguiente macro:
+ 
+ $\#define\ SEGMENT\_SELECTOR(index,\ rpl)\ ((index << 3)\ |\ rpl)$
+ 
+ El cuál se encarga de, dado un índice en la GTD y un RPL específico definir el segmento adecuado.
+ \item Definimos para el caso de las tareas de privilegios de nivel 2 y 3 una pila de nivel 0 (la dirección fue provista por la cátedra) y un ss0 (registro de segmento) para la utilización de esta pila.
 
+Para el caso de la tarea idle la cuál se ejecuta en nivel 0 no fue necesario declarar el segmento de datos para la pila.
+\end{itemize}
+
+\textbf{Ejemplo de definición de TSS con la tarea 1:}
+
+\begin{verbatim}
+	tsss[0].esp 	= TASK_STACK + 0x1000;
+	tsss[0].ebp 	= TASK_STACK + 0x1000;
+	tsss[0].eip    	= TASK_CODE;
+	tsss[0].cr3 	= TASK_1_PAGE_DIR;
+	tsss[0].es 		= SEG_DATOS_3;
+	tsss[0].cs 		= SEG_CODIGO_3;
+	tsss[0].ss 		= SEG_DATOS_3;
+	tsss[0].ds 		= SEG_DATOS_3;
+	tsss[0].fs 		= SEG_DATOS_3;
+	tsss[0].gs 		= SEG_DATOS_3;
+	tsss[0].eflags 	= 0x00000202;
+	tsss[0].iomap 	= 0xFFFF;
+	tsss[0].esp0 	= TASK_1_STACK_RING_0;
+	tsss[0].ss0     = SEG_DATOS_0;
+\end{verbatim}
 
 \subsection{Ejercicio 7: Scheduler}
 
