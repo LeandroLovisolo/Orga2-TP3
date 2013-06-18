@@ -412,6 +412,17 @@ Nuevamente presentaremos un pseudocódigo del handler para que sea más facil de
 
 \subsubsection{Handler de la interrupción 0x90 (iniciar terminar) }
 
+la misma tiene un funcionamiento parecido a la int $0x80$ ya que compara el valor de $eax$ con $200$ y $300$ para saber asi, si debe iniciar o finalizar el juego. Dependiendo del resultado de las comparaciones, si el valor de $eax$ es valido, llama a las funcionas creadas por la catedra $game\_iniciar$ y $game\_terminar$, si el valor de $eax$ no es valido, entonces simplemente sale del handler sin producir ninguna acción.
+
+\subsubsection{Handler de la excepciones}
+
+En este TP cuando se genera un error, se deduce que la tarea producente del mismo, lo genero intentando romper la seguridad del SO. Es por esto que se pasa directamente a elimiar la tarea del scheduler. Hay que tener en cuenta que una tarea tiene permitido pedir memoria, por lo que la unica excepción que no elimina a las tareas del scheduler es la $14$ ($Page$ $Fault$).
+
+Veremos entonces, por un lado, la estrucutra creada para las excepciones que se encargan de eliminar la tarea actual del scheduler, y por otro el handler del $Page$ $Fault$.\\
+
+\textbf{Estructura general para eliminar la tarea actual del scheduler.}\\
+
+
 
 La tarea del árbitro se dedica a mirar constantemente el estado del tablero, graficar los cambios que hayan provocado los jugadores y ver si el juego ha llegado a su fin para poder dar como finalizado el juego y mostrar el ganador.
 Para saber cuando termino el juego, hay que contar cuantos espacios del tablero todavía están libres, en caso que no haya ninguno, entonces el juego termino.
@@ -488,7 +499,7 @@ Otras formas de realizar una excepción:
 
 teniendo en cuenta que un segmento de pila puede ser accedido solamente por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la apuntada por el ESP0 de la tss de la tarea actual.
 
-Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción debe resguardarse en la pila los registros
+Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción debe resguardarse en la pila los siguientes registros:
 
 \begin{itemize}
  \item EFLAGS (que contiene información del contexto de ejecución).
