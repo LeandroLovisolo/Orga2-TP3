@@ -480,6 +480,8 @@ Algo a tener en cuenta es que este espacio debe estar reservado exclusívamente 
 
 \subsection{Pregunta 6: ¿Es posible acceder a una página de nivel de kernel desde usuario?}
 
+No es posible acceder a una página de nivel kernel desde código de nivel usuario. Sin embargo, es posible acceder a la misma memoria física mappeada por la página de nivel kernel si creamos una nueva página de nivel usuario que mappea el mismo rango de memoria.
+
 
 \subsection{Pregunta 7: ¿Se puede mapear una página física desde dos direcciones virtuales distintas, de manera tal que una esté mapeada con nivel de usuario y la otra a nivel de kernel? De ser posible, ¿Qué problemas puede traer?}
 
