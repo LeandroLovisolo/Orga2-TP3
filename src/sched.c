@@ -158,5 +158,4 @@ void reloj_tarea() {
 			aprintf(24, 1, COLOR_A, buf);
 			break;
 	}
-	printf(15, 50, "Reloj tarea actual: %d", tarea);
 }
