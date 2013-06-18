@@ -479,6 +479,6 @@ Si la conmutación de la tarea fue exitosa, esta comenzará a ejecutarse, pudien
 
 Si estas interrupciones están definidas en la IDT pero no están implementadas, lo que ocurre es que el procesador empieza a ejecutar el código en la dirección especificada en la IDT entry correspondiente a la interrupción recibida. El resultado de esto es indeterminado, de acuerdo a lo que hayamos puesto en nuestro kernel en esa dirección de memoria.
 
-Si en cambio las interrupciones no están definidas en la IDT, el procesador produce una excepción de protección general.
+Si en cambio las interrupciones no están definidas en la IDT, o la IDT entry correspondiente está mal definida (por ejemplo, si los campos segmento:offset apuntan a una dirección de memoria no definida) el procesador produce una excepción de protección general.
 
 \end{document}
