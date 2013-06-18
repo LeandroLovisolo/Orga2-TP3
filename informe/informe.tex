@@ -542,7 +542,7 @@ Si efectivamente hay que hacer un cambio en el segmento de pila que va a utiliza
 
 
 \subsection{Pregunta 5: ¿Puede el directorio de páginas estar en cualquier posición arbitraria de memoria?}
-En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. \\
+En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. 
 
 Con 32 bit direccionando a byte se pueden direccionar $2^{32}$ $bytes$ $=$ $4294967296$ $bytes$ $=$ $4$ $GB$ de memoria. Es por esto que se puede alojar el directorio de páginas de una tarea en cualquier posición de memoria. 
 
@@ -556,7 +556,7 @@ No es posible acceder a una página de nivel kernel desde código de nivel usuar
 
 \subsection{Pregunta 7: ¿Se puede mapear una página física desde dos direcciones virtuales distintas, de manera tal que una esté mapeada con nivel de usuario y la otra a nivel de kernel? De ser posible, ¿Qué problemas puede traer?}
 
-Si, se puede hacer eso si se quisiera. Para esto, en los descriptores de páginas a los que apuntan las dos direcciones virtuales deben tener el mismo valor de adress.
+Si, es posible. Para esto, los descriptores de páginas a los que pertencen las dos direcciones virtuales deben tener el mismo valor de address.
 
 Los problemas que esta acción puede generar, es que si los permisos asignados son incorrectos, un codigo con privilegio de usuario podria modificar o leer codigo o datos que no deberia poder generando problemas en el SO.
 
