@@ -278,7 +278,7 @@ Para hacer esto hay que tener en cuenta como asignar los atributos.
 De esta manera indicamos que esa página tiene privilegios de supervisor ($user\_supervisor$ en 0), además dice en que parte de la memoria fisica esta alojada la page table, que la misma es de lectura y escritura y que está presente en la memoria.
 Como mencionamos antes, basta cargar estos datos en la primer entrada del page directory para mapear todo el espacio necesario para el kernel del TP.
 
-\subsubsection{inicializando page\_table}
+\subsubsection{Inicializando page\_table}
 Una vez que esta definido el page directory, debemos inicializar correctamente las entradas del page\_table[0] que definimos anteriormente.
 
 Hay que direccionar un espacio de $1.39$ MB =  $1424$ Kb lo cual entra en $356 = 0x164$ paginas de $4$ Kb. Teniendo en cuenta que la cantidad de entradas de un page table es de $1024$ setearemos las todas las entradas en $0$ con una rutina idéntica a la utilizada en el page directory y luego las primeras $356$ las re-seteamos corréctamente.
@@ -290,9 +290,9 @@ $page\_table[i].adress = i$
 Tengamos en cuenta como se decodifica la dirección virtual para obtener una dirección fisica. La misma se puede dividir en $3$ segmentos.
 
 \begin{enumerate}
- \item directorio = contiene el offset dentro del page directory donde se encuentra la page table correspondiente.
- \item tabla = este es el offset dentro del page table donde se encuentra el descriptor de la página correspondiente.
- \item Offset = este es el offset que se le suma a la base de la pagina obtenida para obtener el espacio de memoria exacto que queremos
+ \item \textbf{Directorio:} contiene el offset dentro del page directory donde se encuentra la page table correspondiente.
+ \item \textbf{Tabla:} este es el offset dentro del page table donde se encuentra el descriptor de la página correspondiente.
+ \item \textbf{Offset:} este es el offset que se le suma a la base de la pagina obtenida para obtener el espacio de memoria exacto que queremos
 \end{enumerate}
 
 Como la unica entrada del page directory que utilizaremos es la $0$, el campo directorio deberá ser siempre $0$, lo cual es correcto ya que los últimos $10$ bits de cualquier dirección del kernel son $0$. Luego dentro del page table obtenemos la dirección base de la página, la cual se obtiene de buscar la tabla indicada por el campo table (los bits 12 a 21 de la dirección virtual). Al definirle adress con el mismo número al de la entrada de esa tabla, al momento de sumar el offset de la dirección, obtendremos claramente un $identity$ $mapping$. \\
