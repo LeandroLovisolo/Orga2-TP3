@@ -268,6 +268,19 @@ Teniendo estas cosas en cuenta, los tres números en hexadecimal que se le pasa 
 
 Luego utilizando esto, llenamos todos los campos necesarios en la IDT correctamente. Todas las excepciones utilizarán el segmento de código del kernel salvo las interrupciones $0x80$ y $0x90$, las cuales tienen nivel de privilegio $3$ y $2$ respectivamente que servirán para permitir a los usuarios y al árbitro utilizar los servicios del kernel.
 
+\subsubsection{Rutinas de atención de interrupciones}
+Para las excepciones del procesador, excepto la interrupción 14, utilizamos el macro $ISR\_GENERICO$ definido en $isr.asm$ el cuál hace lo siguiente:
+\begin{itemize}
+\item \textbf{Ejecuta tarea\_actual():} utiliza esta función para conseguir el número de tarea actual (1 a 5).
+\item \textbf{Elimina la tarea actual:} remueve la tarea actual del scheduler utilizando $sched\_remover\_tarea()$ ubicada en $sched.c$ la cuál se encarga de setear en 0 el valor del selector de la tarea en el arreglo de tareas marcándola como eliminada.
+\item \textbf{Mostrar el mensaje de la interrupción correspondiente:} se utiliza la función $aprintf()$ localizada en $screen.c$ para imprimir el tipo de interrupción encontrada en la sección determinada para cáda tarea (recuadro inferior).
+\item \textbf{Conmutar tarea:} debido a que se produjo una interrupción por un problema en la ejecución de la tarea, se llama a $pasar\_turno()$ ubicada en $sched.c$ la cuál se encarga de setear el quantum en 0 y llamar al scheduler para que realize la conmutación de tareas adecuada.
+\end{itemize}
+
+\textbf{Rutina de atención de la interrupción 14 (Page Fault)}
+La rutina de atención de Page Fault's se encarga de atender el problema utilizando la función $asignarMemoria()$ definida en $mmu.c$ la cuál mapea la memoria correspondiente al espacio de memoria reservado para el uso de las tareas. $AsignarMemoria()$ utiliza una dirección base física que incrementa en 4k en cada interrupción realizada por las tareas, asignando una página de memoria correspondiente a la dirección virtual pedida. $AsignarMemoria()$ devuelve 0 en caso fallido (memoria virtual fuera del rángo o máximo de páginas alcanzado) o 1 en caso de finalizar correctamente.
+
+Una vez ocurrido el llamado a $asignarMemoria()$, según el resultado de la operación se procede a eliminar la tarea y mostrar el mensaje correspondiente en caso de haber fallado o a continuar con la tarea.
 
 \subsection{Ejercicio 3: inicializar el directorio y las tablas de paginas del kernel}
 \subsubsection{Inicializando page\_directory}
@@ -353,7 +366,7 @@ Esta función llena correctamente la entrada de la page table en el directorio c
 
 \subsection{Ejercicio 5: Handler de las interrupciones}
 
-La tarea de la interrupción $32$ (reloj) tiene 2 funciones:
+La rutina de atención de la \textbf{interrupción $32$} (reloj) tiene 2 funciones:
 
 \begin{enumerate}
  \item Imprimir el proximo estado del reloj.
@@ -363,8 +376,9 @@ La tarea de la interrupción $32$ (reloj) tiene 2 funciones:
 La impresión del pŕoximo estado del reloj se realiza ejecutando la función $proximo\_reloj$ creada por la cátedra  la cual se encarga de actualizar correctamente el estado de reloj.
 
 Cómo segunda función, la interrupción del reloj se encarga de llamar a $sched$, ubicada en el archivo $sched.c$ la cuál se encarga de administrar los quantums de las tareas y hacer el cambio de estas. La función $sched()$ será detallada en el siguiente punto.
+\\
 
-La interrupción $33$ es la encargada de ver si hay que pausar o reanudar el juego. Esta realiza una lectura del estado del teclado y dependiendo el resultado, setea el espacio de memoria definido por la variable  $pausarReanudar$ (declarada en $sched.c$) en $1$ o en $0$.
+La \textbf{interrupción $33$} es la encargada de ver si hay que pausar o reanudar el juego. Esta realiza una lectura del estado del teclado y dependiendo el resultado, setea el espacio de memoria definido por la variable  $pausarReanudar$ (declarada en $sched.c$) en $1$ o en $0$.
 Para esto utiliza la instrucción assembler \textbf{$in al, 0x60$} y luego compara el valor de $al$ con $0x93$ (soltar tecla R) y $0x99$ (soltar tecla P).
 
 Pseudocódigo de la rutina:
@@ -434,8 +448,6 @@ Esto se implementó de esta manera para poder contar las celulas vacías al mism
 
 
 \subsection{Pregunta 1: ¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por qué?}
-
-Se produce una excepción de protección general. El segmento de video comienza en $B8000$ y termina en $B8FA0$. La excepción se produce porque al escribir en la fila 26, columna 1, estamos modificando el byte $25 * 80 * 2 + 1 = 4001 = FA1$ de la memoria de video, es decir, la dirección $B8FA1$, que no pertenece al segmento de video.
 
 
 \subsection{Pregunta 2: ¿Qué ocurre si no se setean todos los registros de segmento al entrar en
