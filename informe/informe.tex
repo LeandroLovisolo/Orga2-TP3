@@ -250,11 +250,11 @@ A continuación mostramos la lista de atributos que explicaremos.
  \item $3$ $bits$ $en$ $0$
 \end{itemize}
 
-El primer bit $p$ es el que indica que la interrupción está presente en memoria.
+El primer bit $p$ es el que indica que la interrupcion está presente en memoria.
 
 $dpl$ hace referencia a los privilegios que necesita el proceso para poder llamar a la rutina. Un proceso que tiene privilegio de usuario ($3$) no puede llamar a una rutina que tiene $dpl = 0$ ya que el mismo indica que solo un proceso con privilegio de kernel puede llamarlo.
 
-Además como lo que queremos definir son puertas de interrupción, hay que definir como $1 1 0$ los 3 bits de $tipo$ $de$ $descriptor$.
+Además como lo que queremos definir son puertas de interrupcion, hay que definir como $1 1 0$ los 3 bits de $tipo$ $de$ $descriptor$.
 
 Los siguientes 3 bit deben ser seteados en $0$ ya que asi lo indica el manual de intel.\\
 
@@ -352,23 +352,22 @@ mmu\_mappear\_pagina(unsigned int virtual, unsigned int fisica, pd\_entry\* page
 Esta función llena correctamente la entrada de la page table en el directorio correspondiente a la dirección virtual, mapeando la dirección física provista como parámetro a esta.\\
 
 \subsection{Ejercicio 5: Handler de las interrupciones}
-\subsubsection{Handler de la interrupción 32 (reloj)}
-La tarea de la interrupción $32$ ( reloj ) tiene 2 funcionalidades:
+
+La tarea de la interrupción $32$ (reloj) tiene 2 funciones:
 
 \begin{enumerate}
- \item imprimir el proximo estado del reloj.
- \item ir pasandole el comando del procesador a las distintas tareas.
+ \item Imprimir el proximo estado del reloj.
+ \item Ejecutar la función sched que llama al scheduler.
 \end{enumerate}
 
-La primer funcionalidad se ejecuta utilizando una función creada por la cátedra ``$proximo\_reloj$'' la cual se encarga de actualizar correctamente el estado de reloj. \\
+La impresión del pŕoximo estado del reloj se realiza ejecutando la función $proximo\_reloj$ creada por la cátedra  la cual se encarga de actualizar correctamente el estado de reloj.
 
-Para la segunda funcionalidad se utiliza la función $sched$ alojada en el archivo $sched.c$ que detallaremos en el ejercicio 6. \\
+Cómo segunda función, la interrupción del reloj se encarga de llamar a $sched$, ubicada en el archivo $sched.c$ la cuál se encarga de administrar los quantums de las tareas y hacer el cambio de estas. La función $sched()$ será detallada en el siguiente punto.
 
-\subsubsection{Handler de la interrupción 33 (Pausar Reanudar)}
-la interrupción $33$ es la encargada de ver si hay que pausar o reanudar el juego, La misma realiza una lectura del estado del teclado y dependiendo el resultado, setea el espacio de memoria definido por la etiqueta $pausarReanudar$ en $1$ o en $0$.
-Para esto utiliza la instrucción assembler ``in $al$, $0x60$'' y luego compara el valor de $al$ con $0x93$ (soltar tecla R) y $0x99$ (soltar tecla P).
+La interrupción $33$ es la encargada de ver si hay que pausar o reanudar el juego. Esta realiza una lectura del estado del teclado y dependiendo el resultado, setea el espacio de memoria definido por la variable  $pausarReanudar$ (declarada en $sched.c$) en $1$ o en $0$.
+Para esto utiliza la instrucción assembler \textbf{$in al, 0x60$} y luego compara el valor de $al$ con $0x93$ (soltar tecla R) y $0x99$ (soltar tecla P).
 
-un pseudocodigo que ayude a comprender mejor esta rutina es enunciado a continuación:
+Pseudocódigo de la rutina:
 
 \begin{pseudocodigo}
   \STATE $al \leftarrow [0x60]$
@@ -380,43 +379,22 @@ un pseudocodigo que ayude a comprender mejor esta rutina es enunciado a continua
   \ENDIF
 \end{pseudocodigo}
 
-Una vez seteado $pausarReanudar$, cuando se llame a la función sched, la misma se encargara de leer el valor del mismo y efectuar la acción necesaria.\\
-
-\subsubsection{Handler de la interrupción 0x80 (migrar, duplicar) }
-
-Esta interrupción podra ser accedida por un proceso de nivel usuario y debera pasarle parametros para que funcione correctamente. La tabla de los parámetros de entrada correctos esta establecida en el enunciado del TP.
-
-Contamos para la implementación de este handler con dos funciones pasadas por la cátedra $game\_duplicar$ y $game\_migrar$. Luego lo que debemos haces es comparar el valor de $eax$ con $111$ y $222$ para saber cual de las dos funcionalidades llamar.
-
-Teniendo en cuenta que no se pasa por parametro cual es la tarea que llamo a la interrupción, la misma debe obtenerse a traves de la función tarea\_actual.
-
-Además si el valor de $eax$ no es valido se pasa directamente a la tarea siguiente haciendo que la actual pierda su turno.
-
-Nuevamente presentaremos un pseudocódigo del handler para que sea más facil de comprender.
-
-\begin{pseudocodigo}
-  \STATE
-  \STATE $eax \leftarrow$ $obtener$ $la$ $tarea$ $actual$
-  \IF {$eax = 111$}
-    \STATE llamar a la función $game\_duplicar(nro\_jugador,fila,columna)$
-  \ELSE
-    \IF{$eax = 222$}
-      \STATE llamar a la función $game\_migrar(col\_dst,fila\_dst,col\_src,fila\_src,nro\_jugador)$
-    \ELSE
-      \STATE pasar el control del procesador a la próxima tarea del scheduler.
-    \ENDIF
-  \ENDIF
-\end{pseudocodigo}
+Una vez seteado $pausarReanudar$ 
 
 
+\subsection{Ejercicio 6: Scheduler}
 
-\subsubsection{Handler de la interrupción 0x90 (iniciar terminar) }
+El scheduler es el encargado de ir pasandole el control del procesador de una tarea a la otra. Para hacer esto utiliza la interrupcion de reloj como control del tiempo que una tarea lleva en ejecución. De esta manera cuando pasa una cierta cantidad de tiempo acumulado en un quantum le quitamos el control a una tarea y se lo pasamos a la siguiente. También se le quita el control a una tara si las mismas hacen una jugada correcta.
+Por otro lado si se precionan las teclas P se le debe pasar el control a la tarea idle. Si actualmente se esta ejecutando la tarea idle y se preciona la tecla R se le debe pasar el control a la proxima tarea.
 
+Para lograr 
 
+\subsection{Apéndice}
+\subsubsection{Tarea árbitro}
 La tarea del árbitro se dedica a mirar constantemente el estado del tablero, graficar los cambios que hayan provocado los jugadores y ver si el juego ha llegado a su fin para poder dar como finalizado el juego y mostrar el ganador.
 Para saber cuando termino el juego, hay que contar cuantos espacios del tablero todavía están libres, en caso que no haya ninguno, entonces el juego termino.
 
-El pseudocodigo para el árbitro es el siguiente:\\
+El pseudocodigo para el árbitro es el siguiente:
 
 \begin{pseudocodigo}
   \STATE Dibujar la interfaz
@@ -440,15 +418,7 @@ El pseudocodigo para el árbitro es el siguiente:\\
 
 La cantidad de jugadores es 4, pero el array para los puntajes tiene tamaño 5. Esto es porque la última posicion de puntaje es utilizada para contar los espacios libres en tablero, de esta manera, cuando $puntaje[4]= 0$ es porque no quedan casilleros vacios y el juego habrá terminado.
 
-Esto se implementó de esta manera para poder contar las celulass vacías al mismo tiempo que se cuentan las celulas infectadas para ver el puntaje de los jugadores.
-
-\subsection{Ejercicio 6: Scheduler}
-
-El scheduler es el encargado de ir pasandole el control del procesador de una tarea a la otra. Para hacer esto utiliza la interrupción de reloj como control del tiempo que una tarea lleva en ejecución. De esta manera cuando pasa una cierta cantidad de tiempo acumulado en un quantum le quitamos el control a una tarea y se lo pasamos a la siguiente. También se le quita el control a una tara si las mismas hacen una jugada correcta.
-Por otro lado si se precionan las teclas P se le debe pasar el control a la tarea idle. Si actualmente se esta ejecutando la tarea idle y se preciona la tecla R se le debe pasar el control a la proxima tarea.
-
-Para lograr 
-
+Esto se implementó de esta manera para poder contar las celulas vacías al mismo tiempo que se cuentan las celulas infectadas para ver el puntaje de los jugadores.
 
 
 \section{Preguntas y respuestas}
@@ -561,7 +531,7 @@ Si la conmutación de la tarea fue exitosa, esta comenzará a ejecutarse, pudien
 
 \subsection{Pregunta 15: Se sabe que las tareas llaman a la interrupción 0x80 y por 0x90. ¿Qué ocurre si esta no está implementada? ¿Por qué?}
 
-Si estas interrupciónes están definidas en la IDT pero no están implementadas, lo que ocurre es que el procesador empieza a ejecutar el código en la dirección especificada en la IDT entry correspondiente a la interrupción recibida. El resultado de esto es indeterminado, de acuerdo a lo que hayamos puesto en nuestro kernel en esa dirección de memoria.
+Si estas interrupciones están definidas en la IDT pero no están implementadas, lo que ocurre es que el procesador empieza a ejecutar el código en la dirección especificada en la IDT entry correspondiente a la interrupción recibida. El resultado de esto es indeterminado, de acuerdo a lo que hayamos puesto en nuestro kernel en esa dirección de memoria.
 
 Si en cambio las interrupciones no están definidas en la IDT, o la IDT entry correspondiente está mal definida (por ejemplo, si los campos segmento:offset apuntan a una dirección de memoria no definida) el procesador produce una excepción de protección general.
 
