@@ -61,7 +61,6 @@ void sched() {
 			pausado = 0;
 			unsigned short proxTarea = sched_proximo_indice();
 			if(proxTarea != 0)	{
-				reloj_tarea();
 				jmpToTask(proxTarea); // salto a la proxima tarea
 			} else { //Si no quedan tareas por ejecutar porque todas murieron
 				game_terminar();
@@ -72,8 +71,7 @@ void sched() {
 	else {
 		quantum--;
 	}
-return;
-
+	reloj_tarea();
 }
 
 unsigned short sched_proximo_indice() {
@@ -160,4 +158,5 @@ void reloj_tarea() {
 			aprintf(24, 1, COLOR_A, buf);
 			break;
 	}
+	printf(15, 50, "Reloj tarea actual: %d", tarea);
 }
