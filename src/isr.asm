@@ -261,7 +261,6 @@ ISR 32
 	pushad
 	call fin_intr_pic1 		; le comunica al pic que ya se atendio la interrupción
 	call proximo_reloj
-	call reloj_tarea
 	call sched			
 	popad
 	popfd 				; restablece el valor de los flags

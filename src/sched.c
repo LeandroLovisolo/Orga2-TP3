@@ -61,6 +61,7 @@ void sched() {
 			pausado = 0;
 			unsigned short proxTarea = sched_proximo_indice();
 			if(proxTarea != 0)	{
+				reloj_tarea();
 				jmpToTask(proxTarea); // salto a la proxima tarea
 			} else { //Si no quedan tareas por ejecutar porque todas murieron
 				game_terminar();
