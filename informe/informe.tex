@@ -243,9 +243,9 @@ Los siguientes 3 bit deben ser seteados en $0$ ya que asi lo indica el manual de
 Teniendo estas cosas en cuenta, los tres números en hexadecimal que se le pasa al campo $atrr$ para definir las entradas correctamente son:
 
 \begin{enumerate}
- \item $0x8E00 = | 1 | 0 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de kernel.
- \item $0xCE00 = | 1 | 1 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios $2$.
- \item $0xEE00 = | 1 | 1 1 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de usuario.
+ \item  \textbf{0x8E00} $= | 1 | 0 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de kernel.
+ \item \textbf{0xCE00} $= | 1 | 1 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios $2$.
+ \item \textbf{0xEE00} $= | 1 | 1 1 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de usuario.
 \end{enumerate}
 
 Luego utilizando esto, llenamos todos los campos necesarios en la IDT correctamente. Todas las excepciones utilizarán el segmento de código del kernel salvo las interrupciones $0x80$ y $0x90$, las cuales tienen nivel de privilegio $3$ y $2$ respectivamente que servirán para permitir a los usuarios y al árbitro utilizar los servicios del kernel.
