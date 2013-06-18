@@ -477,5 +477,8 @@ Si la conmutación de la tarea fue exitosa, esta comenzará a ejecutarse, pudien
 
 \subsection{Se sabe que las tareas llaman a la interrupción 0x80 y por 0x90. ¿Qué ocurre si esta no está implementada? ¿Por qué?}
 
+Si estas interrupciones están definidas en la IDT pero no están implementadas, lo que ocurre es que el procesador empieza a ejecutar el código en la dirección especificada en la IDT entry correspondiente a la interrupción recibida. El resultado de esto es indeterminado, de acuerdo a lo que hayamos puesto en nuestro kernel en esa dirección de memoria.
+
+Si en cambio las interrupciones no están definidas en la IDT, el procesador produce una excepción de protección general.
 
 \end{document}
