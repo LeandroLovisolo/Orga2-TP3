@@ -420,21 +420,27 @@ Para lograr
 
 
 \section{Preguntas y respuestas}
-\subsection{¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por qué?}
 
-\subsection{¿Qué ocurre si no se setean todos los registros de segmento al entrar en
+
+\subsection{Pregunta 1: ¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por qué?}
+
+
+\subsection{Pregunta 2: ¿Qué ocurre si no se setean todos los registros de segmento al entrar en
 modo protegido? ¿Es necesario setearlos todos? ¿Por qué?}
 Si no se setean los registros al entrar en modo protegido corremos el riesgo de que, en algún momento intentemos utilizarlos y al no tener un selector correcto (existente, distinto del 0 y del segmento que deberíamos utilizar), obtengamos un GPE.
 
 También hay que tener en cuenta de utilizar el selector correcto (código, nivel 0) a la hora de pasar a modo protegido.
 
 Ejemplos de la situación:
+
 \begin{enumerate}
 	\item No haber seteado el registro de segmento de datos e intentar acceder a un dato
 	\item No haber seteado el registro de segmento del stack y querer utilizarlo
 \end{enumerate}
 
-\subsection{¿Cómo se puede hacer para generar una excepción sin utilizar la instrucción int? Mencionar al menos 3 formas posibles.}
+
+\subsection{Pregunta 3: ¿Cómo se puede hacer para generar una excepción sin utilizar la instrucción int? Mencionar al menos 3 formas posibles.}
+
 Otras formas de realizar una excepción:
 \begin{enumerate}
 	\item \textbf{General Protection Exception:}
@@ -445,10 +451,13 @@ Otras formas de realizar una excepción:
 	Excepción relacionada con paginación, puede ocurrir al intentar acceder a memoria que no fue mapeada.
 \end{enumerate}
 
-\subsection{¿Cuáles son los valores del stack cuando se genera una interrupción? ¿Qué significan? Indicar para el caso de operar en nivel 3 y nivel 0}
+
+\subsection{Pregunta 4: ¿Cuáles son los valores del stack cuando se genera una interrupción? ¿Qué significan? Indicar para el caso de operar en nivel 3 y nivel 0}
+
 teniendo en cuenta que un segmento de pila puede ser accedido solamente por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la apuntada por el ESP0 de la tss de la tarea actual.
 
 Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción debe resguardarse en la pila los registros
+
 \begin{itemize}
  \item EFLAGS (que contiene información del contexto de ejecución).
  \item CS (que indica el segmento de código en el cual se estaba ejecutando el programa y permite luego poder volver a seguir corriendo en el mismo lugar).
@@ -461,49 +470,62 @@ Los demás registros deben ser resguardados por la interrupción en caso que los
 Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de  los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
 
 
-\subsection{¿Puede el directorio de páginas estar en cualquier posición arbitraria de memoria?}
+\subsection{Pregunta 5: ¿Puede el directorio de páginas estar en cualquier posición arbitraria de memoria?}
 En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. \\
 
 Con 32 bit direccionando a byte se pueden direccionar $2^{32}$ $bytes$ $=$ $4294967296$ $bytes$ $=$ $4$ $GB$ de memoria. Es por esto que se puede alojar el directorio de páginas de una tarea en cualquier posición de memoria. 
 
 Algo a tener en cuenta es que este espacio debe estar reservado exclusívamente para este uso, ya que en \textbf{CR3} hay una dirección física que no pasa por la unidad de paginación, y por lo tanto, si en ese espacio de memoria física no se encuentra el directorio de paginas, tendriamos un error.
 
-\subsection{¿Es posible acceder a una página de nivel de kernel desde usuario?}
 
-\subsection{¿Se puede mapear una página física desde dos direcciones virtuales distintas, de manera tal que una esté mapeada con nivel de usuario y la otra a nivel de kernel? De ser posible, ¿Qué problemas puede traer?}
+\subsection{Pregunta 6: ¿Es posible acceder a una página de nivel de kernel desde usuario?}
+
+
+\subsection{Pregunta 7: ¿Se puede mapear una página física desde dos direcciones virtuales distintas, de manera tal que una esté mapeada con nivel de usuario y la otra a nivel de kernel? De ser posible, ¿Qué problemas puede traer?}
+
 Si, se puede hacer eso si se quisiera. Para esto, en los descriptores de páginas a los que apuntan las dos direcciones virtuales deben tener el mismo valor de adress.
 
 Los problemas que esta acción puede generar, es que si los permisos asignados son incorrectos, un codigo con privilegio de usuario podria modificar o leer codigo o datos que no deberia poder generando problemas en el SO.
 
-\subsection{¿Qué permisos pueden tener las tablas y directorios de páginas? ¿Cuáles
+
+\subsection{Pregunta 8: ¿Qué permisos pueden tener las tablas y directorios de páginas? ¿Cuáles
 son los permisos efectivos de una dirección de memoria según los permisos del directorio
 y tablas de páginas?}
+
 A diferencia de la segementación, donde un segmento puede tener 4 niveles distintos de privilegios, siendo 0 el más alto (privilegio de kernel) y 3 el más bajo. En paginación hay solo dos niveles de privilegios, User/supervisor. Por otro lado además de los permisos, se cuenta también con el tipo de acceso, el cual indica si una página es de solo lectura, o de lectura escritura.
 
 Tanto las tablas como los directorios de paginas pueden tener privilegios de user o de supervisor como accesos de lectura o lectura y escritura. El resultado para las distintas combinaciones se muestra en la siguiente tabla obtenida del manual de intel.
 
 \includegraphics[height=10cm]{privilegios.png} 
 
-\subsection{¿Es posible desde dos directorios de página, referenciar a una misma tabla de páginas?}
+
+\subsection{Pregunta 9: ¿Es posible desde dos directorios de página, referenciar a una misma tabla de páginas?}
+
 Si, esto es posible ya que no hay restricciones al respecto. Cuando la unidad de paginación va al directorio de páginas lo que recupera es una dirección fisica alineada a $4Kb$ que le indica en que lugar de la memoria se encuentra el page table que buscamos, por lo que para lograr esto simplemente hay que asignarles la direccion de la tabla que se decea compartir en ambos directorios y listo.
 
-\subsection{¿Que es el TLB (Translation Lookaside Buffer) y para qué sirve?}cache de traducciones
+
+\subsection{Pregunta 10: ¿Que es el TLB (Translation Lookaside Buffer) y para qué sirve?}cache de traducciones
 La TLB es una cache de traducciones, en el mismo se guarda la dirección base de una pagina para obtener una direccion fisica más algunos bit de atributos necesarios, entre los cuales se encuentra LRU para saber cual es el próximo elemento de la TLB que debe ser desalojado en caso necesario.
 
 Esto tiene su utilidad ya que se cuenta con el criterio de vecindad, el cual dice que si por ejemplo la dirección almacenada pertenece a una página de código, seguramente la proximas instrucciones estén en la misma página ahorrandose asi la traducción de las mismas que ya se pueden calcular a traves de la TLB. 
 
-\subsection{¿Qué pasa si en la interrupción de teclado no se lee la tecla presionada?}
 
-\subsection{¿Qué pasa si no se resetea el PIC?}
+\subsection{Pregunta 11: ¿Qué pasa si en la interrupción de teclado no se lee la tecla presionada?}
 
-\subsection{Colocando un breakpoint luego de la cargar una tarea, ¿cómo se puede
+
+\subsection{Pregunta 12: ¿Qué pasa si no se resetea el PIC?}
+
+
+\subsection{Pregunta 13: Colocando un breakpoint luego de la cargar una tarea, ¿cómo se puede
 verificar, utilizando el debugger de Bochs, que la tarea se cargó correctamente? ¿Cómo se
 llega a esta conclusión?}
 
-\subsection{¿Cómo se puede verificar si la conmutación de tarea fue exitosa?}
+
+\subsection{Pregunta 14: ¿Cómo se puede verificar si la conmutación de tarea fue exitosa?}
 Si la conmutación de la tarea fue exitosa, esta comenzará a ejecutarse, pudiendose ver en el debugger de Bochs su ejecución. Además de esto, es posible verificar, utilizando \textbf{info tss} si la TSS fue cargada correctamente observando los valores correspondientes a la tarea.
 
-\subsection{Se sabe que las tareas llaman a la interrupción 0x80 y por 0x90. ¿Qué ocurre si esta no está implementada? ¿Por qué?}
+
+\subsection{Pregunta 15: Se sabe que las tareas llaman a la interrupción 0x80 y por 0x90. ¿Qué ocurre si esta no está implementada? ¿Por qué?}
 
 Si estas interrupciones están definidas en la IDT pero no están implementadas, lo que ocurre es que el procesador empieza a ejecutar el código en la dirección especificada en la IDT entry correspondiente a la interrupción recibida. El resultado de esto es indeterminado, de acuerdo a lo que hayamos puesto en nuestro kernel en esa dirección de memoria.
 
