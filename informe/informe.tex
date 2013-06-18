@@ -525,9 +525,9 @@ Otras formas de realizar una excepción:
 
 \subsection{Pregunta 4: ¿Cuáles son los valores del stack cuando se genera una interrupción? ¿Qué significan? Indicar para el caso de operar en nivel 3 y nivel 0}
 
-teniendo en cuenta que un segmento de pila puede ser accedido solamente por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la apuntada por el ESP0 de la tss de la tarea actual.
+Teniendo en cuenta que un segmento de pila puede ser accedido solamente por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la apuntada por el ESP0 de la tss de la tarea actual.
 
-Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción debe resguardarse en la pila los siguientes registros:
+Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción el procesador resguarda en la pila los siguientes registros:
 
 \begin{itemize}
  \item EFLAGS (que contiene información del contexto de ejecución).
@@ -536,9 +536,9 @@ Para poder volver al codigo de la tarea actual sin tener problemas, antes de pas
  \item Código de Error (este campo no es obligatorio pero en caso de que la interrupción tenga código de error entonces se almacena aquí.
 \end{itemize}
 
-Los demás registros deben ser resguardados por la interrupción en caso que los utilize.\\
+Los demás registros deben ser resguardados por la interrupción en caso que los utilize.
 
-Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de  los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
+Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
 
 
 \subsection{Pregunta 5: ¿Puede el directorio de páginas estar en cualquier posición arbitraria de memoria?}
