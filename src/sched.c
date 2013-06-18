@@ -110,7 +110,6 @@ void sched_remover_tarea(unsigned int process_id) {
 	//printf(6, 50, "Borrar: %d", process_id);
 
 	tareas[process_id] = 0;
-	quantum = 0;
 }
 
 // Devuelve un numero entre 1 y 5 representando la tarea actual,
