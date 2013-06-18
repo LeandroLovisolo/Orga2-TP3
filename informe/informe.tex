@@ -442,19 +442,17 @@ El pseudocodigo para el árbitro es el siguiente:
 
 \begin{pseudocodigo}
   \STATE Dibujar la interfaz
-  \STATE llamar a syscall\_iniciar
-  \STATE inicializar un array de tamaño 5 para los puntajes
+  \STATE Llamar a syscall\_iniciar
+  \STATE Inicializar un array de tamaño 5 para los puntajes
   \STATE
   \WHILE{True}
-    \STATE
     \STATE Calcular el puntaje
     \STATE Actualizar la pantalla dependiendo de esos puntajes
     \STATE
     \IF{Termino el juego}
-      \STATE
       \STATE Imprimir el ganador
-      \STATE llamar a syscall\_terminar
-      \STATE salir del while
+      \STATE Llamar a syscall\_terminar
+      \STATE Salir del while
     \ENDIF
   \ENDWHILE
   \STATE
@@ -473,7 +471,8 @@ Las funciones definidas son las siguientes:
 
 \begin{verbatim}
 void  printf(unsigned char fila, unsigned char columna, const char *fmt, ...);
-void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, const char *fmt, ...);
+void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, 
+const char *fmt, ...);
 int  sprintf(char *buffer, const char *fmt, ...);
 \end{verbatim}
 
@@ -492,6 +491,7 @@ La función \texttt{sprintf} es análoga a la función de mismo nombre en la lib
 
 \subsection{Pregunta 1: ¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por qué?}
 
+Se produce una excepción de protección general. El segmento de video comienza en $B8000$ y termina en $B8FA0$. La excepción se produce porque al escribir en la fila 26, columna 1, estamos modificando el byte $25 * 80 * 2 + 1 = 4001 = FA1$ de la memoria de video, es decir, la dirección $B8FA1$, que no pertenece al segmento de video.
 
 \subsection{Pregunta 2: ¿Qué ocurre si no se setean todos los registros de segmento al entrar en
 modo protegido? ¿Es necesario setearlos todos? ¿Por qué?}
@@ -522,9 +522,9 @@ Otras formas de realizar una excepción:
 
 \subsection{Pregunta 4: ¿Cuáles son los valores del stack cuando se genera una interrupción? ¿Qué significan? Indicar para el caso de operar en nivel 3 y nivel 0}
 
-teniendo en cuenta que un segmento de pila puede ser accedido solamente por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la apuntada por el ESP0 de la tss de la tarea actual.
+Teniendo en cuenta que un segmento de pila puede ser accedido solamente por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la apuntada por el ESP0 de la tss de la tarea actual.
 
-Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción debe resguardarse en la pila los siguientes registros:
+Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción el procesador resguarda en la pila los siguientes registros:
 
 \begin{itemize}
  \item EFLAGS (que contiene información del contexto de ejecución).
@@ -533,13 +533,13 @@ Para poder volver al codigo de la tarea actual sin tener problemas, antes de pas
  \item Código de Error (este campo no es obligatorio pero en caso de que la interrupción tenga código de error entonces se almacena aquí.
 \end{itemize}
 
-Los demás registros deben ser resguardados por la interrupción en caso que los utilize.\\
+Los demás registros deben ser resguardados por la interrupción en caso que los utilize.
 
-Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de  los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
+Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
 
 
 \subsection{Pregunta 5: ¿Puede el directorio de páginas estar en cualquier posición arbitraria de memoria?}
-En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. \\
+En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. 
 
 Con 32 bit direccionando a byte se pueden direccionar $2^{32}$ $bytes$ $=$ $4294967296$ $bytes$ $=$ $4$ $GB$ de memoria. Es por esto que se puede alojar el directorio de páginas de una tarea en cualquier posición de memoria. 
 
@@ -553,7 +553,7 @@ No es posible acceder a una página de nivel kernel desde código de nivel usuar
 
 \subsection{Pregunta 7: ¿Se puede mapear una página física desde dos direcciones virtuales distintas, de manera tal que una esté mapeada con nivel de usuario y la otra a nivel de kernel? De ser posible, ¿Qué problemas puede traer?}
 
-Si, se puede hacer eso si se quisiera. Para esto, en los descriptores de páginas a los que apuntan las dos direcciones virtuales deben tener el mismo valor de adress.
+Si, es posible. Para esto, los descriptores de páginas a los que pertencen las dos direcciones virtuales deben tener el mismo valor de address.
 
 Los problemas que esta acción puede generar, es que si los permisos asignados son incorrectos, un codigo con privilegio de usuario podria modificar o leer codigo o datos que no deberia poder generando problemas en el SO.
 

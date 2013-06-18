@@ -105,6 +105,7 @@ void mmu_inicializar() {
 
     // Árbitro
     mmu_inicializar_tarea_arbitro();
+    tlbflush();
 }
 
 void mmu_mappear_pagina(unsigned int virtual,
@@ -185,18 +186,12 @@ le demos una página de memoria fisica. Cada tarea puede tener a lo sumo 5 pági
 No es necesario llevar el rastro de a que tarea se le asigna cual dirección fisica o algo similar
 Ya que no se necesita liberar memoria y las direcciones que ya se mapean no vuelven a tirar PF*/
 char asignarMemoria(unsigned int direccion) {
-    unsigned short tarea = tarea_actual() - 1; //Me da el valor del indice de la tarea
-    //breakpoint();
-    //printf(15, 45, "Tarea %u -> dir %x veces %u", tarea, direccion, cantPaginas[tarea]);
+    unsigned short tarea = tarea_actual() - 1; //Me da el valor del indice de la tarea;
     if((direccion >= 0x003D0000) && (direccion < 0x003F0000) && (cantPaginas[tarea] <= 5)) {
-        //printf(16, 45, "Pasa el if");
         cantPaginas[tarea]++;
-        //printf(17, 45, "Incremento contador");
         mmu_mappear_pagina(direccion, ultimaDirfisica, (pd_entry*)directorioDeTareas[tarea], 1, 1);
-        //printf(18, 45, "Hago el mapeo");
-        ultimaDirfisica += 4096; //Ver si hay que sumarle uno también
-        //printf(19, 45, "Incremento dir");
-        //breakpoint();
+        ultimaDirfisica += 4096;
+        tlbflush();
         return 1;
     }
     else {
