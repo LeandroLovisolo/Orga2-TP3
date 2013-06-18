@@ -114,7 +114,6 @@ mensaje_vacio db '                                                              
 
 	%defstr intr_num_%1 %1
 	intr_msg_%1     db  %2, ' (', intr_num_%1, ')', 0
-	intr_msg_len_%1 equ $ - intr_msg_%1
 
 	_isr%1:
 
