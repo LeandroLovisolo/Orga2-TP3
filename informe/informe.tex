@@ -220,8 +220,7 @@ A continuación veremos el codigo que pasa de modo real a modo protegido.
   \STATE mov ESP, 0x00020000
 \end{pseudocodigo}
 
-(ESTO NO ES DE 20 A 32 bits?)
-la función $habilitar\_A20$ creada por la catedra sirve para poder trabajar con espacios de memoria por encima del primer Mbyte de memoria, la misma debe ser llamada antes de pasar al modo protegido, ya que si no se genera un general protection $\#GP$.
+la función $habilitar\_A20$ creada por la catedra sirve para poder extender la limitación inicial de 20 lineas de direccionamiento a 32. La misma debe ser llamada antes de pasar al modo protegido, ya que si no se genera un general protection $\#GP$.
 
 También se debe cargar la GDT, ya que una vez que pasemos a modo protegido se empezará a utilizar la misma para gestionar la memoria. Es por esto que las primeras acciones que se llevan a cabo luego de pasar a modo protegido es setear los selectores de segmento correctamente y pasarle la dirección de la pila a los registros \textbf{EBP} y \textbf{ESP}. Si esto no se llevara a cabo rapidamente, se corre el riezgo de tener errores, ya que si se necesitace usar estos recursos, los mismos estarían con basura.
 
