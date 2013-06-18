@@ -521,10 +521,10 @@ Al resetear el PIC, las interrupciones de hardware quedan mapeadas en el área d
 \subsection{Pregunta 13: Colocando un breakpoint luego de la cargar una tarea, ¿cómo se puede
 verificar, utilizando el debugger de Bochs, que la tarea se cargó correctamente? ¿Cómo se
 llega a esta conclusión?}
-
+El comando \textbf{info tss} indica la información de la TSS entry correspondiente a la tarea cargada. Es posible verificar los valores de los campos de la TSS que muestra el comando contra los de la tarea cargada. 
 
 \subsection{Pregunta 14: ¿Cómo se puede verificar si la conmutación de tarea fue exitosa?}
-Si la conmutación de la tarea fue exitosa, esta comenzará a ejecutarse, pudiendose ver en el debugger de Bochs su ejecución. Además de esto, es posible verificar, utilizando \textbf{info tss} si la TSS fue cargada correctamente observando los valores correspondientes a la tarea.
+Si la conmutación de la tarea fue exitosa, esta comenzará a ejecutarse, pudiendose ver en el debugger de Bochs su ejecución (se debe tener en cuenta a que dirección virtual y física se encuentra en la ejecución y comprobar que correspondan a la tarea). Además de esto, es posible verificar, utilizando \textbf{info tss} si la TSS fue cargada correctamente observando los valores correspondientes a la tarea.
 
 
 \subsection{Pregunta 15: Se sabe que las tareas llaman a la interrupción 0x80 y por 0x90. ¿Qué ocurre si esta no está implementada? ¿Por qué?}
