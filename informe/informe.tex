@@ -127,7 +127,7 @@ Como estamos definiendo nuestro SO con un sistema Flat, todas las bases de los $
 
 A continuación se enuncia detalladamente como fueron cargados los descriptores. \\
 
-\textbf{Segmento 1: ( segmento de código )}
+\textbf{Segmento 1: (segmento de código)}
 \begin{itemize}
  \item $limit\_0\_15 = 0xFFFF$ (Se encuentran los primeros $16$ bits que indican el limite del segmento, poniendo este valor, como la base es $0$ obtenemos segmentos de $2GB$ como fue pedido en el enunciado del TP).
  \item $base\_0\_15 = 0$ 
@@ -144,39 +144,24 @@ A continuación se enuncia detalladamente como fueron cargados los descriptores.
  \item $base\_31\_24  = 0$
 \end{itemize}
 
-\textbf{Segmento $2$: ( segmento de código )} \\
-Es muy similar al segmento $1$ solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $1$. \\
+\textbf{Segmento $2$: (segmento de código)} \\
+Igual al segmento $1$, con $dpl = 1$. \\
 
-\textbf{Segmento $3$: ( segmento de código )} \\
-Es muy similar al segmento $1$ solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\
+\textbf{Segmento $3$: (segmento de código)} \\
+Igual al segmento $1$, con $dpl = 2$. \\
 
-\textbf{Segmento $4$: ( segmento de datos )} \\
-Es muy similar al segmento $1$ cambiando el atributo $type$ por $2$ = $0010$. \\
+\textbf{Segmento $4$: (segmento de datos)} \\
+Igual al segmento $1$, con $type = 2$. \\
 
-\textbf{Segmento $5$: ( segmento de datos )} \\
-Es muy similar al segmento anterior solo que cambia el nivel de privilegio definido en $dpl$ que pasa a ser $1$. \\
+\textbf{Segmento $5$: (segmento de datos)} \\
+Igual al segmento $1$, con $type = 2$ y $dpl = 1$. \\
 
-\textbf{Segmento $6$: ( segmento de datos )} \\
-Es muy similar al segmento anterior solo que cambia es el nivel de privilegio definido en $dpl$ que pasa a ser $2$. \\ 
+\textbf{Segmento $6$: (segmento de datos)} \\
+Igual al segmento $1$, con $type = 2$ y $dpl = 1$. \\
 
-Además de esto hay que declarar un segmento de datos más para describir el área de la pantalla en memoria, el mismo esta definido de la siguiente manera: 
-\begin{itemize}
- \item $limit\_0\_15 = 0x7FFF$
- \item $base\_0\_15 = 0x8000$ 
- \item $base\_23\_16 = 0xB$
- \item $type = 2$
- \item $s = 1$
- \item $dpl = 3$
- \item $p = 1$
- \item $limit_16_19 = 0$
- \item $avl = 0$
- \item $l = 0$
- \item $db = 1$
- \item $g = 0$
- \item $base\_31\_24  = 0$
-\end{itemize}
+\textbf{Segmento $7$: (segmento de video)} \\
+Igual al segmento $1$, con $base = 0xB8000$, $limit = 0xFA0$, $dpl = 3$ y $g = 0$. \\
 
-Si observamos veremos que la base es $0xB8000$ (dirección de memoria donde empieza la memoria de video), el limite es $0x07FFF$ (el límite de la memoria de video es $0xC0000$ por lo tanto $0xC0000-1 = 0x07FFF$) y su granularidad es 0 ya que su límite puede determinar la memoria necesaria sin usar granularidad. (VER TP TIENE GRANULARIDAD 1 ERROR CREO)
 
 \subsubsection{Pasando a modo protegido}
 
@@ -222,6 +207,7 @@ También se debe cargar la GDT, ya que una vez que pasemos a modo protegido se e
 
 \subsection{Ejercicio 2: Completar la IDT}
 La IDT (Interrupt Descriptor Table) es la encargada de almacenar los descriptores de interrupciones, la misma tiene un total de 256 entradas, las cuales se corresponden con todos los distintos tipos de interrupciones que maneja el microprocesador, estas pueden ser excepciones o interrupciones provocadas por el usuario. Las entradas 2, 15 y de la 20 a la 31 están reservadas por intel, por lo que no hay que utilizarlas. Para el resto de las entradas, se creó en $isr.asm$ la rutina de atención correspondiente y se llenó con los descriptores correctos para que apunten a la rutina creada.
+
 Para llenar la IDT con sus descriptores utilizamos el archivo $idt.c$, el cual contiene la siguiente macro creada por la cátedra que facilita el trabajo del mismo.\\
 
 \#define IDT\_ENTRY(numero, seg, atrr) \\                                                                      
@@ -257,9 +243,9 @@ Los siguientes 3 bit deben ser seteados en $0$ ya que asi lo indica el manual de
 Teniendo estas cosas en cuenta, los tres números en hexadecimal que se le pasa al campo $atrr$ para definir las entradas correctamente son:
 
 \begin{enumerate}
- \item $0x8E00 = | 1 | 0 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de kernel.
- \item $0xCE00 = | 1 | 1 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios $2$.
- \item $0xEE00 = | 1 | 1 1 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de usuario.
+ \item  \textbf{0x8E00} $= | 1 | 0 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de kernel.
+ \item \textbf{0xCE00} $= | 1 | 1 0 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios $2$.
+ \item \textbf{0xEE00} $= | 1 | 1 1 | 0 1 1 1 0 | 0 0 0 | 0 0 0 0 0 | $ \\ aqui definimos los atributos para rutinas con nivel de privilegios de usuario.
 \end{enumerate}
 
 Luego utilizando esto, llenamos todos los campos necesarios en la IDT correctamente. Todas las excepciones utilizarán el segmento de código del kernel salvo las interrupciones $0x80$ y $0x90$, las cuales tienen nivel de privilegio $3$ y $2$ respectivamente que servirán para permitir a los usuarios y al árbitro utilizar los servicios del kernel.
@@ -292,7 +278,7 @@ Para hacer esto hay que tener en cuenta como asignar los atributos.
 De esta manera indicamos que esa página tiene privilegios de supervisor ($user\_supervisor$ en 0), además dice en que parte de la memoria fisica esta alojada la page table, que la misma es de lectura y escritura y que está presente en la memoria.
 Como mencionamos antes, basta cargar estos datos en la primer entrada del page directory para mapear todo el espacio necesario para el kernel del TP.
 
-\subsubsection{inicializando page\_table}
+\subsubsection{Inicializando page\_table}
 Una vez que esta definido el page directory, debemos inicializar correctamente las entradas del page\_table[0] que definimos anteriormente.
 
 Hay que direccionar un espacio de $1.39$ MB =  $1424$ Kb lo cual entra en $356 = 0x164$ paginas de $4$ Kb. Teniendo en cuenta que la cantidad de entradas de un page table es de $1024$ setearemos las todas las entradas en $0$ con una rutina idéntica a la utilizada en el page directory y luego las primeras $356$ las re-seteamos corréctamente.
@@ -304,9 +290,9 @@ $page\_table[i].adress = i$
 Tengamos en cuenta como se decodifica la dirección virtual para obtener una dirección fisica. La misma se puede dividir en $3$ segmentos.
 
 \begin{enumerate}
- \item directorio = contiene el offset dentro del page directory donde se encuentra la page table correspondiente.
- \item tabla = este es el offset dentro del page table donde se encuentra el descriptor de la página correspondiente.
- \item Offset = este es el offset que se le suma a la base de la pagina obtenida para obtener el espacio de memoria exacto que queremos
+ \item \textbf{Directorio:} contiene el offset dentro del page directory donde se encuentra la page table correspondiente.
+ \item \textbf{Tabla:} este es el offset dentro del page table donde se encuentra el descriptor de la página correspondiente.
+ \item \textbf{Offset:} este es el offset que se le suma a la base de la pagina obtenida para obtener el espacio de memoria exacto que queremos
 \end{enumerate}
 
 Como la unica entrada del page directory que utilizaremos es la $0$, el campo directorio deberá ser siempre $0$, lo cual es correcto ya que los últimos $10$ bits de cualquier dirección del kernel son $0$. Luego dentro del page table obtenemos la dirección base de la página, la cual se obtiene de buscar la tabla indicada por el campo table (los bits 12 a 21 de la dirección virtual). Al definirle adress con el mismo número al de la entrada de esa tabla, al momento de sumar el offset de la dirección, obtendremos claramente un $identity$ $mapping$. \\
@@ -318,14 +304,14 @@ Como la unica entrada del page directory que utilizaremos es la $0$, el campo di
 Para el caso de las tareas lo que sucede es similar, a diferencia de que aqui no hacemos $indetity$ $mapping$. 
 Tenemos que considerar que hay que mapear la memoria del kernel para poder manejar las interrupciones, y luego mapear la memoria de la tarea, del la pila y del tablero. Como estas $3$ últimas no son mayores a 4kb entonces con una página para cada una alcanza. Es por esto que a las $356$ del kernel le sumamos $3$ y es la cantidad de páginas que hay que mapear, que nuevamente nos alcanza con la primer entrada de la page directory.
 
-los pasos a seguir entonces para mapear la memoria de una tarea es:
+Los pasos a seguir entonces para mapear la memoria de una tarea es:
 
 \begin{enumerate}
- \item inicializar el directorio con con todas entradas vacias.
- \item inicializar correctamente la primer entrada del directorio.
- \item inicializar la tabla correspondiente a la primer entrada con entradas vacias.
- \item mapear la memoria del kernel.
- \item mapear la memoria de la pila, del codigo y del tablero.
+ \item Inicializar el directorio con con todas entradas vacias.
+ \item Inicializar correctamente la primer entrada del directorio.
+ \item Inicializar la tabla correspondiente a la primer entrada con entradas vacias.
+ \item Mapear la memoria del kernel.
+ \item Mapear la memoria de la pila, del codigo y del tablero.
 \end{enumerate}
 
 Para los item $1$, $2$, $3$ y $4$ se utiliza la misma técnica implementada en el ejercicio $3$ del TP.
@@ -352,11 +338,11 @@ Esta función llena correctamente la entrada de la page table en el directorio c
 La rutina de atención de la \textbf{interrupción $32$} (reloj) tiene 2 funciones:
 
 \begin{enumerate}
- \item imprimir el proximo estado del reloj.
- \item ir pasandole el comando del procesador a las distintas tareas.
+ \item Imprimir el proximo estado del reloj.
+ \item Conmutar a la siguiente tarea habiendo acabado el tiempo de la tarea que se estuviera ejecutando.
 \end{enumerate}
 
-La primer funcionalidad se ejecuta utilizando una función creada por la cátedra ``$proximo\_reloj$'' la cual se encarga de actualizar correctamente el estado de reloj. \\
+Imprimir el próximo estado del reloj se realiza ejecutando la función creada por la cátedra $proximo\_reloj()$ la cual se encarga de actualizar correctamente el estado de reloj.
 
 Cómo segunda función, la interrupción del reloj se encarga de llamar a $sched$, ubicada en el archivo $sched.c$ la cuál se encarga de administrar los quantums de las tareas y hacer el cambio de estas. La función $sched()$ será detallada en el siguiente punto.
 
@@ -377,32 +363,32 @@ Pseudocódigo de la rutina:
   \ENDIF
 \end{pseudocodigo}
 
-Una vez seteado $pausarReanudar$, cuando se llame a la función sched, la misma se encargara de leer el valor del mismo y efectuar la acción necesaria.\\
+Una vez seteado $pausarReanudar$, cuando se llame a la función sched, la misma se encargara de leer el valor del mismo y efectuar la acción necesaria.
 
-\subsubsection{Handler de la interrupción 0x80 (migrar, duplicar) }
+\subsubsection{Handler de la interrupción 0x80 (migrar, duplicar)}
 
 Esta interrupción podra ser accedida por un proceso de nivel usuario y debera pasarle parametros para que funcione correctamente. La tabla de los parámetros de entrada correctos esta establecida en el enunciado del TP.
 
 Contamos para la implementación de este handler con dos funciones pasadas por la cátedra $game\_duplicar$ y $game\_migrar$. Luego lo que debemos haces es comparar el valor de $eax$ con $111$ y $222$ para saber cual de las dos funcionalidades llamar.
 
-Teniendo en cuenta que no se pasa por parametro cual es la tarea que llamo a la interrupción, la misma debe obtenerse a traves de la función tarea\_actual.
+Teniendo en cuenta que no se pasa por parametro cual es la tarea que llamo a la interrupción, la misma debe obtenerse a traves de la función $tarea\_actual()$ definida en $sched.c$.
 
 Además si el valor de $eax$ no es valido se pasa directamente a la tarea siguiente haciendo que la actual pierda su turno.
 
 Nuevamente presentaremos un pseudocódigo del handler para que sea más facil de comprender.
 
 \begin{pseudocodigo}
-  \STATE
-  \STATE $eax \leftarrow$ $obtener$ $la$ $tarea$ $actual$
-  \IF {$eax = 111$}
-    \STATE llamar a la función $game\_duplicar(nro\_jugador,fila,columna)$
+  \IF{$eax = 111$}
+    \STATE $retval$ $\leftarrow$ game\_duplicar(nro\_jugador, fila, columna)
   \ELSE
     \IF{$eax = 222$}
-      \STATE llamar a la función $game\_migrar(col\_dst,fila\_dst,col\_src,fila\_src,nro\_jugador)$
+      \STATE $retval$ $\leftarrow$ game\_migrar(col\_dst, fila\_dst, col\_src, fila\_src, nro\_jugador)
     \ELSE
-      \STATE pasar el control del procesador a la próxima tarea del scheduler.
+      \STATE $retval$ $\leftarrow$ $0$
     \ENDIF
   \ENDIF
+  \STATE pasar a la siguiente tarea
+  \STATE $eax$ $\leftarrow$ $retval$
 \end{pseudocodigo}
 
 
@@ -472,19 +458,17 @@ El pseudocodigo para el árbitro es el siguiente:
 
 \begin{pseudocodigo}
   \STATE Dibujar la interfaz
-  \STATE llamar a syscall\_iniciar
-  \STATE inicializar un array de tamaño 5 para los puntajes
+  \STATE Llamar a syscall\_iniciar
+  \STATE Inicializar un array de tamaño 5 para los puntajes
   \STATE
   \WHILE{True}
-    \STATE
     \STATE Calcular el puntaje
     \STATE Actualizar la pantalla dependiendo de esos puntajes
     \STATE
     \IF{Termino el juego}
-      \STATE
       \STATE Imprimir el ganador
-      \STATE llamar a syscall\_terminar
-      \STATE salir del while
+      \STATE Llamar a syscall\_terminar
+      \STATE Salir del while
     \ENDIF
   \ENDWHILE
   \STATE
@@ -503,7 +487,8 @@ Las funciones definidas son las siguientes:
 
 \begin{verbatim}
 void  printf(unsigned char fila, unsigned char columna, const char *fmt, ...);
-void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, const char *fmt, ...);
+void aprintf(unsigned char fila, unsigned char columna, unsigned char attr,
+                                                        const char *fmt, ...);
 int  sprintf(char *buffer, const char *fmt, ...);
 \end{verbatim}
 
@@ -522,6 +507,7 @@ La función \texttt{sprintf} es análoga a la función de mismo nombre en la lib
 
 \subsection{Pregunta 1: ¿Qué ocurre si se intenta escribir en la fila 26, columna 1 de la matriz de video, utilizando el segmento de la GDT que direcciona a la memoria de video? ¿Por qué?}
 
+Se produce una excepción de protección general. El segmento de video comienza en $B8000$ y termina en $B8FA0$. La excepción se produce porque al escribir en la fila 26, columna 1, estamos modificando el byte $25 * 80 * 2 + 1 = 4001 = FA1$ de la memoria de video, es decir, la dirección $B8FA1$, que no pertenece al segmento de video.
 
 \subsection{Pregunta 2: ¿Qué ocurre si no se setean todos los registros de segmento al entrar en
 modo protegido? ¿Es necesario setearlos todos? ¿Por qué?}
@@ -552,9 +538,9 @@ Otras formas de realizar una excepción:
 
 \subsection{Pregunta 4: ¿Cuáles son los valores del stack cuando se genera una interrupción? ¿Qué significan? Indicar para el caso de operar en nivel 3 y nivel 0}
 
-teniendo en cuenta que un segmento de pila puede ser accedido solamente por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la apuntada por el ESP0 de la tss de la tarea actual.
+Teniendo en cuenta que un segmento de pila puede ser accedido solamente por segmentos de codigo de mismo nivel de privilegio, cuando se genera una interrupción, dependiendo el nivel de privilegio de la tarea actual, se pasa a utilizar otro segmento de pila o no. Si la tarea actual es de privilegio 0, al pasar a una interrupción no se produce cambio de segmento de pila. Por el contrario si la tarea que se esta corriendo al momento que se produce la interrupción es de nivel 3, se hace un cambio de segmento de pila pasando a usar la apuntada por el ESP0 de la tss de la tarea actual.
 
-Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción debe resguardarse en la pila los siguientes registros:
+Para poder volver al codigo de la tarea actual sin tener problemas, antes de pasar a atender la interrupción el procesador resguarda en la pila los siguientes registros:
 
 \begin{itemize}
  \item EFLAGS (que contiene información del contexto de ejecución).
@@ -563,13 +549,13 @@ Para poder volver al codigo de la tarea actual sin tener problemas, antes de pas
  \item Código de Error (este campo no es obligatorio pero en caso de que la interrupción tenga código de error entonces se almacena aquí.
 \end{itemize}
 
-Los demás registros deben ser resguardados por la interrupción en caso que los utilize.\\
+Los demás registros deben ser resguardados por la interrupción en caso que los utilize.
 
-Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de  los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
+Si efectivamente hay que hacer un cambio en el segmento de pila que va a utilizar la interrupción, primero se copian los valores mensionados anteriormente en el nuevo segmento de pila, agregando también los valores actuales de los registros ESP y SS, y luego se produce el cambio de segmento de pila. De esta manera en el segmento de pila de la interrupción actual se tiene toda la info necesaria para restaurar la tarea al salir de la interrupción con $iret$.
 
 
 \subsection{Pregunta 5: ¿Puede el directorio de páginas estar en cualquier posición arbitraria de memoria?}
-En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. \\
+En un sistema operativo de 32 bit el máximo espacio direcionable es de $4GB$. Por otro lado el registro \textbf{CR3} en el que se encuentra la direccón física donde está alojada la página de directorios es de 32 bits. 
 
 Con 32 bit direccionando a byte se pueden direccionar $2^{32}$ $bytes$ $=$ $4294967296$ $bytes$ $=$ $4$ $GB$ de memoria. Es por esto que se puede alojar el directorio de páginas de una tarea en cualquier posición de memoria. 
 
@@ -583,7 +569,7 @@ No es posible acceder a una página de nivel kernel desde código de nivel usuar
 
 \subsection{Pregunta 7: ¿Se puede mapear una página física desde dos direcciones virtuales distintas, de manera tal que una esté mapeada con nivel de usuario y la otra a nivel de kernel? De ser posible, ¿Qué problemas puede traer?}
 
-Si, se puede hacer eso si se quisiera. Para esto, en los descriptores de páginas a los que apuntan las dos direcciones virtuales deben tener el mismo valor de adress.
+Si, es posible. Para esto, los descriptores de páginas a los que pertencen las dos direcciones virtuales deben tener el mismo valor de address.
 
 Los problemas que esta acción puede generar, es que si los permisos asignados son incorrectos, un codigo con privilegio de usuario podria modificar o leer codigo o datos que no deberia poder generando problemas en el SO.
 
