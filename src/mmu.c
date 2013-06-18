@@ -157,7 +157,7 @@ void mmu_inicializar_tarea_jugador(
     for (i = 0; i < 0x164; i++) {
         page_table[i].user_supervisor = 0;
         page_table[i].address = i;
-        page_table[i].read_write = 1;
+        page_table[i].read_write = 0;
         page_table[i].present = 1;
     }
     
