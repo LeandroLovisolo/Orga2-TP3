@@ -155,12 +155,13 @@ void mmu_inicializar_tarea_jugador(
 
     // Mappeo memoria del kernel
     for (i = 0; i < 0x164; i++) {
-        page_table[i].user_supervisor = 0;
+        page_table[i].user_supervisor = 1;
         page_table[i].address = i;
-        page_table[i].read_write = 1;
+        page_table[i].read_write = 0;
         page_table[i].present = 1;
     }
-    
+    //(user_supervisor) Privilegio de la Pagina: ’0’ Supervisor (Kernel), y ’1’ Usuario
+    //RW Establece si la pagina es Read Only (0) o si puede ser escrita (1).
     // Mappeo la memoria
     mmu_mappear_pagina(TASK_CODE,    code_address, page_directory,    1, 1);
     mmu_mappear_pagina(TASK_STACK,   stack_address, page_directory,   1, 1);
