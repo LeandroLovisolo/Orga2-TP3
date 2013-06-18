@@ -113,13 +113,9 @@ Lautaro José Petaccio 		& 443/11 & lausuper@gmail.com\\
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Introducción                                                              %%
+%% Desarrollo                                                                %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-\section{Introducción}
-
-bla bla bla
 
 \section{Desarrollo}
 \subsection{Ejercicio 1: GDT y modo protegido}
@@ -439,8 +435,12 @@ El scheduler cuenta con las siguientes funciones:
 	\item \textbf{game\_terminado():} se utiliza para saber si el juego terminó y realizar la conmutación a la tarea idle. La rutina se encuentra en $game.c$
 \end{itemize}
 
+
 \subsection{Detalles de implementación}
+
+
 \subsubsection{Tarea árbitro}
+
 La tarea del árbitro se dedica a mirar constantemente el estado del tablero, graficar los cambios que hayan provocado los jugadores y ver si el juego ha llegado a su fin para poder dar como finalizado el juego y mostrar el ganador.
 Para saber cuando termino el juego, hay que contar cuantos espacios del tablero todavía están libres, en caso que no haya ninguno, entonces el juego termino.
 
@@ -469,6 +469,28 @@ El pseudocodigo para el árbitro es el siguiente:
 La cantidad de jugadores es 4, pero el array para los puntajes tiene tamaño 5. Esto es porque la última posicion de puntaje es utilizada para contar los espacios libres en tablero, de esta manera, cuando $puntaje[4]= 0$ es porque no quedan casilleros vacios y el juego habrá terminado.
 
 Esto se implementó de esta manera para poder contar las celulas vacías al mismo tiempo que se cuentan las celulas infectadas para ver el puntaje de los jugadores.
+
+
+\subsubsection{Familia de funciones *printf}
+
+Definimos un conjunto de funciones para imprimir en pantalla basadas en una implementación parcial de la función \texttt{printf} de la librería standard de C, extraída de \texttt{http://geezer.osdevbrasil.net/osd/}. Utilizamos estas funciones en la tarea árbitro para imprimir todo el texto de la interfaz, y en \texttt{isr.asm}, donde se reportan en pantalla las excepciones de cada tarea en caso de haberlas.
+
+Las funciones definidas son las siguientes:
+
+\begin{verbatim}
+void  printf(unsigned char fila, unsigned char columna, const char *fmt, ...);
+void aprintf(unsigned char fila, unsigned char columna, unsigned char attr, const char *fmt, ...);
+int  sprintf(char *buffer, const char *fmt, ...);
+\end{verbatim}
+
+Las funciones \texttt{printf} y \texttt{aprintf} imprimen el string en el parámetro \texttt{fmt} en la posición (\texttt{fila}, \texttt{columna}), interpolando los parámetros opcionales en el string de acuerdo a los modificadores de formato, tal como en la función \texttt{printf} de la librería standard de C. El subconjunto de los modificadores de formato implementados se describe en los comentarios en \texttt{screen.h}.
+
+La función \texttt{sprintf} es análoga a la función de mismo nombre en la librería standard de C: recibe un arreglo de chars, una string de formato y parámetros opcionales, y almacena en el arreglo de chars la string resultante de reemplazar los caracteres de control por los valores correspondientes. Devuelve la longitud de la string almacenada en el arreglo de chars, sin contar el byte 0 al final de la misma.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Preguntas y respuestas                                                    %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \section{Preguntas y respuestas}
