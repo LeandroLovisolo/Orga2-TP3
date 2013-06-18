@@ -304,14 +304,14 @@ Como la unica entrada del page directory que utilizaremos es la $0$, el campo di
 Para el caso de las tareas lo que sucede es similar, a diferencia de que aqui no hacemos $indetity$ $mapping$. 
 Tenemos que considerar que hay que mapear la memoria del kernel para poder manejar las interrupciones, y luego mapear la memoria de la tarea, del la pila y del tablero. Como estas $3$ últimas no son mayores a 4kb entonces con una página para cada una alcanza. Es por esto que a las $356$ del kernel le sumamos $3$ y es la cantidad de páginas que hay que mapear, que nuevamente nos alcanza con la primer entrada de la page directory.
 
-los pasos a seguir entonces para mapear la memoria de una tarea es:
+Los pasos a seguir entonces para mapear la memoria de una tarea es:
 
 \begin{enumerate}
- \item inicializar el directorio con con todas entradas vacias.
- \item inicializar correctamente la primer entrada del directorio.
- \item inicializar la tabla correspondiente a la primer entrada con entradas vacias.
- \item mapear la memoria del kernel.
- \item mapear la memoria de la pila, del codigo y del tablero.
+ \item Inicializar el directorio con con todas entradas vacias.
+ \item Inicializar correctamente la primer entrada del directorio.
+ \item Inicializar la tabla correspondiente a la primer entrada con entradas vacias.
+ \item Mapear la memoria del kernel.
+ \item Mapear la memoria de la pila, del codigo y del tablero.
 \end{enumerate}
 
 Para los item $1$, $2$, $3$ y $4$ se utiliza la misma técnica implementada en el ejercicio $3$ del TP.
