@@ -47,7 +47,7 @@ LDFLAGS=-static -m elf_i386 --oformat binary -b elf32-i386 -e start -Ttext 0x120
 
 QUIET = @
 
-.PHONY=clean all image tasks
+.PHONY=clean all image tasks bundle
 
 all: cleantasks tasks image #clean
 
@@ -143,3 +143,9 @@ cleantasks:
 	rm -f *.tsk
 	rm -f *.tsko
 	@echo ''
+
+bundle:
+	mkdir ../TP3
+	cp ../README.md ../informe ../src ../TP3 -r
+	tar zcf ../TP3.tar.gz ../TP3
+	rm ../TP3 -rf
