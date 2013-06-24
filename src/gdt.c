@@ -191,7 +191,7 @@ void gdt_tareas_ii(){
 	gdt[8].avl         = 0;
 	gdt[8].l           = 0;
 	gdt[8].db          = 1;
-	gdt[8].g           = 1;
+	gdt[8].g           = 0;
 	gdt[8].base_31_24  = (unsigned int)&tss_inicial >> 24;
 
 	// Tarea Idle
@@ -206,7 +206,7 @@ void gdt_tareas_ii(){
 	gdt[9].avl         = 0;
 	gdt[9].l           = 0;
 	gdt[9].db          = 1;
-	gdt[9].g           = 1;
+	gdt[9].g           = 0;
 	gdt[9].base_31_24  = (unsigned int)&tarea_idle >> 24;
 
 	// Tarea 1 (DPLS de tareas 0)
@@ -221,7 +221,7 @@ void gdt_tareas_ii(){
 	gdt[10].avl         = 0;
 	gdt[10].l           = 0;
 	gdt[10].db          = 1;
-	gdt[10].g           = 1;
+	gdt[10].g           = 0;
 	gdt[10].base_31_24  = (unsigned int)&tsss[0] >> 24;
 
 	// Tarea 2
@@ -236,7 +236,7 @@ void gdt_tareas_ii(){
 	gdt[11].avl         = 0;
 	gdt[11].l           = 0;
 	gdt[11].db          = 1;
-	gdt[11].g           = 1;
+	gdt[11].g           = 0;
 	gdt[11].base_31_24  = (unsigned int)&tsss[1] >> 24;
 
 	// Tarea 3
@@ -251,7 +251,7 @@ void gdt_tareas_ii(){
 	gdt[12].avl         = 0;
 	gdt[12].l           = 0;
 	gdt[12].db          = 1;
-	gdt[12].g           = 1;
+	gdt[12].g           = 0;
 	gdt[12].base_31_24  = (unsigned int)&tsss[2] >> 24;
 
 	// Tarea 4
@@ -266,7 +266,7 @@ void gdt_tareas_ii(){
 	gdt[13].avl         = 0;
 	gdt[13].l           = 0;
 	gdt[13].db          = 1;
-	gdt[13].g           = 1;
+	gdt[13].g           = 0;
 	gdt[13].base_31_24  = (unsigned int)&tsss[3] >> 24;
 
 	// Tarea 5 (arbitro)
@@ -281,6 +281,6 @@ void gdt_tareas_ii(){
 	gdt[14].avl         = 0;
 	gdt[14].l           = 0;
 	gdt[14].db          = 1;
-	gdt[14].g           = 1;
+	gdt[14].g           = 0;
 	gdt[14].base_31_24  = (unsigned int)&tsss[4] >> 24;
 }
